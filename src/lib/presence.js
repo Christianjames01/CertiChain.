@@ -5,8 +5,12 @@ const HEARTBEAT_MS = 45_000
 const PRESENCE_POLL_MS = 30_000
 
 // Pings the server every ~45s while the tab is open and visible, so the
-// superadmin's "online now" status reflects reality. Best effort: a failed
-// ping never affects the page it's running on.
+// superadmin's "online now" status and Messages' "Active now" reflect
+// reality. Best effort: a failed ping never affects the page it's running
+// on. Also clears presence immediately on tab-hide/close instead of
+// waiting out the server-side staleness window (see go_offline()) --
+// otherwise switching tabs or closing the window still reads "online" for
+// up to 90s afterward.
 export function usePresenceHeartbeat(active) {
     useEffect(() => {
         if (!active) return undefined
@@ -19,6 +23,10 @@ export function usePresenceHeartbeat(active) {
             }
         }
 
+        const goOffline = () => {
+            supabase.rpc('go_offline').catch(() => {})
+        }
+
         ping()
         const interval = setInterval(() => {
             if (document.visibilityState === 'visible') ping()
@@ -26,12 +34,15 @@ export function usePresenceHeartbeat(active) {
 
         const onVisible = () => {
             if (document.visibilityState === 'visible') ping()
+            else goOffline()
         }
         document.addEventListener('visibilitychange', onVisible)
+        window.addEventListener('pagehide', goOffline)
 
         return () => {
             clearInterval(interval)
             document.removeEventListener('visibilitychange', onVisible)
+            window.removeEventListener('pagehide', goOffline)
         }
     }, [active])
 }
