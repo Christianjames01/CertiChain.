@@ -302,6 +302,30 @@
     color: var(--blue-accent, var(--blue));
 }
 
+.student-primary-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 13.5px;
+    background: var(--blue);
+    color: var(--white, #fff);
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.student-primary-button:hover {
+    background: var(--blue-dark, var(--blue));
+}
+
+.student-primary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .student-secondary-button {
     display: inline-flex;
     align-items: center;
@@ -1122,41 +1146,6 @@
 .ss-steps li.is-current { color: var(--blue-accent, var(--blue)); }
 .ss-steps li.is-current .ss-steps-num { border-color: var(--blue-accent, var(--blue)); background: var(--blue-accent, var(--blue)); color: #fff; box-shadow: 0 0 0 4px var(--blue-tint); }
 
-.ss-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 36px 20px;
-    border: 1.5px dashed var(--line);
-    border-radius: 14px;
-    background: var(--surface);
-    text-align: center;
-}
-
-.ss-empty strong { font-size: 16px; color: var(--ink); }
-.ss-empty p { margin: 0 0 8px; max-width: 460px; font-size: 14px; line-height: 1.55; color: var(--slate); }
-.ss-empty-icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 4px; border-radius: 50%; background: var(--blue-tint); color: var(--blue-accent, var(--blue)); }
-.ss-empty-icon svg { width: 24px; height: 24px; }
-
-.ss-empty-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    padding: 0 20px;
-    border: 0;
-    border-radius: 10px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.ss-empty-btn:hover { background: var(--blue-dark); color: #fff; }
-
 .ss-info {
     display: flex;
     flex-direction: column;
@@ -1180,7 +1169,6 @@
     .ss-steps { flex-direction: column; align-items: flex-start; }
     .ss-steps ol { flex-direction: column; align-items: flex-start; gap: 6px; }
     .ss-steps li + li::before { display: none; }
-    .ss-empty-btn { width: 100%; }
 }
 
 /* Notifications: type label + what tapping does. */
@@ -1234,6 +1222,10 @@
     flex-direction: column;
     gap: 10px;
     margin-top: 6px;
+}
+
+.ss-upload-row .student-primary-button {
+    align-self: flex-start;
 }
 
 .ss-file {
@@ -1315,27 +1307,11 @@
     cursor: pointer;
 }
 
-.ss-upload-btn {
-    align-self: flex-start;
-    min-height: 44px;
-    padding: 0 22px;
-    border: 0;
-    border-radius: 10px;
-    background: var(--blue);
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.ss-upload-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.ss-upload-btn:not(:disabled):hover { background: var(--blue-dark); }
-
 @media (max-width: 720px) {
     .ss-file { align-items: flex-start; }
     .ss-file.is-chosen { flex-wrap: wrap; }
     .ss-file-actions { width: 100%; }
     .ss-file-actions a,
     .ss-file-actions button { flex: 1; justify-content: center; min-height: 44px; }
-    .ss-upload-btn { align-self: stretch; }
+    .ss-upload-row .student-primary-button { align-self: stretch; }
 }

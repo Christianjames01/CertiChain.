@@ -327,10 +327,13 @@ html[data-theme='dark'] .sa-portal {
 
 /* ===== Empty / error states ===== */
 .sa-empty {
-    padding: var(--sa-space-6) var(--sa-space-4);
     text-align: center;
+    padding: 48px 24px;
     color: var(--sa-text-muted);
-    font-size: 13.5px;
+    background: var(--sa-surface);
+    border: 1px dashed var(--sa-border);
+    border-radius: 12px;
+    font-size: 14px;
 }
 
 .sa-alert {

@@ -268,7 +268,7 @@ function UploadRequirements() {
 
                                     <button
                                         type="button"
-                                        className="ss-upload-btn"
+                                        className="student-primary-button"
                                         onClick={() => uploadRequirement(req)}
                                         disabled={uploadingId === req.request_requirement_id || !files[req.request_requirement_id]}
                                     >

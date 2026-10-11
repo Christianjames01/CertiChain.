@@ -1,0 +1,75 @@
+/* Shared empty-state box (components/EmptyState.jsx), used by the student,
+   employee, and admin/head portals -- same dashed-box footprint as the
+   plain "No X found." text (.admin-empty / .employee-empty /
+   .student-empty), just with an optional icon and call-to-action. Relies
+   on each portal's own --surface/--ink/--slate/--line/--blue tokens
+   (defined on .admin-layout / .employee-layout / .student-layout), so it
+   only themes correctly inside those three portals. */
+
+.ui-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 48px 24px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    text-align: center;
+}
+
+.ui-empty-state strong {
+    font-size: 16px;
+    color: var(--ink);
+}
+
+.ui-empty-state p {
+    margin: 0 0 8px;
+    max-width: 460px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--slate);
+}
+
+.ui-empty-state-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 4px;
+    border-radius: 50%;
+    background: var(--blue-tint);
+    color: var(--blue-accent, var(--blue));
+}
+
+.ui-empty-state-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.ui-empty-state-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ui-empty-state-btn:hover {
+    background: var(--blue-dark, var(--blue));
+    color: #fff;
+}
+
+@media (max-width: 720px) {
+    .ui-empty-state-btn {
+        width: 100%;
+    }
+}

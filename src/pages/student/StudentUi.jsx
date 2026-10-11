@@ -1,5 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+export { EmptyState } from '../../components/EmptyState'
 
 // "image/jpeg,image/png,application/pdf" -> "JPG, PNG, PDF"
 const friendlyTypes = (accept) => {
@@ -99,20 +99,6 @@ export function TaskSteps({ steps, current = 0, label = 'How this works' }) {
                 })}
             </ol>
         </nav>
-    )
-}
-
-// A helpful empty state: what's missing, why, and what to do.
-export function EmptyState({ icon, title, text, action }) {
-    return (
-        <div className="ss-empty">
-            {icon && <span className="ss-empty-icon" aria-hidden="true">{icon}</span>}
-            <strong>{title}</strong>
-            {text && <p>{text}</p>}
-            {action && (action.to
-                ? <Link to={action.to} className="ss-empty-btn">{action.label}</Link>
-                : <button type="button" className="ss-empty-btn" onClick={action.onClick}>{action.label}</button>)}
-        </div>
     )
 }
 
