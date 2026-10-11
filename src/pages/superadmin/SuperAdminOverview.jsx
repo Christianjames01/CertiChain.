@@ -1,13 +1,32 @@
 import { Link, useOutletContext } from 'react-router-dom'
 import { ROLE_NAMES, STAFF_ROLES, daysSince, displayName, formatDay, timeAgo } from './superadminFormat'
 import { SkeletonStatGrid } from '../../components/Skeleton'
+import { IconPulse, IconKey, IconShieldLock } from './icons'
+import { IconBarChart, IconUsers, IconFileStack, IconIdCard } from '../admin/icons'
+import { IconShieldCheck } from '../employee/icons'
 
-function Tile({ label, value, note, tone }) {
+function Tile({ label, value, note, tone, icon }) {
     return (
         <div className={`sa-tile${tone ? ` is-${tone}` : ''}`}>
-            <span className="sa-tile-label">{label}</span>
+            <div className="sa-tile-top">
+                <span className="sa-tile-label">{label}</span>
+                {icon && <span className="sa-tile-icon" aria-hidden="true">{icon}</span>}
+            </div>
             <span className="sa-tile-value">{value ?? '—'}</span>
             {note && <span className="sa-tile-note">{note}</span>}
+        </div>
+    )
+}
+
+function MiniStat({ icon, label, value, note }) {
+    return (
+        <div className="sa-mini-stat">
+            <span className="sa-mini-stat-icon" aria-hidden="true">{icon}</span>
+            <span className="sa-mini-stat-body">
+                <strong>{value ?? '—'}</strong>
+                <span>{label}</span>
+                {note && <em>{note}</em>}
+            </span>
         </div>
     )
 }
@@ -54,8 +73,9 @@ function RoleBars({ counts }) {
 }
 
 function SuperAdminOverview() {
-    const { overview, accounts, logins, daily, loading } = useOutletContext()
+    const { overview, accounts, logins, daily, systemActivity, loading } = useOutletContext()
     const stats = overview || {}
+    const activity = systemActivity || {}
     const staff = accounts.filter((a) => STAFF_ROLES.includes(a.role))
     const neverSignedIn = staff.filter((a) => a.status === 'active' && !a.last_sign_in_at)
     const idle = staff.filter((a) => a.status === 'active' && a.last_sign_in_at && daysSince(a.last_sign_in_at) > 30)
@@ -75,15 +95,17 @@ function SuperAdminOverview() {
             ) : (
                 <section className="sa-tiles">
                     <Tile
+                        icon={<IconPulse />}
                         label="Online right now"
                         value={stats.online_now}
                         note={<span className="sa-online-label"><span className="sa-online-dot" aria-hidden="true" />Live</span>}
                         tone="online"
                     />
-                    <Tile label="Logins today" value={stats.logins_today} note="Manila time" />
-                    <Tile label="Logins, last 7 days" value={stats.logins_7d} />
-                    <Tile label="People signed in, 7 days" value={stats.users_7d} />
+                    <Tile icon={<IconKey />} label="Logins today" value={stats.logins_today} note="Manila time" />
+                    <Tile icon={<IconBarChart />} label="Logins, last 7 days" value={stats.logins_7d} />
+                    <Tile icon={<IconUsers />} label="People signed in, 7 days" value={stats.users_7d} />
                     <Tile
+                        icon={<IconShieldLock />}
                         label="Active accounts"
                         value={stats.active}
                         note={`${stats.inactive ?? 0} inactive`}
@@ -106,6 +128,27 @@ function SuperAdminOverview() {
                         <Link to="/superadmin/accounts" className="sa-btn sa-btn-ghost">Manage →</Link>
                     </div>
                     <RoleBars counts={stats.accounts} />
+                </section>
+
+                <section className="sa-card">
+                    <div className="sa-card-head">
+                        <h2>System activity</h2>
+                    </div>
+                    <div className="sa-mini-stats">
+                        <MiniStat icon={<IconIdCard />} label="Students" value={activity.total_students?.toLocaleString?.() ?? activity.total_students} />
+                        <MiniStat
+                            icon={<IconFileStack />}
+                            label="Document requests"
+                            value={activity.total_requests?.toLocaleString?.() ?? activity.total_requests}
+                            note={activity.requests_7d ? `${activity.requests_7d} in the last 7 days` : null}
+                        />
+                        <MiniStat
+                            icon={<IconShieldCheck />}
+                            label="Credentials issued"
+                            value={activity.total_credentials?.toLocaleString?.() ?? activity.total_credentials}
+                            note={activity.credentials_7d ? `${activity.credentials_7d} in the last 7 days` : null}
+                        />
+                    </div>
                 </section>
 
                 <section className="sa-card">

@@ -63,7 +63,7 @@ const COLLAPSE_KEY = 'sa-sidebar-collapsed'
 
 function SuperAdminLayout() {
     const navigate = useNavigate()
-    const [data, setData] = useState({ overview: null, accounts: [], logins: [], daily: [] })
+    const [data, setData] = useState({ overview: null, accounts: [], logins: [], daily: [], systemActivity: null })
     const [loading, setLoading] = useState(true)
     const [loadError, setLoadError] = useState('')
     const [who, setWho] = useState({ name: '', initials: '' })
@@ -79,11 +79,12 @@ function SuperAdminLayout() {
 
     const load = useCallback(async ({ silent = false } = {}) => {
         if (!silent) setLoading(true)
-        const [overviewRes, accountsRes, loginsRes, dailyRes] = await Promise.all([
+        const [overviewRes, accountsRes, loginsRes, dailyRes, activityRes] = await Promise.all([
             supabase.rpc('superadmin_overview'),
             supabase.rpc('superadmin_list_accounts'),
             supabase.rpc('superadmin_login_history', { p_limit: LOGIN_LIMIT }),
             supabase.rpc('superadmin_daily_logins', { p_days: 14 }),
+            supabase.rpc('superadmin_system_activity'),
         ])
         const failed = overviewRes.error || accountsRes.error || loginsRes.error || dailyRes.error
         setLoadError(failed ? failed.message : '')
@@ -92,6 +93,7 @@ function SuperAdminLayout() {
             accounts: accountsRes.data || [],
             logins: loginsRes.data || [],
             daily: dailyRes.data || [],
+            systemActivity: activityRes.data || null,
         })
         setLoading(false)
     }, [])
