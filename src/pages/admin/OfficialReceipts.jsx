@@ -148,7 +148,7 @@ function OfficialReceipts() {
                 relatedRequestId: receipt.request_id,
             })
 
-            await loadReceipts()
+            await loadReceipts({ silent: true })
 
         } catch (err) {
             console.error('VERIFY RECEIPT ERROR:', err)
@@ -217,7 +217,7 @@ function OfficialReceipts() {
 
             setRejectTarget(null)
             setRejectionReason('')
-            await loadReceipts()
+            await loadReceipts({ silent: true })
 
         } catch (err) {
             console.error('REJECT RECEIPT ERROR:', err)

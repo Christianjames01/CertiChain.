@@ -347,7 +347,7 @@ function StudentDetails() {
 
             notifySuccess('Student information updated.')
             setEditingSection(null)
-            await loadDetails()
+            await loadDetails({ silent: true })
 
         } catch (err) {
             console.error('SAVE STUDENT EDIT ERROR:', err)
@@ -451,7 +451,7 @@ function StudentDetails() {
             })
 
             notifySuccess(`Login email changed to ${newEmail}.`)
-            await loadDetails()
+            await loadDetails({ silent: true })
 
         } catch (err) {
             console.error('CHANGE STUDENT LOGIN EMAIL ERROR:', err)

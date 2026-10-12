@@ -452,7 +452,7 @@ function AdminRequestDetails() {
             })
 
             notifySuccess('Payment verified successfully.')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('VERIFY PAYMENT ERROR:', err)
@@ -530,7 +530,7 @@ function AdminRequestDetails() {
             notifySuccess('Payment rejected successfully.')
             setShowReject(false)
             setRejectionReason('')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('REJECT PAYMENT ERROR:', err)
@@ -582,7 +582,7 @@ function AdminRequestDetails() {
             })
 
             notifySuccess('Requirement approved.')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('APPROVE REQUIREMENT ERROR:', err)
@@ -642,7 +642,7 @@ function AdminRequestDetails() {
             setSelectedRequirement(null)
             setShowReject(false)
             setRejectionReason('')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('REJECT REQUIREMENT ERROR:', err)
@@ -721,7 +721,7 @@ function AdminRequestDetails() {
             })
 
             notifySuccess('Document processing has started.')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('START PROCESSING ERROR:', err)
@@ -808,7 +808,7 @@ function AdminRequestDetails() {
 
             notifySuccess(`Digital credential generated successfully.\n\nCredential Number: ${credential.credential_number}`)
             setCredentialNumberInput('')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('GENERATE DIGITAL CREDENTIAL ERROR:', err)
@@ -870,7 +870,7 @@ function AdminRequestDetails() {
             }
 
             notifySuccess('Request reassigned.')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('REASSIGN ERROR:', err)
@@ -931,7 +931,7 @@ function AdminRequestDetails() {
 
             notifySuccess('Status updated.')
             setOverrideReason('')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('OVERRIDE STATUS ERROR:', err)
@@ -1017,7 +1017,7 @@ function AdminRequestDetails() {
             })
 
             notifySuccess('Missed claiming appointment dismissed.')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (err) {
             console.error('DISMISS MISSED CLAIM ERROR:', err)

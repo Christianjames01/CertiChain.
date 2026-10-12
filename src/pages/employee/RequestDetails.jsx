@@ -554,7 +554,7 @@ function EmployeeRequestDetails() {
                 'Payment verified successfully.'
             )
 
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (error) {
             console.error(
@@ -678,7 +678,7 @@ function EmployeeRequestDetails() {
             setShowReject(false)
             setRejectionReason('')
 
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (error) {
             console.error(
@@ -1069,7 +1069,7 @@ function EmployeeRequestDetails() {
                 'Document processing has started.'
             )
 
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (error) {
             console.error(
@@ -1192,7 +1192,7 @@ function EmployeeRequestDetails() {
                 `Digital credential generated successfully.\n\nCredential Number: ${credential.credential_number}`
             )
 
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (error) {
             console.error(
@@ -1251,7 +1251,7 @@ function EmployeeRequestDetails() {
 
             setStatusReason('')
             notifySuccess('Status updated.')
-            await loadRequest()
+            await loadRequest({ silent: true })
 
         } catch (error) {
             console.error('CHANGE STATUS ERROR:', error)
