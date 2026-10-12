@@ -18,6 +18,7 @@ import HighlightedText from '../../components/HighlightedText'
 import Modal from '../../components/Modal'
 import './AdminPages.css'
 import RequestNotes from '../../components/RequestNotes'
+import RequestHandoffs from '../../components/RequestHandoffs'
 import RepresentativeStaffCard from '../../components/RepresentativeStaffCard'
 import { ReceiptFileIcon, CheckIcon, XIcon } from '../../components/ReceiptIcons'
 import '../../components/ReceiptActions.css'
@@ -1282,6 +1283,13 @@ function AdminRequestDetails() {
                     </button>
                 </div>
             )}
+
+            <RequestHandoffs
+                request={request}
+                cardClassName="admin-card"
+                canPass={role === 'superadmin' ? false : 'head'}
+                onPassed={() => loadRequest({ silent: true })}
+            />
 
             <RequestNotes request={request} cardClassName="admin-card" canDeleteAny />
 

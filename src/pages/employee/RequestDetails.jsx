@@ -15,6 +15,7 @@ import HighlightedText from '../../components/HighlightedText'
 import Modal from '../../components/Modal'
 import './EmployeePages.css'
 import RequestNotes from '../../components/RequestNotes'
+import RequestHandoffs from '../../components/RequestHandoffs'
 import RepresentativeStaffCard from '../../components/RepresentativeStaffCard'
 import { ReceiptFileIcon, CheckIcon, XIcon } from '../../components/ReceiptIcons'
 import '../../components/ReceiptActions.css'
@@ -51,6 +52,7 @@ function EmployeeRequestDetails() {
 
     const [request, setRequest] = useState(null)
     const [accessScope, setAccessScope] = useState('full')
+    const [myEmployeeId, setMyEmployeeId] = useState(null)
     const [documentName, setDocumentName] = useState('')
     const [documentPreview, setDocumentPreview] = useState(null)
     const [receipt, setReceipt] = useState(null)
@@ -134,6 +136,7 @@ function EmployeeRequestDetails() {
 
             const isReleasingOnly = employee.access_scope === 'releasing'
             setAccessScope(employee.access_scope || 'full')
+            setMyEmployeeId(employee.employee_id)
 
             let requestQuery = supabase
                 .from('document_requests')
@@ -1482,6 +1485,13 @@ function EmployeeRequestDetails() {
                     </div>
                 )}
             </div>
+
+            <RequestHandoffs
+                request={request}
+                cardClassName="employee-card"
+                canPass={Boolean(myEmployeeId) && request.assigned_employee_id === myEmployeeId}
+                onPassed={() => navigate('/employee/dashboard')}
+            />
 
             <RequestNotes request={request} cardClassName="employee-card" />
 

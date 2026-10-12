@@ -87,6 +87,7 @@ const AdminMessages = lazy(() => import('./pages/admin/Messages'))
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'))
 const AdminActivityLogs = lazy(() => import('./pages/admin/ActivityLogs'))
 const AdminIssuedCertificates = lazy(() => import('./pages/admin/IssuedCertificates'))
+const AdminRequestHandling = lazy(() => import('./pages/admin/RequestHandling'))
 const Reports = lazy(() => import('./pages/admin/Reports'))
 const AdminProfile = lazy(() => import('./pages/admin/Profile'))
 const AdminCredentials = lazy(() => import('./pages/admin/Credentials'))
@@ -107,6 +108,7 @@ const PORTAL_PAGES = [
     ['/requests/:requestId', <AdminRequestDetails />],
     ['/requests/:requestId/claim-schedule', <AdminClaimSchedule />],
     ['/assignments', <Assignments />],
+    ['/request-handling', <AdminRequestHandling />],
     ['/employees', <AdminEmployees />],
     ['/employees/:employeeId', <EmployeeDetails />],
     ['/students', <AdminStudents />],

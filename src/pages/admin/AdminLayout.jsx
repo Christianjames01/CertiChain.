@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import certichainLogo from '../../assets/certichain-logo.png'
 import { IconHome, IconCalendar, IconReceipt, IconBell, IconUserCircle, IconLogout, IconMenu, IconX, IconBook } from '../student/icons'
 import { IconClipboardList, IconUsers, IconMessage, IconHistory, IconShieldCheck } from '../employee/icons'
-import { IconSwap, IconIdCard, IconDocument, IconBuilding, IconBarChart, IconMegaphone, IconTicket, IconClipboardCheck } from './icons'
+import { IconSwap, IconIdCard, IconDocument, IconBuilding, IconBarChart, IconMegaphone, IconTicket, IconClipboardCheck, IconLayers } from './icons'
 import ThemeToggle from '../../components/ThemeToggle'
 import './AdminLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
@@ -20,6 +20,7 @@ const NAV_ITEMS = [
     { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, end: true },
     { to: '/requests', label: 'All Requests', icon: <IconClipboardList /> },
     { to: '/assignments', label: 'Request Assignments', icon: <IconSwap /> },
+    { to: '/request-handling', label: 'Request Handling', icon: <IconLayers /> },
     { to: '/employees', label: 'Employees', icon: <IconUsers /> },
     { to: '/students', label: 'Students', icon: <IconIdCard />, badgeKey: 'pendingStudents' },
     { to: '/documents', label: 'Documents', icon: <IconDocument /> },
