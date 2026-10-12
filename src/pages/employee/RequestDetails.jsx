@@ -1315,8 +1315,9 @@ function EmployeeRequestDetails() {
                 blocks={[
                     { type: 'back' },
                     { type: 'header', subtitle: false },
-                    { type: 'card', pill: true, fields: 8, titleWidth: 150 },
-                    { type: 'card', fields: 4, buttons: 2, titleWidth: 150 },
+                    { type: 'card', factRows: 9, titleWidth: 170 },
+                    { type: 'card', rows: 2, titleWidth: 150 },
+                    { type: 'card', factRows: 3, buttons: 2, titleWidth: 150 },
                     { type: 'card', rows: 2, titleWidth: 170 },
                     { type: 'card', lines: 2, buttons: 1, titleWidth: 170 },
                     { type: 'card', rows: 3, titleWidth: 140 },

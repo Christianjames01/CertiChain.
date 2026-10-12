@@ -489,11 +489,9 @@ function StudentHistory() {
                 portal="employee"
                 blocks={[
                     { type: 'back' },
-                    { type: 'header', avatar: true },
-                    { type: 'card', action: true, fields: 7, titleWidth: 190 },
-                    { type: 'card', action: true, fields: 10, titleWidth: 180 },
-                    { type: 'card', titleWidth: 90, lines: 1, buttons: 2 },
-                    { type: 'list', count: 2, fields: 2, action: false },
+                    { type: 'profilePage', stats: 4, left: [8, 10], right: [2] },
+                    { type: 'list', count: 2, fields: 3, action: false },
+                    { type: 'card', title: true, rows: 2 },
                 ]}
             />
         )

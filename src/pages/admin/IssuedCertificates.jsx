@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 import PageStats from '../../components/PageStats'
 import { IconCalendarCheck, IconUsers, IconFileStack, IconBarChart } from './icons'
 import './AdminPages.css'
@@ -130,8 +130,9 @@ function IssuedCertificates() {
                 <p>Every Certificate of Enrollment saved &amp; printed by registrar staff, and how many each one has issued.</p>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Total issued', value: certificates.length, note: 'All certificates saved & printed', Icon: IconFileStack },
                         { label: 'Today', value: todayCount, note: 'Issued today', Icon: IconCalendarCheck },
@@ -144,7 +145,7 @@ function IssuedCertificates() {
             {error && <div className="admin-error-box">{error}</div>}
 
             {loading ? (
-                <SkeletonList count={3} />
+                <SkeletonTable portal="admin" columns={['Issued by', 'Total', 'Today', 'This month', 'Last issued', '']} rows={3} />
             ) : certificates.length === 0 ? (
                 <div className="admin-empty">No certificates have been saved &amp; printed yet.</div>
             ) : (

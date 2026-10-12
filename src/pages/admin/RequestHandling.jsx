@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 import PageStats from '../../components/PageStats'
 import { HANDOFF_STAGES, loadEmployeeNames } from '../../lib/requestHandoffs'
 import '../../components/RequestHandoffs.css'
@@ -108,8 +108,9 @@ function RequestHandling() {
                 </div>
             ) : (
                 <>
-                    {!loading && (
+                    {(
                         <PageStats
+                            loading={loading}
                             stats={[
                                 { label: 'Hand-offs', value: passes.length, note: 'Passed between employees', Icon: IconSwap },
                                 { label: 'Today', value: rows.filter((r) => isToday(r.created_at)).length, note: 'Handling changes today', Icon: IconCalendarCheck },
@@ -147,7 +148,7 @@ function RequestHandling() {
                     {error && <div className="admin-error-box">{error}</div>}
 
                     {loading ? (
-                        <SkeletonList count={3} />
+                        <SkeletonTable portal="admin" columns={['When', 'Request', 'Stage', 'From → To', 'Note', 'By']} rows={6} />
                     ) : visibleRows.length === 0 ? (
                         <div className="admin-empty">
                             {rows.length === 0 ? 'No request has been assigned or passed on yet.' : 'Nothing matches this search.'}

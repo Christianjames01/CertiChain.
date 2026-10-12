@@ -217,8 +217,9 @@ function MyRequest() {
                 </div>
             )}
 
-            {!loading && requests.length > 0 && (
+            {(loading || requests.length > 0) && (
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Active requests', value: countOf(ACTIVE), note: 'Not yet claimed', Icon: IconFileStack, onClick: () => setChip('all') },
                         { label: 'Needs your action', value: countOf(NEEDS_ACTION), note: countOf(NEEDS_ACTION) ? 'Pay, upload a receipt or requirements' : 'Nothing to do right now', Icon: IconHourglass, warn: countOf(NEEDS_ACTION) > 0, onClick: () => setChip(NEEDS_ACTION.join(',')) },

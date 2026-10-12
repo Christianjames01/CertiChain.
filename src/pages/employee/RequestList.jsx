@@ -168,8 +168,9 @@ function EmployeeRequestList({ title, subtitle, statusFilter, showFilterChips, e
                 <p>{releasingOnly ? 'All requests ready for claiming, scheduled, claimed, or completed — across all staff.' : subtitle}</p>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Requests', value: requests.length, note: releasingOnly ? 'For claiming, office-wide' : 'In this list', Icon: IconFileStack, onClick: showFilterChips ? () => setChip('all') : undefined },
                         { label: 'To verify', value: countOf(['pending', 'payment_pending', 'receipt_uploaded']), note: 'Payment or requirements', Icon: IconHourglass, warn: countOf(['receipt_uploaded']) > 0 },

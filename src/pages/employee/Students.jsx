@@ -6,7 +6,7 @@ import { notifyStudentByStudentId, notifyError, notifySuccess, confirmModal } fr
 import { deleteStudentAccount } from '../../lib/deleteStudentAccount'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import Swal from 'sweetalert2'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 import PageStats from '../../components/PageStats'
 import { IconIdCard, IconHourglass, IconLayers, IconBuilding } from '../admin/icons'
 import './EmployeePages.css'
@@ -388,8 +388,9 @@ function Students() {
                 <p>All enrolled students. Search to narrow the list, or view a student's information and request history.</p>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Students', value: results.length, note: 'Registered and verified', Icon: IconIdCard },
                         { label: 'Pending verification', value: pendingVerifications.length, note: pendingVerifications.length ? 'Waiting for your approval' : 'Nothing to review', Icon: IconHourglass, warn: pendingVerifications.length > 0 },
@@ -573,7 +574,7 @@ function Students() {
             {error && <div className="employee-error-box">{error}</div>}
 
             {loading ? (
-                <SkeletonList count={3} />
+                <SkeletonTable portal="employee" columns={['College', 'Course', 'Students', '']} rows={5} />
             ) : term.trim() ? (
                 matches.length === 0 && incompleteMatches.length === 0 ? (
                     <div className="employee-empty">No students matched "{term.trim()}".</div>

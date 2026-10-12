@@ -415,8 +415,9 @@ function AllRequests() {
                 <p>Every document request in the system, across all employees.</p>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'All requests', value: requests.length, note: 'Across all employees', Icon: IconFileStack, onClick: () => setChip('all') },
                         { label: 'In progress', value: countStatus(IN_PROGRESS), note: 'Not yet ready to claim', Icon: IconHourglass, onClick: () => setChip(IN_PROGRESS.join(',')) },

@@ -323,8 +323,9 @@ function ClaimScheduleList() {
 
             {error && <div className="employee-error-box">{error}</div>}
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Today', value: todayAppointments.length, note: 'Claiming appointments', Icon: IconCalendarCheck },
                         { label: 'Claimed today', value: todayAppointments.filter((a) => a.status === 'claimed').length, note: 'Released', Icon: IconCheckCircle },

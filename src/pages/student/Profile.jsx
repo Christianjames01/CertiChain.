@@ -376,13 +376,7 @@ function Profile() {
                 portal="student"
                 blocks={[
                     { type: 'header', titleWidth: 120 },
-                    { type: 'profile' },
-                    { type: 'card', fields: 6, titleWidth: 200 },
-                    { type: 'card', fields: 3, titleWidth: 190 },
-                    { type: 'card', action: true, fields: 5, titleWidth: 180 },
-                    { type: 'card', action: true, lines: 1, titleWidth: 110 },
-                    { type: 'card', action: true, lines: 1, titleWidth: 100 },
-                    { type: 'card', lines: 2, buttons: 1, titleWidth: 220 },
+                    { type: 'profilePage', stats: 0, left: [6, 3, 6], right: [3] },
                 ]}
             />
         )

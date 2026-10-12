@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 import HighlightedText from '../../components/HighlightedText'
 import PageStats from '../../components/PageStats'
 import { IconHistory } from '../employee/icons'
@@ -139,8 +139,9 @@ function ActivityLogs() {
                 </p>
             </div>
 
-            {!loading && logs.length > 0 && (
+            {(loading || logs.length > 0) && (
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: filterDate ? 'Actions that day' : 'Recent actions', value: logs.length, note: filterDate ? 'Every recorded action' : 'Latest 200', Icon: IconHistory },
                         { label: 'Today', value: todayCount, note: 'Actions recorded today', Icon: IconCalendarCheck },
@@ -181,7 +182,7 @@ function ActivityLogs() {
             {error && <div className="admin-error-box">{error}</div>}
 
             {loading ? (
-                <SkeletonList count={3} />
+                <SkeletonTable portal="admin" columns={['Actor', 'Action', 'Description', 'Date']} rows={8} />
             ) : visibleLogs.length === 0 ? (
                 <div className="admin-empty">
                     {filterDate ? 'No activity recorded on this date.' : 'No activity matches this search.'}

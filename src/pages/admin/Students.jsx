@@ -7,7 +7,7 @@ import { deleteStudentAccount } from '../../lib/deleteStudentAccount'
 import { exportStudentBackup } from '../../lib/studentBackup'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import Swal from 'sweetalert2'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 import PageStats from '../../components/PageStats'
 import { IconIdCard, IconHourglass, IconLayers, IconBuilding } from './icons'
 import './AdminPages.css'
@@ -517,8 +517,9 @@ function Students() {
                 <p>All enrolled students. Search to narrow the list, or view a student's information, request history, and submitted requirements.</p>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Students', value: allStudents.length, note: 'Registered and verified', Icon: IconIdCard },
                         { label: 'Pending verification', value: pendingVerifications.length, note: pendingVerifications.length ? 'Waiting for your approval' : 'Nothing to review', Icon: IconHourglass, warn: pendingVerifications.length > 0 },
@@ -697,7 +698,7 @@ function Students() {
             )}
 
             {loading ? (
-                <SkeletonList count={3} />
+                <SkeletonTable portal="admin" columns={['College', 'Course', 'Students', '']} rows={5} />
             ) : !searched ? null : results.length === 0 ? (
                 <div className="admin-empty">
                     {term.trim() ? `No students matched "${term}".` : 'No students found.'}

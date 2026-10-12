@@ -127,8 +127,9 @@ function UploadReceiptList() {
 
             {error && <div className="student-error-box">{error}</div>}
 
-            {!loading && requests.length > 0 && (
+            {(loading || requests.length > 0) && (
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'To upload', value: requests.filter((r) => !r.receipt).length, note: 'Pay at the Finance Office first', Icon: IconReceipt, warn: requests.some((r) => !r.receipt) },
                         { label: 'Waiting for verification', value: requests.filter((r) => r.receipt?.status === 'uploaded').length, note: 'Uploaded receipts', Icon: IconHourglass },

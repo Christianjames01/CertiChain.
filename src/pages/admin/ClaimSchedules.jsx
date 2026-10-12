@@ -361,8 +361,9 @@ function ClaimSchedules() {
 
             {error && <div className="admin-error-box">{error}</div>}
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Today', value: countFor('today'), note: 'Claiming appointments today', Icon: IconCalendarCheck, onClick: () => setActiveChip('today') },
                         { label: 'Upcoming', value: countFor('upcoming'), note: 'Scheduled from today on', Icon: IconCalendarCheck, onClick: () => setActiveChip('upcoming') },

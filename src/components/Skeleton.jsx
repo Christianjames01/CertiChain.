@@ -208,6 +208,7 @@ function SkeletonCardBlock({ portal, block, index }) {
         buttons = 0,
         rows = 0,
         media = 0,
+        factRows = 0,
     } = block
 
     return (
@@ -230,6 +231,21 @@ function SkeletonCardBlock({ portal, block, index }) {
 
             {fields > 0 && <SkeletonFields portal={portal} count={fields} />}
 
+            {factRows > 0 && (
+                <div className={`${portal}-table-wrapper`}>
+                    <table className={`${portal}-table ${portal}-fact-table`} aria-hidden="true">
+                        <tbody>
+                            {Array.from({ length: factRows }).map((_, i) => (
+                                <tr key={i}>
+                                    <th scope="row"><Skeleton width={`${55 + ((i * 17) % 35)}%`} height={11} /></th>
+                                    <td><Skeleton width={FIELD_VALUE_WIDTHS[i % FIELD_VALUE_WIDTHS.length]} height={13} /></td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
             {media > 0 && <Skeleton width="100%" height={media} radius={10} style={{ marginTop: fields ? 18 : 0 }} />}
 
             {rows > 0 && (
@@ -247,7 +263,7 @@ function SkeletonCardBlock({ portal, block, index }) {
             )}
 
             {buttons > 0 && (
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: fields || rows || lines || media ? 18 : 0 }}>
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: fields || rows || lines || media || factRows ? 18 : 0 }}>
                     {Array.from({ length: buttons }).map((_, i) => (
                         <Skeleton key={i} width={i === 0 ? 150 : 120} height={40} radius={8} />
                     ))}
@@ -322,13 +338,125 @@ function SkeletonListBlock({ portal, block }) {
     )
 }
 
+const CELL_WIDTHS = ['72%', '54%', '86%', '46%', '64%', '58%']
+
+// A placeholder table drawn with the portal's real table classes, for list
+// pages that render a table (logs, issued certificates, course lists, ...).
+// columns: number of columns, or their header labels (shown as-is).
+export function SkeletonTable({ portal = 'admin', columns = 4, rows = 5, wrapperStyle }) {
+    const heads = Array.isArray(columns) ? columns : Array.from({ length: columns }, () => null)
+    return (
+        <LoadingRegion className={`${portal}-table-wrapper`} style={wrapperStyle}>
+            <table className={`${portal}-table`} aria-hidden="true">
+                <thead>
+                    <tr>
+                        {heads.map((label, i) => (
+                            <th key={i}>{label ?? <Skeleton width={i === 0 ? 90 : 70} height={11} />}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.from({ length: rows }).map((_, r) => (
+                        <tr key={r}>
+                            {heads.map((__, c) => (
+                                <td key={c}>
+                                    <Skeleton width={CELL_WIDTHS[(r + c * 2) % CELL_WIDTHS.length]} height={13} />
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </LoadingRegion>
+    )
+}
+
+// The profile-style details page (components/ProfileParts): hero, stat
+// tiles, then two columns of field cards.
+function SkeletonProfilePageBlock({ block }) {
+    const { stats = 4, left = [8, 9], right = [2] } = block
+    const card = (fields, key, rowsInsteadOfFields = false) => (
+        <section className="pf-card skeleton-card" key={key}>
+            <div className="pf-card-head">
+                <Skeleton width={38} height={38} radius={10} />
+                <div className="pf-card-heading" style={{ flex: 1 }}>
+                    <Skeleton width="45%" height={16} radius={6} style={{ marginBottom: 7 }} />
+                    <Skeleton width="65%" height={11} />
+                </div>
+                {!rowsInsteadOfFields && <Skeleton width={52} height={30} radius={999} />}
+            </div>
+            {rowsInsteadOfFields ? (
+                Array.from({ length: fields }).map((_, i) => (
+                    <div className="pf-row" key={i}>
+                        <Skeleton width={32} height={32} radius={9} />
+                        <div className="pf-row-main" style={{ flex: 1 }}>
+                            <Skeleton width="40%" height={13} style={{ marginBottom: 7 }} />
+                            <Skeleton width="85%" height={11} />
+                        </div>
+                        <Skeleton width={64} height={30} radius={999} />
+                    </div>
+                ))
+            ) : (
+                <div className="pf-fields">
+                    {Array.from({ length: fields }).map((_, i) => (
+                        <div className={`pf-field${i >= fields - 2 && fields % 2 === 0 ? ' is-wide' : ''}`} key={i}>
+                            <Skeleton width="38%" height={10} style={{ marginBottom: 8 }} />
+                            <Skeleton width={FIELD_VALUE_WIDTHS[i % FIELD_VALUE_WIDTHS.length]} height={14} />
+                        </div>
+                    ))}
+                </div>
+            )}
+        </section>
+    )
+
+    return (
+        <div className="pf-page">
+            <section className="pf-hero skeleton-card">
+                <div className="pf-avatar-wrap">
+                    <Skeleton width={84} height={84} radius={42} />
+                </div>
+                <div className="pf-hero-main" style={{ flex: 1 }}>
+                    <Skeleton width={70} height={11} style={{ marginBottom: 10 }} />
+                    <Skeleton width="min(320px, 70%)" height={26} radius={8} style={{ marginBottom: 10 }} />
+                    <Skeleton width="min(260px, 55%)" height={13} style={{ marginBottom: 12 }} />
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        {[130, 70, 64].map((w, i) => <Skeleton key={i} width={w} height={24} radius={999} />)}
+                    </div>
+                </div>
+            </section>
+
+            {stats > 0 && (
+                <div className="dash-overview-grid page-stats">
+                    {Array.from({ length: stats }).map((_, i) => (
+                        <div className="dash-stat-tile dash-overview-tile is-static skeleton-card" key={i} style={{ animationDelay: `${i * 60}ms` }}>
+                            <div className="dash-stat-top" style={{ justifyContent: 'space-between' }}>
+                                <Skeleton width="45%" height={13} />
+                                <Skeleton width={34} height={34} radius={10} />
+                            </div>
+                            <Skeleton width={46} height={30} radius={8} style={{ margin: '4px 0 2px' }} />
+                            <Skeleton width="60%" height={11} />
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            <div className="pf-layout">
+                <div className="pf-column">{left.map((n, i) => card(n, `l${i}`))}</div>
+                <div className="pf-column">{right.map((n, i) => card(n, `r${i}`, true))}</div>
+            </div>
+        </div>
+    )
+}
+
 /**
  * blocks: an array of
  *   { type: 'back' }
  *   { type: 'header', avatar?, subtitle?, action?, titleWidth? }
  *   { type: 'profile' }
- *   { type: 'card', title?, action?, pill?, fields?, lines?, buttons?, rows?, media? }
+ *   { type: 'card', title?, action?, pill?, fields?, factRows?, lines?, buttons?, rows?, media? }
  *   { type: 'list', title?, count?, fields?, action? }
+ *   { type: 'profilePage', stats?, left?: [fieldCounts], right?: [rowCounts] }
+ *   { type: 'table', title?, columns?, rows? }
  */
 export function SkeletonPage({ portal, blocks }) {
     return (
@@ -337,6 +465,19 @@ export function SkeletonPage({ portal, blocks }) {
                 if (block.type === 'back') return <Skeleton key={i} width={130} height={14} style={{ marginBottom: 20 }} />
                 if (block.type === 'header') return <SkeletonHeaderBlock key={i} portal={portal} block={block} />
                 if (block.type === 'profile') return <SkeletonProfileBlock key={i} portal={portal} />
+                if (block.type === 'profilePage') return <SkeletonProfilePageBlock key={i} block={block} />
+                if (block.type === 'table') {
+                    return (
+                        <div key={i}>
+                            {block.title !== false && (
+                                <div className="skeleton-card-head" style={{ margin: '26px 0 12px' }}>
+                                    <Skeleton width={block.titleWidth || 170} height={18} radius={6} />
+                                </div>
+                            )}
+                            <SkeletonTable portal={portal} columns={block.columns || 4} rows={block.rows || 4} />
+                        </div>
+                    )
+                }
                 if (block.type === 'list') return <SkeletonListBlock key={i} portal={portal} block={block} />
                 return <SkeletonCardBlock key={i} portal={portal} block={block} index={i} />
             })}

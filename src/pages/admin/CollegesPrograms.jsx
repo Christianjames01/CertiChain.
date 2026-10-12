@@ -517,8 +517,9 @@ function CollegesPrograms() {
                 <button className="admin-primary-button" onClick={openAddModal}>+ Add Academic Divisions & Programs</button>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Colleges', value: colleges.filter((c) => c.status === 'active').length, note: `${colleges.length} in total`, Icon: IconBuilding, onClick: () => { setTab('colleges'); setSearch('') } },
                         { label: 'Programs', value: programs.filter((p) => p.status === 'active').length, note: `${programs.length} in total`, Icon: IconLayers, onClick: () => { setTab('programs'); setSearch('') } },

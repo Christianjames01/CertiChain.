@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { confirmModal, notifyError, notifySuccess } from '../../lib/notify'
 import { ROLE_NAMES, STAFF_ROLES, displayName, downloadCsv, formatWhen, timeAgo } from './superadminFormat'
 import { friendlyError } from '../../lib/friendlyError'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 
 const FILTERS = [
     { key: 'all', label: 'All' },
@@ -147,7 +147,7 @@ function SuperAdminAccounts() {
 
             <section className="sa-card">
                 {stillLoading ? (
-                    <SkeletonList count={6} fields={0} />
+                    <SkeletonTable portal="sa" columns={['Name', 'Role', 'Status', 'Last sign-in', 'Created', '']} rows={8} />
                 ) : visible.length === 0 ? (
                     <p className="sa-empty">No accounts match this filter.</p>
                 ) : (

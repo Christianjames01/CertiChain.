@@ -1059,8 +1059,9 @@ function AdminRequestDetails() {
                 blocks={[
                     { type: 'back' },
                     { type: 'header', action: true },
-                    { type: 'card', fields: 8, titleWidth: 180 },
-                    { type: 'card', fields: 4, titleWidth: 150 },
+                    { type: 'card', factRows: 6, titleWidth: 170 },
+                    { type: 'card', rows: 2, titleWidth: 150 },
+                    { type: 'card', factRows: 2, buttons: 2, titleWidth: 150 },
                     { type: 'card', rows: 2, titleWidth: 170 },
                     { type: 'card', lines: 2, buttons: 1, titleWidth: 170 },
                     { type: 'card', rows: 3, titleWidth: 140 },

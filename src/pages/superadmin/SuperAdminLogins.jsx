@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { ROLE_NAMES, displayName, downloadCsv, formatWhen, timeAgo } from './superadminFormat'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 
 const RANGES = [
     { key: 'today', label: 'Today', days: 1 },
@@ -87,7 +87,7 @@ function SuperAdminLogins() {
 
             <section className="sa-card">
                 {stillLoading ? (
-                    <SkeletonList count={6} fields={0} />
+                    <SkeletonTable portal="sa" columns={['When', 'Name', 'Role']} rows={8} />
                 ) : (
                     <>
                         <p className="sa-muted sa-count">{visible.length} sign-in{visible.length === 1 ? '' : 's'}</p>

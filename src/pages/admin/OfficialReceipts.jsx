@@ -239,8 +239,9 @@ function OfficialReceipts() {
                 <p>Every official receipt uploaded by students, across all employees.</p>
             </div>
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Uploaded', value: countFor('uploaded'), note: countFor('uploaded') ? 'Waiting to be verified' : 'Nothing to verify', Icon: IconHourglass, warn: countFor('uploaded') > 0, onClick: () => setActiveChip('uploaded') },
                         { label: 'Verified', value: countFor('verified'), note: 'Payment confirmed', Icon: IconCheckCircle, onClick: () => setActiveChip('verified') },

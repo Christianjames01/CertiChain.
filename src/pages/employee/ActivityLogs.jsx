@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { SkeletonList } from '../../components/Skeleton'
+import { SkeletonTable } from '../../components/Skeleton'
 import HighlightedText from '../../components/HighlightedText'
 import PageStats from '../../components/PageStats'
 import { IconHistory } from './icons'
@@ -112,8 +112,9 @@ function ActivityLogs() {
                 </p>
             </div>
 
-            {!loading && logs.length > 0 && (
+            {(loading || logs.length > 0) && (
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: filterDate ? 'Actions that day' : 'Your actions', value: logs.length, note: filterDate ? 'Every recorded action' : 'Latest 200', Icon: IconHistory },
                         { label: 'Today', value: todayCount, note: 'Recorded today', Icon: IconCalendarCheck },
@@ -153,7 +154,7 @@ function ActivityLogs() {
             {error && <div className="employee-error-box">{error}</div>}
 
             {loading ? (
-                <SkeletonList count={3} />
+                <SkeletonTable portal="employee" columns={['Action', 'Description', 'Date']} rows={8} />
             ) : logs.length === 0 && !filterDate ? (
                 <div className="employee-empty">
                     No activity has been recorded yet. Actions you take (verifying payments,

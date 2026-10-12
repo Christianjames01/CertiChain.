@@ -809,8 +809,9 @@ function Employees() {
                 </Modal>
             )}
 
-            {!loading && (
+            {(
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Active staff', value: activeCount, note: `${employees.length} account${employees.length === 1 ? '' : 's'} in total`, Icon: IconUsers, onClick: () => setStatusFilter('active') },
                         { label: 'Awaiting activation', value: inactiveCount, note: inactiveCount ? 'Inactive — activate to let them log in' : 'Everyone is active', Icon: IconHourglass, warn: inactiveCount > 0, onClick: () => setStatusFilter('inactive') },

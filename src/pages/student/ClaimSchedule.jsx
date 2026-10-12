@@ -233,8 +233,9 @@ function ClaimSchedule() {
 
             {error && <div className="student-error-box">{error}</div>}
 
-            {!loading && schedules.length > 0 && (
+            {(loading || schedules.length > 0) && (
                 <PageStats
+                    loading={loading}
                     stats={[
                         { label: 'Upcoming', value: schedules.filter((sc) => sc.status === 'scheduled').length, note: 'Bring a valid ID and your receipt', Icon: IconCalendarCheck },
                         { label: 'Claimed', value: schedules.filter((sc) => sc.status === 'claimed').length, note: 'Documents received', Icon: IconCheckCircle },

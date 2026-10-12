@@ -241,12 +241,7 @@ function Profile() {
                 portal="employee"
                 blocks={[
                     { type: 'header', titleWidth: 120 },
-                    { type: 'profile' },
-                    { type: 'card', fields: 6, titleWidth: 200 },
-                    { type: 'card', rows: 2, titleWidth: 280 },
-                    { type: 'card', action: true, fields: 3, titleWidth: 180 },
-                    { type: 'card', action: true, lines: 1, titleWidth: 100 },
-                    { type: 'card', lines: 2, buttons: 1, titleWidth: 220 },
+                    { type: 'profilePage', stats: 0, left: [4, 2, 2], right: [2] },
                 ]}
             />
         )
