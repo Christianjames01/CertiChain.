@@ -8,28 +8,24 @@ import { IconFileStack, IconCalendarCheck } from '../admin/icons'
 import hcdcLogo from '../../assets/hcdc-logo.png'
 import hcdc75Logo from '../../assets/hcdc-75-logo.png'
 import pacucoaLogo from '../../assets/footer-pacucoa.png'
-import cocopeaLogo from '../../assets/footer-cocopea.png'
 import ceapLogo from '../../assets/footer-ceap.png'
 import davaoChamberLogo from '../../assets/footer-davao-chamber.png'
 import dacsLogo from '../../assets/footer-dacs.png'
-import umapLogo from '../../assets/footer-umap.png'
 import tuvnordLogo from '../../assets/footer-tuvnord.png'
 import eccpLogo from '../../assets/footer-eccp.png'
 import erasmusLogo from '../../assets/footer-erasmus.png'
-import dacunLogo from '../../assets/footer-dacun.png'
 import './EmployeePages.css'
 import './CertificateOfEnrollment.css'
 
 // Same order as the Registrar's printed letterhead, left to right.
+// TODO: the Registrar's letterhead starts this row with the AUN-QA logo --
+// add it first once the image is in src/assets.
 const MEMBERSHIP_LOGOS = [
-    { src: ceapLogo, alt: 'Catholic Educational Association of the Philippines' },
-    { src: cocopeaLogo, alt: 'COCOPEA' },
-    { src: davaoChamberLogo, alt: 'Davao City Chamber of Commerce and Industry Foundation' },
-    { src: dacsLogo, alt: 'Davao Association of Catholic Schools' },
-    { src: dacunLogo, alt: 'Davao Colleges and Universities Network' },
-    { src: umapLogo, alt: 'University Mobility in Asia and the Pacific' },
-    { src: eccpLogo, alt: 'European Chamber of Commerce of the Philippines' },
     { src: erasmusLogo, alt: 'Erasmus+' },
+    { src: eccpLogo, alt: 'European Chamber of Commerce of the Philippines' },
+    { src: davaoChamberLogo, alt: 'Davao City Chamber of Commerce and Industry Foundation' },
+    { src: ceapLogo, alt: 'Catholic Educational Association of the Philippines' },
+    { src: dacsLogo, alt: 'Davao Association of Catholic Schools' },
 ]
 
 // The preview is laid out at real US Letter size (8.5in = 816 CSS px) so
@@ -254,7 +250,7 @@ function CertificateOfEnrollment() {
                         </div>
 
                         <div className="coe-accreditation-col">
-                            <span className="coe-accreditation-label">Institutional Member of:</span>
+                            <span className="coe-accreditation-label">Institutional Membership:</span>
                             <div className="coe-accreditation-row">
                                 {MEMBERSHIP_LOGOS.map((logo) => (
                                     <img key={logo.alt} src={logo.src} alt={logo.alt} />

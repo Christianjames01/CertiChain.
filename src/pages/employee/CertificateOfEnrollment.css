@@ -240,7 +240,8 @@
     align-self: flex-end;
     margin: 0.4in 0.675in 0 0;
     font-size: 12pt;
-    line-height: 0.295in;
+    /* Name and "Registrar" on consecutive lines, single-spaced. */
+    line-height: 1.2;
     text-align: center;
 }
 
@@ -291,8 +292,8 @@
 .coe-accreditation-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.04in;
+    justify-content: center;
+    gap: 0.08in;
     width: 100%;
 }
 
