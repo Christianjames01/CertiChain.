@@ -23,22 +23,33 @@ import {
 import ThemeToggle from '../../components/ThemeToggle'
 import '../../components/DashboardStats.css'
 import '../../components/PortalUi.css'
+import '../../components/NavStages.css'
 import './StudentLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
 
 // In the order a student uses them: see requests, request one, pay, pick up.
+// Grouped into work stages like an Agile board (see NAV_STAGES).
 const NAV_ITEMS = [
-    { to: '/student/dashboard', label: 'Dashboard', icon: <IconHome />, end: true },
-    { to: '/student/my-requests', label: 'My Requests', icon: <IconList /> },
-    { to: '/student/new-request', label: 'Request a Document', icon: <IconDocumentPlus /> },
-    { to: '/student/upload-receipt', label: 'Payments & Receipts', icon: <IconReceipt /> },
-    { to: '/student/claim-schedule', label: 'Pickup Schedule', icon: <IconCalendar /> },
-    { to: '/student/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications' },
-    { to: '/student/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages' },
-    { to: '/student/profile', label: 'Profile', icon: <IconUserCircle /> },
-    { to: '/student/guide', label: 'User Guide', icon: <IconBook /> },
-    { to: '/student/help', label: 'Help & Support', icon: <IconHelp /> },
+    { to: '/student/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
+    { to: '/student/new-request', label: 'Request a Document', icon: <IconDocumentPlus />, stage: 'todo' },
+    { to: '/student/upload-receipt', label: 'Payments & Receipts', icon: <IconReceipt />, stage: 'todo' },
+    { to: '/student/my-requests', label: 'My Requests', icon: <IconList />, stage: 'progress' },
+    { to: '/student/claim-schedule', label: 'Pickup Schedule', icon: <IconCalendar />, stage: 'done' },
+    { to: '/student/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications', stage: 'account' },
+    { to: '/student/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages', stage: 'account' },
+    { to: '/student/profile', label: 'Profile', icon: <IconUserCircle />, stage: 'account' },
+    { to: '/student/guide', label: 'User Guide', icon: <IconBook />, stage: 'account' },
+    { to: '/student/help', label: 'Help & Support', icon: <IconHelp />, stage: 'account' },
+]
+
+const NAV_STAGES = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'todo', label: 'To do' },
+    { key: 'progress', label: 'In progress' },
+    { key: 'done', label: 'Done' },
+    { key: 'manage', label: 'Manage' },
+    { key: 'account', label: 'Account' },
 ]
 
 function StudentLayout() {
@@ -205,7 +216,9 @@ function StudentLayout() {
                     </div>
 
                     <nav className="student-nav">
-                        {NAV_ITEMS.map((item) => (
+                        {(() => {
+                            const visible = NAV_ITEMS
+                            const renderItem = (item) => (
                             <NavLink
                                 key={item.to}
                                 to={item.to}
@@ -230,7 +243,18 @@ function StudentLayout() {
                                     )
                                 })()}
                             </NavLink>
-                        ))}
+                        )
+                            return NAV_STAGES.map((stage) => {
+                                const items = visible.filter((item) => item.stage === stage.key)
+                                if (items.length === 0) return null
+                                return (
+                                    <div className="nav-stage" data-stage={stage.key} key={stage.key}>
+                                        <span className="nav-stage-label" data-stage={stage.key}>{stage.label}</span>
+                                        {items.map(renderItem)}
+                                    </div>
+                                )
+                            })
+                        })()}
                     </nav>
                 </div>
 

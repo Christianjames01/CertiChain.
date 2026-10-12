@@ -6,6 +6,7 @@ import { IconHome, IconCalendar, IconReceipt, IconBell, IconUserCircle, IconLogo
 import { IconClipboardList, IconUsers, IconMessage, IconHistory, IconShieldCheck } from '../employee/icons'
 import { IconSwap, IconIdCard, IconDocument, IconBuilding, IconBarChart, IconMegaphone, IconTicket, IconClipboardCheck, IconLayers } from './icons'
 import ThemeToggle from '../../components/ThemeToggle'
+import '../../components/NavStages.css'
 import './AdminLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
@@ -16,28 +17,38 @@ import { adminPath } from '../../lib/portalPaths'
 // account that isn't the one signed in as head (its own profile, the guide).
 const HIDDEN_FOR_SUPERADMIN = ['/announcements', '/queue', '/guide', '/profile']
 
+// Grouped into work stages like an Agile board (see NAV_STAGES).
 const NAV_ITEMS = [
-    { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, end: true },
-    { to: '/requests', label: 'All Requests', icon: <IconClipboardList /> },
-    { to: '/assignments', label: 'Request Assignments', icon: <IconSwap /> },
-    { to: '/request-handling', label: 'Request Handling', icon: <IconLayers /> },
-    { to: '/employees', label: 'Employees', icon: <IconUsers /> },
-    { to: '/students', label: 'Students', icon: <IconIdCard />, badgeKey: 'pendingStudents' },
-    { to: '/documents', label: 'Documents', icon: <IconDocument /> },
-    { to: '/announcements', label: 'Announcements', icon: <IconMegaphone /> },
-    { to: '/colleges-programs', label: 'Academic Divisions & Programs', icon: <IconBuilding /> },
-    { to: '/claim-schedules', label: 'Claim Schedules', icon: <IconCalendar />, badgeKey: 'unclaimed' },
-    { to: '/office-calendar', label: 'Office Calendar', icon: <IconCalendar /> },
-    { to: '/queue', label: 'Walk-in Queue', icon: <IconTicket /> },
-    { to: '/receipts', label: 'Official Receipts', icon: <IconReceipt />, badgeKey: 'uploadedReceipts' },
-    { to: '/credentials', label: 'Credentials', icon: <IconShieldCheck /> },
-    { to: '/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages' },
-    { to: '/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications' },
-    { to: '/activity-logs', label: 'Activity Logs', icon: <IconHistory /> },
-    { to: '/issued-certificates', label: 'Issued Certificates', icon: <IconClipboardCheck /> },
-    { to: '/reports', label: 'Reports', icon: <IconBarChart /> },
-    { to: '/guide', label: 'User Guide', icon: <IconBook /> },
-    { to: '/profile', label: 'Profile', icon: <IconUserCircle /> },
+    { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
+    { to: '/requests', label: 'All Requests', icon: <IconClipboardList />, stage: 'todo' },
+    { to: '/assignments', label: 'Request Assignments', icon: <IconSwap />, stage: 'todo' },
+    { to: '/students', label: 'Students', icon: <IconIdCard />, badgeKey: 'pendingStudents', stage: 'todo' },
+    { to: '/receipts', label: 'Official Receipts', icon: <IconReceipt />, badgeKey: 'uploadedReceipts', stage: 'todo' },
+    { to: '/request-handling', label: 'Request Handling', icon: <IconLayers />, stage: 'progress' },
+    { to: '/claim-schedules', label: 'Claim Schedules', icon: <IconCalendar />, badgeKey: 'unclaimed', stage: 'progress' },
+    { to: '/queue', label: 'Walk-in Queue', icon: <IconTicket />, stage: 'progress' },
+    { to: '/office-calendar', label: 'Office Calendar', icon: <IconCalendar />, stage: 'progress' },
+    { to: '/credentials', label: 'Credentials', icon: <IconShieldCheck />, stage: 'done' },
+    { to: '/issued-certificates', label: 'Issued Certificates', icon: <IconClipboardCheck />, stage: 'done' },
+    { to: '/reports', label: 'Reports', icon: <IconBarChart />, stage: 'done' },
+    { to: '/activity-logs', label: 'Activity Logs', icon: <IconHistory />, stage: 'done' },
+    { to: '/employees', label: 'Employees', icon: <IconUsers />, stage: 'manage' },
+    { to: '/documents', label: 'Documents', icon: <IconDocument />, stage: 'manage' },
+    { to: '/announcements', label: 'Announcements', icon: <IconMegaphone />, stage: 'manage' },
+    { to: '/colleges-programs', label: 'Academic Divisions & Programs', icon: <IconBuilding />, stage: 'manage' },
+    { to: '/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages', stage: 'account' },
+    { to: '/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications', stage: 'account' },
+    { to: '/guide', label: 'User Guide', icon: <IconBook />, stage: 'account' },
+    { to: '/profile', label: 'Profile', icon: <IconUserCircle />, stage: 'account' },
+]
+
+const NAV_STAGES = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'todo', label: 'To do' },
+    { key: 'progress', label: 'In progress' },
+    { key: 'done', label: 'Done' },
+    { key: 'manage', label: 'Manage' },
+    { key: 'account', label: 'Account' },
 ]
 
 function AdminLayout() {
@@ -231,7 +242,9 @@ function AdminLayout() {
                     </div>
 
                     <nav className="admin-nav">
-                        {NAV_ITEMS.filter((item) => role !== 'superadmin' || !HIDDEN_FOR_SUPERADMIN.includes(item.to)).map((item) => {
+                        {(() => {
+                            const visible = NAV_ITEMS.filter((item) => role !== 'superadmin' || !HIDDEN_FOR_SUPERADMIN.includes(item.to))
+                            const renderItem = (item) => {
                             const count = item.badgeKey ? badgeValue(item.badgeKey) : 0
 
                             return (
@@ -253,7 +266,18 @@ function AdminLayout() {
                                     )}
                                 </NavLink>
                             )
-                        })}
+                        }
+                            return NAV_STAGES.map((stage) => {
+                                const items = visible.filter((item) => item.stage === stage.key)
+                                if (items.length === 0) return null
+                                return (
+                                    <div className="nav-stage" data-stage={stage.key} key={stage.key}>
+                                        <span className="nav-stage-label" data-stage={stage.key}>{stage.label}</span>
+                                        {items.map(renderItem)}
+                                    </div>
+                                )
+                            })
+                        })()}
                     </nav>
                 </div>
 

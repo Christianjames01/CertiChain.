@@ -9,28 +9,39 @@ import { IconIdCard, IconTicket, IconUsers, IconDocument, IconClipboardCheck } f
 import ThemeToggle from '../../components/ThemeToggle'
 import '../../components/DashboardStats.css'
 import '../../components/PortalUi.css'
+import '../../components/NavStages.css'
 import './EmployeeLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
 import { loadCanIssueCertificates } from '../../lib/canIssueCertificates'
 
+// Grouped into work stages like an Agile board (see NAV_STAGES).
 const NAV_ITEMS = [
-    { to: '/employee/dashboard', label: 'Dashboard', icon: <IconHome />, end: true },
-    { to: '/employee/requests', label: 'Assigned Requests', icon: <IconClipboardList /> },
-    { to: '/employee/verification', label: 'Request Verification', icon: <IconShieldCheck />, fullAccessOnly: true },
-    { to: '/employee/processing', label: 'Document Processing', icon: <IconGear />, fullAccessOnly: true },
-    { to: '/employee/claim-schedule', label: 'Claim Schedule', icon: <IconCalendar /> },
-    { to: '/employee/office-calendar', label: 'Office Calendar', icon: <IconCalendar /> },
-    { to: '/employee/queue', label: 'Walk-in Queue', icon: <IconTicket />, fullAccessOnly: true },
-    { to: '/employee/students', label: 'Students', icon: <IconIdCard />, fullAccessOnly: true, badgeKey: 'pendingStudents' },
-    { to: '/employee/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages', fullAccessOnly: true },
-    { to: '/employee/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications' },
-    { to: '/employee/activity-logs', label: 'Activity Logs', icon: <IconHistory />, fullAccessOnly: true },
-    { to: '/employee/documents', label: 'Documents', icon: <IconDocument /> },
-    { to: '/employee/certificate-of-enrollment', label: 'Certificate of Enrollment', icon: <IconClipboardCheck />, canIssueCertificatesOnly: true },
-    { to: '/employee/add-employee', label: 'Add Employee', icon: <IconUsers />, canAddEmployeesOnly: true },
-    { to: '/employee/guide', label: 'User Guide', icon: <IconBook /> },
-    { to: '/employee/profile', label: 'Profile', icon: <IconUserCircle /> },
+    { to: '/employee/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
+    { to: '/employee/requests', label: 'Assigned Requests', icon: <IconClipboardList />, stage: 'overview' },
+    { to: '/employee/verification', label: 'Request Verification', icon: <IconShieldCheck />, fullAccessOnly: true, stage: 'todo' },
+    { to: '/employee/students', label: 'Students', icon: <IconIdCard />, fullAccessOnly: true, badgeKey: 'pendingStudents', stage: 'todo' },
+    { to: '/employee/processing', label: 'Document Processing', icon: <IconGear />, fullAccessOnly: true, stage: 'progress' },
+    { to: '/employee/claim-schedule', label: 'Claim Schedule', icon: <IconCalendar />, stage: 'progress' },
+    { to: '/employee/office-calendar', label: 'Office Calendar', icon: <IconCalendar />, stage: 'progress' },
+    { to: '/employee/queue', label: 'Walk-in Queue', icon: <IconTicket />, fullAccessOnly: true, stage: 'progress' },
+    { to: '/employee/activity-logs', label: 'Activity Logs', icon: <IconHistory />, fullAccessOnly: true, stage: 'done' },
+    { to: '/employee/certificate-of-enrollment', label: 'Certificate of Enrollment', icon: <IconClipboardCheck />, canIssueCertificatesOnly: true, stage: 'done' },
+    { to: '/employee/documents', label: 'Documents', icon: <IconDocument />, stage: 'manage' },
+    { to: '/employee/add-employee', label: 'Add Employee', icon: <IconUsers />, canAddEmployeesOnly: true, stage: 'manage' },
+    { to: '/employee/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages', fullAccessOnly: true, stage: 'account' },
+    { to: '/employee/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications', stage: 'account' },
+    { to: '/employee/guide', label: 'User Guide', icon: <IconBook />, stage: 'account' },
+    { to: '/employee/profile', label: 'Profile', icon: <IconUserCircle />, stage: 'account' },
+]
+
+const NAV_STAGES = [
+    { key: 'overview', label: 'Overview' },
+    { key: 'todo', label: 'To do' },
+    { key: 'progress', label: 'In progress' },
+    { key: 'done', label: 'Done' },
+    { key: 'manage', label: 'Manage' },
+    { key: 'account', label: 'Account' },
 ]
 
 function EmployeeLayout() {
@@ -225,11 +236,13 @@ function EmployeeLayout() {
                     </div>
 
                     <nav className="employee-nav">
-                        {NAV_ITEMS.filter((item) =>
+                        {(() => {
+                            const visible = NAV_ITEMS.filter((item) =>
                             (!item.fullAccessOnly || accessScope === 'full') &&
                             (!item.canAddEmployeesOnly || canAddEmployees) &&
                             (!item.canIssueCertificatesOnly || canIssueCertificates)
-                        ).map((item) => {
+                        )
+                            const renderItem = (item) => {
                             const count = item.badgeKey ? badgeValue(item.badgeKey) : 0
 
                             return (
@@ -251,7 +264,18 @@ function EmployeeLayout() {
                                     )}
                                 </NavLink>
                             )
-                        })}
+                        }
+                            return NAV_STAGES.map((stage) => {
+                                const items = visible.filter((item) => item.stage === stage.key)
+                                if (items.length === 0) return null
+                                return (
+                                    <div className="nav-stage" data-stage={stage.key} key={stage.key}>
+                                        <span className="nav-stage-label" data-stage={stage.key}>{stage.label}</span>
+                                        {items.map(renderItem)}
+                                    </div>
+                                )
+                            })
+                        })()}
                     </nav>
                 </div>
 

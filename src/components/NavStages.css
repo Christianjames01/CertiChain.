@@ -1,0 +1,47 @@
+/* Sidebar grouped into work stages, like the columns of an Agile board:
+   Overview, To do -> In progress -> Done, then the rest. Shared by the
+   admin/head, employee and student sidebars (all on a dark navy panel). */
+
+.nav-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.nav-stage + .nav-stage {
+    margin-top: 14px;
+}
+
+.nav-stage-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* Board-column marker: a dot in the stage's colour. */
+.nav-stage-label::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+.nav-stage-label[data-stage='todo']::before {
+    background: #cbd5e1;
+}
+
+.nav-stage-label[data-stage='progress']::before {
+    background: #f5b942;
+}
+
+.nav-stage-label[data-stage='done']::before {
+    background: #4ade80;
+}
