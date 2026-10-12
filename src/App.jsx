@@ -8,6 +8,7 @@ import PageLoading from './components/PageLoading'
 import ProtectedRoute from './components/ProtectedRoute'
 import RequireFullEmployeeAccess from './components/RequireFullEmployeeAccess'
 import RequireCanAddEmployees from './components/RequireCanAddEmployees'
+import RequireCanIssueCertificates from './components/RequireCanIssueCertificates'
 import StudentVerificationGate from './components/StudentVerificationGate'
 import HomeRoute from './components/HomeRoute'
 
@@ -404,7 +405,7 @@ function App() {
 
           <Route
             path="/employee/certificate-of-enrollment"
-            element={<RequireFullEmployeeAccess><CertificateOfEnrollment /></RequireFullEmployeeAccess>}
+            element={<RequireCanIssueCertificates><CertificateOfEnrollment /></RequireCanIssueCertificates>}
           />
 
           <Route

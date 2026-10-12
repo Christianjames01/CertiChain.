@@ -12,6 +12,7 @@ import '../../components/PortalUi.css'
 import './EmployeeLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
+import { loadCanIssueCertificates } from '../../lib/canIssueCertificates'
 
 const NAV_ITEMS = [
     { to: '/employee/dashboard', label: 'Dashboard', icon: <IconHome />, end: true },
@@ -26,7 +27,7 @@ const NAV_ITEMS = [
     { to: '/employee/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications' },
     { to: '/employee/activity-logs', label: 'Activity Logs', icon: <IconHistory />, fullAccessOnly: true },
     { to: '/employee/documents', label: 'Documents', icon: <IconDocument /> },
-    { to: '/employee/certificate-of-enrollment', label: 'Certificate of Enrollment', icon: <IconClipboardCheck />, fullAccessOnly: true },
+    { to: '/employee/certificate-of-enrollment', label: 'Certificate of Enrollment', icon: <IconClipboardCheck />, canIssueCertificatesOnly: true },
     { to: '/employee/add-employee', label: 'Add Employee', icon: <IconUsers />, canAddEmployeesOnly: true },
     { to: '/employee/guide', label: 'User Guide', icon: <IconBook /> },
     { to: '/employee/profile', label: 'Profile', icon: <IconUserCircle /> },
@@ -39,6 +40,7 @@ function EmployeeLayout() {
     const [positionTitle, setPositionTitle] = useState('')
     const [accessScope, setAccessScope] = useState('full')
     const [canAddEmployees, setCanAddEmployees] = useState(false)
+    const [canIssueCertificates, setCanIssueCertificates] = useState(false)
     const [unreadNotifications, setUnreadNotifications] = useState(0)
     const [unreadMessages, setUnreadMessages] = useState(0)
     const [pendingStudents, setPendingStudents] = useState(0)
@@ -95,6 +97,9 @@ function EmployeeLayout() {
             setAccessScope(employee.access_scope || 'full')
             setCanAddEmployees(!!employee.can_add_employees)
         }
+
+        // Granted per employee by the head (see lib/canIssueCertificates).
+        setCanIssueCertificates(await loadCanIssueCertificates())
     }
 
     async function loadBadgeCounts() {
@@ -217,7 +222,8 @@ function EmployeeLayout() {
                     <nav className="employee-nav">
                         {NAV_ITEMS.filter((item) =>
                             (!item.fullAccessOnly || accessScope === 'full') &&
-                            (!item.canAddEmployeesOnly || canAddEmployees)
+                            (!item.canAddEmployeesOnly || canAddEmployees) &&
+                            (!item.canIssueCertificatesOnly || canIssueCertificates)
                         ).map((item) => {
                             const count = item.badgeKey ? badgeValue(item.badgeKey) : 0
 

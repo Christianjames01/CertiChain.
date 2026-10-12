@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { logActivity } from '../../lib/activityLog'
 import { createEmployeeAccount } from '../../lib/createEmployeeAccount'
 import { exportEmployeeBackup } from '../../lib/employeeBackup'
-import { notifyError, notifySuccess, notifyWarning, confirmModal } from '../../lib/notify'
+import { notify, notifyError, notifySuccess, notifyWarning, confirmModal } from '../../lib/notify'
 import { SkeletonList } from '../../components/Skeleton'
 import Modal from '../../components/Modal'
 import PasswordRequirements from '../../components/PasswordRequirements'
@@ -46,6 +46,7 @@ function Employees() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [updating, setUpdating] = useState(null)
+    const [certPermissionReady, setCertPermissionReady] = useState(false)
     const [removing, setRemoving] = useState(null)
 
     const [showAddForm, setShowAddForm] = useState(false)
@@ -93,6 +94,14 @@ function Employees() {
 
             const employeeIds = data.map((e) => e.employee_id)
 
+            // Separate query so the page still loads before the
+            // can_issue_certificates column exists (migration 20261012030000).
+            const { data: certFlags } = await supabase
+                .from('employees')
+                .select('employee_id, can_issue_certificates')
+            const canIssueById = Object.fromEntries((certFlags || []).map((e) => [e.employee_id, !!e.can_issue_certificates]))
+            setCertPermissionReady(Boolean(certFlags))
+
             const { data: openRequests } = employeeIds.length
                 ? await supabase
                     .from('document_requests')
@@ -118,6 +127,7 @@ function Employees() {
                         collegeName: collegeNameById[e.assigned_college_id] || 'Unassigned',
                         openCount: openCountByEmployee[e.employee_id] || 0,
                         canAddEmployees: !!e.can_add_employees,
+                        canIssueCertificates: !!canIssueById[e.employee_id],
                     }
                 })
             )
@@ -411,6 +421,60 @@ function Employees() {
         } catch (err) {
             console.error('TOGGLE STATUS ERROR:', err)
             notifyError(friendlyError(err, 'Failed to update employee status.'))
+        } finally {
+            setUpdating(null)
+        }
+    }
+
+    const toggleCanIssueCertificates = async (employee) => {
+        if (blockedForReadOnlyViewer(role)) return
+        const next = !employee.canIssueCertificates
+
+        const confirmed = await confirmModal(
+            next
+                ? `${employee.name} will be able to create (save & print) Certificates of Enrollment.`
+                : `${employee.name} will no longer be able to create Certificates of Enrollment.`,
+            { title: next ? 'Allow creating certificates?' : 'Revoke creating certificates?', confirmButtonText: next ? 'Allow' : 'Revoke' }
+        )
+        if (!confirmed) return
+
+        try {
+            setUpdating(employee.employee_id)
+
+            const { data: { user } } = await supabase.auth.getUser()
+
+            const { error: updateError } = await supabase
+                .from('employees')
+                .update({ can_issue_certificates: next, updated_at: new Date().toISOString() })
+                .eq('employee_id', employee.employee_id)
+
+            if (updateError) {
+                throw new Error('Failed to update permission: ' + updateError.message)
+            }
+
+            await logActivity({
+                userId: user?.id,
+                action: next ? 'grant_issue_certificates' : 'revoke_issue_certificates',
+                tableName: 'employees',
+                recordId: employee.employee_id,
+                description: `${next ? 'Allowed' : 'Revoked'} "${employee.name}" (${employee.employee_number}) creating Certificates of Enrollment.`,
+            })
+
+            if (employee.user_id) {
+                await notify({
+                    userId: employee.user_id,
+                    title: next ? 'You can now create certificates' : 'Certificate access removed',
+                    message: next
+                        ? 'The registrar head allowed you to create Certificates of Enrollment. Find it in your sidebar.'
+                        : 'The registrar head removed your access to create Certificates of Enrollment.',
+                    notificationType: 'account',
+                })
+            }
+
+            await loadEmployees()
+        } catch (err) {
+            console.error('TOGGLE CAN_ISSUE_CERTIFICATES ERROR:', err)
+            notifyError(friendlyError(err, 'Failed to update permission.'))
         } finally {
             setUpdating(null)
         }
@@ -732,6 +796,7 @@ function Employees() {
                                         {employee.name}
                                         {employee.displayName && <span className="admin-card-badge">Shown to students as “{employee.displayName}”</span>}
                                         {employee.canAddEmployees && <span className="admin-card-badge">Can add employees</span>}
+                                        {employee.canIssueCertificates && <span className="admin-card-badge">Can create certificates</span>}
                                     </h3>
                                     <p>{employee.employee_number} · {employee.position_title} · {employee.email}</p>
                                 </div>
@@ -759,6 +824,16 @@ function Employees() {
                             >
                                 {employee.canAddEmployees ? 'Revoke adding employees' : 'Allow adding employees'}
                             </button>
+
+                            {certPermissionReady && (
+                                <button
+                                    className={`admin-link-button${employee.canIssueCertificates ? ' is-warning' : ' is-success'}`}
+                                    onClick={() => toggleCanIssueCertificates(employee)}
+                                    disabled={updating === employee.employee_id}
+                                >
+                                    {employee.canIssueCertificates ? 'Revoke creating certificates' : 'Allow creating certificates'}
+                                </button>
+                            )}
 
                             <button
                                 className="admin-link-button"
