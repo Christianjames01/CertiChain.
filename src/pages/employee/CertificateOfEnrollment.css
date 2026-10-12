@@ -58,16 +58,65 @@
     line-height: 1.7;
 }
 
-.coe-header {
+.coe-letterhead {
     display: flex;
-    justify-content: center;
-    margin-bottom: 28px;
+    align-items: center;
+    gap: 14px;
+    margin: -24px -16px 0;
 }
 
-.coe-header img {
-    width: 84px;
-    height: 84px;
+.coe-letterhead-seal,
+.coe-letterhead-75 {
+    flex-shrink: 0;
     object-fit: contain;
+}
+
+.coe-letterhead-seal {
+    width: 72px;
+    height: 72px;
+}
+
+.coe-letterhead-75 {
+    width: 54px;
+    height: 60px;
+}
+
+.coe-letterhead-text {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
+
+.coe-letterhead-text h1 {
+    margin: 0 0 2px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #3a3a3a;
+    text-transform: capitalize;
+}
+
+.coe-letterhead-office {
+    margin: 0 0 4px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #3a3a3a;
+}
+
+.coe-letterhead-text p {
+    margin: 0;
+    font-size: 9.5px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.coe-letterhead-rule {
+    height: 2px;
+    margin: 10px 0 26px;
+    background: linear-gradient(#111, #111) top / 100% 1px no-repeat,
+        linear-gradient(#111, #111) bottom / 100% 1px no-repeat;
 }
 
 .coe-title {

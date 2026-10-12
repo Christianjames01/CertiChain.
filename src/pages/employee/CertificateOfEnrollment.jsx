@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { friendlyError } from '../../lib/friendlyError'
 import hcdcLogo from '../../assets/hcdc-logo.png'
+import hcdc75Logo from '../../assets/hcdc-75-logo.png'
 import './EmployeePages.css'
 import './CertificateOfEnrollment.css'
 
@@ -192,9 +193,21 @@ function CertificateOfEnrollment() {
 
                 <section className="coe-preview-wrap">
                     <div className="coe-preview" id="coe-print-area">
-                        <div className="coe-header">
-                            <img src={hcdcLogo} alt="Holy Cross of Davao College" width="84" height="84" />
+                        <div className="coe-letterhead">
+                            <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" width="84" height="84" />
+
+                            <div className="coe-letterhead-text">
+                                <h1>Holy Cross of Davao College, Inc.</h1>
+                                <p className="coe-letterhead-office">Office of Registration and Records Management</p>
+                                <p>Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
+                                <p>Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>
+                                <p>Cellphone No.: (+63) 9468108617 &amp; (+63) 9061509582</p>
+                                <p>Email: registrar@hcdc.edu.ph • Website: http://www.hcdc.edu.ph/</p>
+                            </div>
+
+                            <img src={hcdc75Logo} alt="HCDC 75th Diamond Jubilee" className="coe-letterhead-75" width="64" height="70" />
                         </div>
+                        <div className="coe-letterhead-rule" aria-hidden="true" />
 
                         <h2 className="coe-title">C E R T I F I C A T I O N</h2>
 
