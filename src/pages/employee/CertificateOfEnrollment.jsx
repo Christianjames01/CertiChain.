@@ -145,8 +145,11 @@ function CertificateOfEnrollment() {
 
             if (error) throw error
 
-            notifySuccess('Certificate logged.')
+            // Print before showing the notice: while a SweetAlert modal is
+            // open it aria-hides the rest of <body>, and its print CSS then
+            // hides those elements -- the certificate included.
             window.print()
+            notifySuccess('Certificate logged.')
         } catch (err) {
             console.error('SAVE CERTIFICATE ERROR:', err)
             notifyError(friendlyError(err, 'Failed to save the certificate.'))

@@ -297,8 +297,10 @@
         display: none !important;
     }
 
+    /* !important: an open SweetAlert modal aria-hides the rest of <body>
+       and its print CSS hides [aria-hidden] siblings -- not this one. */
     .coe-print-root {
-        display: block;
+        display: block !important;
     }
 
     .coe-print-root .coe-preview {
