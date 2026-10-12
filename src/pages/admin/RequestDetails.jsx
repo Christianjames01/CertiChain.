@@ -581,6 +581,14 @@ function AdminRequestDetails() {
                 description: `Approved "${requirement.document_requirements?.requirement_name || 'requirement'}" for request "${request?.request_number || requestId}" (Registrar Head).`,
             })
 
+            await notifyStudentByStudentId({
+                studentId: request.student_id,
+                title: 'Requirement approved',
+                message: `"${requirement.document_requirements?.requirement_name || 'A requirement'}" for request ${request?.request_number || ''} was approved.`,
+                notificationType: 'requirement',
+                relatedRequestId: requestId,
+            })
+
             notifySuccess('Requirement approved.')
             await loadRequest({ silent: true })
 
