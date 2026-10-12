@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { friendlyError } from '../../lib/friendlyError'
+import PageStats from '../../components/PageStats'
+import { IconFileStack, IconCalendarCheck } from '../admin/icons'
 import hcdcLogo from '../../assets/hcdc-logo.png'
 import hcdc75Logo from '../../assets/hcdc-75-logo.png'
 import pacucoaLogo from '../../assets/footer-pacucoa.png'
@@ -75,6 +77,7 @@ function CertificateOfEnrollment() {
     const [programs, setPrograms] = useState([])
     const [saving, setSaving] = useState(false)
     const [previewScale, setPreviewScale] = useState(1)
+    const [myCounts, setMyCounts] = useState(null)
     const previewWrapRef = useRef(null)
 
     const [form, setForm] = useState({
@@ -92,6 +95,7 @@ function CertificateOfEnrollment() {
 
     useEffect(() => {
         loadLookups()
+        loadMyCounts()
     }, [])
 
     useEffect(() => {
@@ -112,6 +116,24 @@ function CertificateOfEnrollment() {
             .order('program_name')
 
         setPrograms((programRows || []).map((p) => p.program_name))
+    }
+
+    // How many certificates this staff member has saved & printed, overall
+    // and today (local date). The registrar head sees everyone's tally on
+    // the head portal's Issued Certificates page.
+    const loadMyCounts = async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const now = new Date()
+        const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+
+        const [{ count: total }, { count: todayCount }] = await Promise.all([
+            supabase.from('enrollment_certificates').select('certificate_id', { count: 'exact', head: true }).eq('issued_by', user.id),
+            supabase.from('enrollment_certificates').select('certificate_id', { count: 'exact', head: true }).eq('issued_by', user.id).gte('created_at', new Date(`${today}T00:00:00`).toISOString()),
+        ])
+
+        setMyCounts({ total: total || 0, today: todayCount || 0 })
     }
 
     const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -149,6 +171,7 @@ function CertificateOfEnrollment() {
             // open it aria-hides the rest of <body>, and its print CSS then
             // hides those elements -- the certificate included.
             window.print()
+            loadMyCounts()
             notifySuccess('Certificate logged.')
         } catch (err) {
             console.error('SAVE CERTIFICATE ERROR:', err)
@@ -256,6 +279,15 @@ function CertificateOfEnrollment() {
                 <h1>Certificate of Enrollment</h1>
                 <p>Fill in the student's details, then save and print — matches the Registrar's standard certification format (ORRM CF-004C).</p>
             </header>
+
+            {myCounts && (
+                <PageStats
+                    stats={[
+                        { label: 'You have issued', value: myCounts.total, note: 'Certificates saved & printed', Icon: IconFileStack },
+                        { label: 'Today', value: myCounts.today, note: 'Saved & printed today', Icon: IconCalendarCheck },
+                    ]}
+                />
+            )}
 
             <div className="coe-layout">
                 <section className="employee-card coe-form">

@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase'
 import certichainLogo from '../../assets/certichain-logo.png'
 import { IconHome, IconCalendar, IconReceipt, IconBell, IconUserCircle, IconLogout, IconMenu, IconX, IconBook } from '../student/icons'
 import { IconClipboardList, IconUsers, IconMessage, IconHistory, IconShieldCheck } from '../employee/icons'
-import { IconSwap, IconIdCard, IconDocument, IconBuilding, IconBarChart, IconMegaphone, IconTicket } from './icons'
+import { IconSwap, IconIdCard, IconDocument, IconBuilding, IconBarChart, IconMegaphone, IconTicket, IconClipboardCheck } from './icons'
 import ThemeToggle from '../../components/ThemeToggle'
 import './AdminLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
@@ -33,6 +33,7 @@ const NAV_ITEMS = [
     { to: '/messages', label: 'Messages', icon: <IconMessage />, badgeKey: 'messages' },
     { to: '/notifications', label: 'Notifications', icon: <IconBell />, badgeKey: 'notifications' },
     { to: '/activity-logs', label: 'Activity Logs', icon: <IconHistory /> },
+    { to: '/issued-certificates', label: 'Issued Certificates', icon: <IconClipboardCheck /> },
     { to: '/reports', label: 'Reports', icon: <IconBarChart /> },
     { to: '/guide', label: 'User Guide', icon: <IconBook /> },
     { to: '/profile', label: 'Profile', icon: <IconUserCircle /> },
