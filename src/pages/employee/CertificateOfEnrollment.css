@@ -28,13 +28,22 @@
     margin-top: 0;
 }
 
+.coe-hint {
+    margin-top: 4px;
+    font-size: 11.5px;
+    color: var(--slate);
+}
+
 .coe-row-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
 }
 
-/* ---- Certificate preview: looks like a printed page ---- */
+/* ---- Certificate preview ----
+   A true US Letter sheet (8.5 x 11 in) measured off the Registrar's own
+   template, so the printout is a duplicate of it. On screen the component
+   zooms the whole sheet down to fit this column. */
 .coe-preview-wrap {
     display: flex;
     justify-content: center;
@@ -42,211 +51,220 @@
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: 12px;
-    overflow-x: auto;
-}
-
-/* Splits the leftover vertical space evenly above and below the
-   certification body, so it sits centered between the letterhead and
-   the page footer instead of stacked right under the header. */
-.coe-spacer {
-    flex: 1 1 auto;
+    overflow: hidden;
 }
 
 .coe-preview {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 700px;
-    min-height: 780px;
-    padding: 64px 56px 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 8.5in;
+    height: 11in;
+    padding: 0.4in 0.45in 0;
     background: #fff;
-    color: #111;
+    color: #000;
     box-shadow: 0 10px 30px -14px rgba(10, 20, 40, 0.3);
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 14.5px;
-    line-height: 1.7;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    line-height: 0.295in;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
+
+/* Keeps hyphenated fill-ins like "CHED-TDP" from splitting across lines. */
+.coe-nowrap {
+    white-space: nowrap;
+}
+
+/* ---- Letterhead ---- */
 .coe-letterhead {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: -24px -16px 0;
+    flex-shrink: 0;
+    align-items: flex-start;
+    height: 1.12in;
+    padding: 0 0.08in 0 0.09in;
 }
 
 .coe-letterhead-seal,
 .coe-letterhead-75 {
     flex-shrink: 0;
+    width: 1.08in;
+    height: 1.1in;
     object-fit: contain;
-}
-
-.coe-letterhead-seal {
-    width: 72px;
-    height: 72px;
-}
-
-.coe-letterhead-75 {
-    width: 54px;
-    height: 60px;
 }
 
 .coe-letterhead-text {
     flex: 1;
     min-width: 0;
+    padding-top: 0.13in;
     text-align: center;
+    font-family: Calibri, Carlito, Arial, Helvetica, sans-serif;
+    color: #000;
 }
 
 .coe-letterhead-text h1 {
-    margin: 0 0 2px;
+    margin: 0;
     font-family: inherit;
-    font-size: 16px;
+    font-size: 22pt;
     font-weight: 700;
-    letter-spacing: 0.01em;
-    color: #3a3a3a;
-    text-transform: capitalize;
-}
-
-.coe-letterhead-office {
-    margin: 0 0 4px;
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #3a3a3a;
+    font-variant: small-caps;
+    line-height: 1.2;
+    color: #000;
 }
 
 .coe-letterhead-text p {
     margin: 0;
-    font-size: 9.5px;
-    line-height: 1.5;
-    color: #333;
+    font-size: 10pt;
+    line-height: 12.6pt;
 }
 
-.coe-letterhead-rule {
-    height: 2px;
-    margin: 10px 0 26px;
-    background: linear-gradient(#111, #111) top / 100% 1px no-repeat,
-        linear-gradient(#111, #111) bottom / 100% 1px no-repeat;
-}
-
-.coe-title {
-    margin: 0 0 28px;
-    font-family: inherit;
-    font-size: 17px;
+.coe-letterhead-text .coe-letterhead-office {
+    margin-top: 0.025in !important;
+    font-size: 13pt;
     font-weight: 700;
-    letter-spacing: 0.35em;
+    line-height: 1.2;
+    text-transform: uppercase;
+}
+
+.coe-link {
+    color: #0563c1;
+    text-decoration: underline;
+}
+
+/* Thick blue rule with a hairline red one under it -- used under the
+   letterhead and above the accreditation strip. */
+.coe-rule {
+    flex-shrink: 0;
+    height: 1.5pt;
+    border-top: 3.5pt solid #5b9bd5;
+    border-bottom: 0.75pt solid #e00000;
+}
+
+.coe-letterhead + .coe-rule {
+    margin-top: 0.27in;
+}
+
+/* ---- Body ---- */
+.coe-title {
+    margin: 0.93in 0 0;
+    font-family: inherit;
+    font-size: 14pt;
+    font-weight: 700;
+    line-height: 0.2in;
+    letter-spacing: 1pt;
     text-align: center;
+    white-space: pre;
+}
+
+.coe-salutation,
+.coe-body,
+.coe-note {
+    margin-left: 0.55in;
+    margin-right: 0.55in;
 }
 
 .coe-salutation {
-    margin: 0 0 20px;
-    font-weight: 700;
+    margin-top: 0.9in;
+    margin-bottom: 0.365in;
 }
 
 .coe-body {
-    margin: 0 0 20px;
-    text-indent: 2.5em;
+    margin-top: 0;
+    margin-bottom: 0.21in;
+    text-indent: 0.5in;
     text-align: justify;
 }
 
-.coe-signoff {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 24px;
-    margin: 56px 0 24px;
+.coe-body sup {
+    font-size: 0.65em;
+    line-height: 0;
 }
 
-.coe-footer {
-    font-size: 10.5px;
-    line-height: 1.5;
+/* "Not Valid w/out" block, small, under the last paragraph. */
+.coe-note {
+    margin-top: 0.38in;
+    font-size: 8pt;
+    line-height: 9.7pt;
 }
 
-.coe-footer p {
+.coe-note p {
     margin: 0;
 }
 
+/* Registrar sign-off, on the right. */
 .coe-signature {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-left: auto;
+    align-self: flex-end;
+    margin: 0.4in 0.675in 0 0;
     text-align: center;
 }
 
-.coe-signature strong {
-    font-size: 14.5px;
-    letter-spacing: 0.02em;
-}
-
-.coe-signature span {
-    margin-top: 4px;
-}
-
-/* ---- Accreditation / membership / certification strip: pinned to the
-   bottom edge of the page, full-bleed (breaks out of the body's side
-   padding), matching the real letterhead's footer. ---- */
+/* ---- Accreditation / membership / certification strip, pinned to the
+   bottom of the sheet like the real letterhead. ---- */
 .coe-page-footer {
     margin-top: auto;
-    margin-left: -56px;
-    margin-right: -56px;
-    padding: 0 24px 20px;
-}
-
-.coe-accreditation-rule {
-    height: 1px;
-    margin: 0 0 14px;
-    background: #999;
+    padding-bottom: 0.65in;
 }
 
 .coe-accreditation {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-    align-items: flex-start;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.3in;
+    align-items: start;
+    margin-top: 0.12in;
+    padding: 0 0.1in;
 }
 
 .coe-accreditation-col {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 0.1in;
     text-align: center;
 }
 
-.coe-accreditation-col.is-wide {
-    flex: 1;
-    min-width: 220px;
-}
-
 .coe-accreditation-label {
-    font-size: 9px;
+    font-family: Calibri, Carlito, Arial, Helvetica, sans-serif;
+    font-size: 7.5pt;
     font-weight: 700;
-    letter-spacing: 0.02em;
-    color: #444;
+    line-height: 1.2;
+    white-space: nowrap;
+    color: #000;
 }
 
-.coe-accreditation-wide {
-    max-width: 120px;
-    max-height: 32px;
+.coe-accreditation-pacucoa {
+    height: 0.5in;
+    object-fit: contain;
+}
+
+.coe-accreditation-tuv {
+    height: 0.42in;
+    max-width: 1in;
     object-fit: contain;
 }
 
 .coe-accreditation-row {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: space-between;
+    gap: 0.04in;
+    width: 100%;
 }
 
 .coe-accreditation-row img {
-    max-width: 56px;
-    max-height: 26px;
+    height: 0.48in;
+    max-width: 0.8in;
+    min-width: 0;
     object-fit: contain;
 }
 
-/* ---- Printing: only the certificate itself, full page ---- */
+/* ---- Printing: only the certificate itself, one full Letter page.
+   The zero-margin @page rule lives in the component (PRINT_PAGE_RULE) so it
+   only applies while this page is mounted -- other pages print normally. */
 @media print {
     body * {
         visibility: hidden;
@@ -261,17 +279,8 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        min-height: auto;
+        zoom: 1 !important;
+        overflow: hidden;
         box-shadow: none;
-        padding: 0.5in;
-    }
-
-    /* The on-screen full-bleed treatment assumes the preview's own 56px
-       side padding; print already uses a safe page margin instead, so
-       the footer stays within it rather than breaking out further. */
-    .coe-page-footer {
-        margin: auto 0 0;
-        padding: 0;
     }
 }
