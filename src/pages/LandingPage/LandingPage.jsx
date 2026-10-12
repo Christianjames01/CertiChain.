@@ -328,16 +328,16 @@ function Benefits({ documentCount }) {
     const scan = useCountUp(1, inView, 600);
 
     const before = [
-        "Queue at the Registrar counter just to file a request",
+        "Line up at the Registrar counter to hand in your requirements",
         "Come back again and again to ask if it’s ready",
-        "No way to know where your request is",
-        "Paper documents are hard to check for forgery",
+        "No way to know where your request is or what’s missing",
+        "No set day to claim, so you wait at the window",
     ];
     const after = [
-        "Request online from home, any time of day",
-        "Live status with a notification at every step",
-        "A set claiming date, time and window",
-        "A signed credential and QR code anyone can verify",
+        "Request your document online and get a request number",
+        "Upload your requirements and Official Receipt from your phone",
+        "Follow every step, with a notification when it changes",
+        "A set pickup date, time and window, or send a representative",
     ];
 
     return (
@@ -359,7 +359,7 @@ function Benefits({ documentCount }) {
                     </div>
                     <div className="lpm-stat" data-reveal style={{ "--d": "100ms" }}>
                         <strong>{steps}</strong>
-                        <span>clear steps from request to verified credential</span>
+                        <span>clear steps from request to completed</span>
                     </div>
                     <div className="lpm-stat" data-reveal style={{ "--d": "200ms" }}>
                         <strong>{hours}/7</strong>
