@@ -22,7 +22,6 @@ const NAV_ITEMS = [
     { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
     { to: '/requests', label: 'All Requests', icon: <IconClipboardList />, stage: 'todo' },
     { to: '/assignments', label: 'Request Assignments', icon: <IconSwap />, stage: 'todo' },
-    { to: '/students', label: 'Students', icon: <IconIdCard />, badgeKey: 'pendingStudents', stage: 'todo' },
     { to: '/receipts', label: 'Official Receipts', icon: <IconReceipt />, badgeKey: 'uploadedReceipts', stage: 'todo' },
     { to: '/request-handling', label: 'Request Handling', icon: <IconLayers />, stage: 'progress' },
     { to: '/claim-schedules', label: 'Claim Schedules', icon: <IconCalendar />, badgeKey: 'unclaimed', stage: 'progress' },
@@ -33,6 +32,7 @@ const NAV_ITEMS = [
     { to: '/reports', label: 'Reports', icon: <IconBarChart />, stage: 'done' },
     { to: '/activity-logs', label: 'Activity Logs', icon: <IconHistory />, stage: 'done' },
     { to: '/employees', label: 'Employees', icon: <IconUsers />, stage: 'manage' },
+    { to: '/students', label: 'Students', icon: <IconIdCard />, badgeKey: 'pendingStudents', stage: 'manage' },
     { to: '/documents', label: 'Documents', icon: <IconDocument />, stage: 'manage' },
     { to: '/announcements', label: 'Announcements', icon: <IconMegaphone />, stage: 'manage' },
     { to: '/colleges-programs', label: 'Academic Divisions & Programs', icon: <IconBuilding />, stage: 'manage' },
@@ -47,6 +47,7 @@ const NAV_STAGES = [
     { key: 'todo', label: 'To do' },
     { key: 'progress', label: 'In progress' },
     { key: 'done', label: 'Done' },
+    { key: 'generate', label: 'Generate' },
     { key: 'manage', label: 'Manage' },
     { key: 'account', label: 'Account' },
 ]

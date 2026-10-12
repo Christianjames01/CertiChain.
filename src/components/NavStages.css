@@ -45,3 +45,7 @@
 .nav-stage-label[data-stage='done']::before {
     background: #4ade80;
 }
+
+.nav-stage-label[data-stage='generate']::before {
+    background: #a78bfa;
+}
