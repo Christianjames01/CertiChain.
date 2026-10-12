@@ -62,8 +62,8 @@
     background: #fff;
     color: #111;
     box-shadow: 0 10px 30px -14px rgba(10, 20, 40, 0.3);
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12pt;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14.5px;
     line-height: 1.7;
 }
 
@@ -131,25 +131,19 @@
 .coe-title {
     margin: 0 0 28px;
     font-family: inherit;
-    font-size: 16pt;
+    font-size: 17px;
     font-weight: 700;
     letter-spacing: 0.35em;
     text-align: center;
 }
 
-.coe-title-near-header {
-    margin-top: 24px;
-}
-
 .coe-salutation {
     margin: 0 0 20px;
-    font-size: 12pt;
     font-weight: 700;
 }
 
 .coe-body {
     margin: 0 0 20px;
-    font-size: 12pt;
     text-indent: 2.5em;
     text-align: justify;
 }
@@ -163,7 +157,7 @@
 }
 
 .coe-footer {
-    font-size: 8pt;
+    font-size: 10.5px;
     line-height: 1.5;
 }
 
@@ -180,7 +174,7 @@
 }
 
 .coe-signature strong {
-    font-size: 16pt;
+    font-size: 14.5px;
     letter-spacing: 0.02em;
 }
 
