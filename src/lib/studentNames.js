@@ -9,7 +9,7 @@ export async function loadStudentsById(studentIds) {
 
     const { data: students } = await supabase
         .from('students')
-        .select('student_id, user_id, student_number')
+        .select('student_id, user_id, student_number, college_id, program_id')
         .in('student_id', ids)
 
     const userIds = [...new Set((students || []).map((s) => s.user_id).filter(Boolean))]
@@ -24,7 +24,7 @@ export async function loadStudentsById(studentIds) {
         (students || []).map((s) => {
             const p = profileByUserId[s.user_id]
             const name = p ? `${p.first_name || ''} ${p.last_name || ''}`.trim() : ''
-            return [s.student_id, { name: name || `Student ${s.student_number}`, number: s.student_number || 'N/A' }]
+            return [s.student_id, { name: name || `Student ${s.student_number}`, number: s.student_number || 'N/A', collegeId: s.college_id || null, programId: s.program_id || null }]
         })
     )
 }

@@ -45,6 +45,8 @@ function Assignments() {
     // Rebalancing: open requests that already have an employee, the
     // employee whose requests are expanded, and what's picked to move.
     const [assignedOpen, setAssignedOpen] = useState([])
+    // employee_id -> Set of "college:program" they are assigned to (active, primary).
+    const [coverageByEmployee, setCoverageByEmployee] = useState({})
     const [expandedEmployeeId, setExpandedEmployeeId] = useState(null)
     const [moveSelected, setMoveSelected] = useState(new Set())
     const [moveTargetId, setMoveTargetId] = useState('')
@@ -84,6 +86,19 @@ function Assignments() {
             }))
 
             setEmployees(employeeList)
+
+            // Who covers which college/program -- the same rule the system
+            // uses to auto-assign a new request (lib/assignEmployee).
+            const { data: coverageRows } = await supabase
+                .from('employee_assignments')
+                .select('employee_id, college_id, program_id')
+                .eq('is_primary', true)
+                .eq('status', 'active')
+            const coverage = {}
+            for (const a of coverageRows || []) {
+                (coverage[a.employee_id] ||= new Set()).add(`${a.college_id}:${a.program_id}`)
+            }
+            setCoverageByEmployee(coverage)
 
             const { data: allRequests, error: requestError } = await supabase
                 .from('document_requests')
@@ -162,6 +177,8 @@ function Assignments() {
                         ...r,
                         studentName: studentInfo[r.student_id]?.name || 'Student',
                         studentNumber: studentInfo[r.student_id]?.number || 'N/A',
+                        collegeId: studentInfo[r.student_id]?.collegeId || null,
+                        programId: studentInfo[r.student_id]?.programId || null,
                         documentName: documentNameById[r.document_type_id] || 'Document',
                     }))
                     .sort((a, b) => new Date(a.requested_at) - new Date(b.requested_at))
@@ -433,7 +450,13 @@ function Assignments() {
     // ---- Rebalancing -------------------------------------------------------
 
     const average = averageLoad(workload.map((e) => e.openCount))
-    const suggestedMoves = useMemo(() => suggestRebalance(employees, assignedOpen), [employees, assignedOpen])
+    // Only suggest moving a request to someone assigned to that student's
+    // college and program.
+    const suggestedMoves = useMemo(
+        () => suggestRebalance(employees, assignedOpen, (employeeId, request) =>
+            Boolean(request.collegeId && request.programId && coverageByEmployee[employeeId]?.has(`${request.collegeId}:${request.programId}`))),
+        [employees, assignedOpen, coverageByEmployee]
+    )
     const nameOfEmployee = (id) => employees.find((e) => e.employee_id === id)?.name || 'Employee'
 
     const toggleExpanded = (employeeId) => {
@@ -696,7 +719,7 @@ function Assignments() {
                             <span>
                                 {suggestedMoves.length > 0
                                     ? previewChanges
-                                    : 'Moves not-yet-started requests from the busiest to the least busy employee'}
+                                    : 'Moves not-yet-started requests to a less busy employee assigned to the same college and program'}
                             </span>
                         </div>
                         {workload.length > 1 && suggestedMoves.length > 0 && (
@@ -711,7 +734,7 @@ function Assignments() {
                     ) : workload.length < 2 ? (
                         <p className="dash-panel-empty">Only one active employee — add another to share the workload.</p>
                     ) : suggestedMoves.length === 0 ? (
-                        <p className="dash-panel-empty">The workload is balanced. Nothing to move.</p>
+                        <p className="dash-panel-empty">Nothing to move. The workload is balanced, or no other employee is assigned to the same college and program.</p>
                     ) : (
                         <ul className="dash-row-list">
                             {suggestedMoves.map((m) => (

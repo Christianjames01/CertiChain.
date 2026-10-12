@@ -16,15 +16,18 @@ export function isOverloaded(count, average, employeeCount) {
     return employeeCount > 1 && count - average >= 2 && count > average * 1.5
 }
 
-// Proposes moves that even out open requests: repeatedly takes the newest
+// Proposes moves that even out open requests: repeatedly takes a
 // not-yet-started request from the busiest employee and gives it to the
-// least busy one, until nobody is more than one request apart (or nothing
-// movable is left).
+// least busy employee who may handle it, until nobody is more than one
+// request apart (or nothing movable is left).
 //
 // employees: [{ employee_id, name }]
 // requests:  open requests, [{ request_id, assigned_employee_id, status, requested_at, ... }]
+// canTake:   optional (employeeId, request) => boolean -- who may receive a
+//            request (e.g. only employees assigned to the student's college
+//            and program). Without it, anyone may.
 // Returns [{ request, fromId, fromName, toId, toName }]
-export function suggestRebalance(employees, requests) {
+export function suggestRebalance(employees, requests, canTake = () => true) {
     if (employees.length < 2) return []
 
     const load = Object.fromEntries(employees.map((e) => [e.employee_id, 0]))
@@ -46,17 +49,30 @@ export function suggestRebalance(employees, requests) {
     const ids = Object.keys(load)
 
     for (let guard = 0; guard < 500; guard += 1) {
+        let move = null
+
+        // Busiest employee first; take their newest request that someone
+        // eligible and at least two requests lighter can receive.
         const donors = ids.filter((id) => movable[id].length > 0).sort((a, b) => load[b] - load[a])
-        if (donors.length === 0) break
+        for (const from of donors) {
+            for (const request of movable[from]) {
+                const to = ids
+                    .filter((id) => id !== from && canTake(id, request))
+                    .sort((a, b) => load[a] - load[b])[0]
+                if (to && load[from] - load[to] > 1) {
+                    move = { from, to, request }
+                    break
+                }
+            }
+            if (move) break
+        }
 
-        const from = donors[0]
-        const to = ids.filter((id) => id !== from).sort((a, b) => load[a] - load[b])[0]
-        if (load[from] - load[to] <= 1) break
+        if (!move) break
 
-        const request = movable[from].shift()
-        load[from] -= 1
-        load[to] += 1
-        moves.push({ request, fromId: from, fromName: nameOf[from], toId: to, toName: nameOf[to] })
+        movable[move.from] = movable[move.from].filter((r) => r !== move.request)
+        load[move.from] -= 1
+        load[move.to] += 1
+        moves.push({ request: move.request, fromId: move.from, fromName: nameOf[move.from], toId: move.to, toName: nameOf[move.to] })
     }
 
     return moves
