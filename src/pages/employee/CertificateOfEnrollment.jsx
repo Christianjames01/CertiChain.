@@ -219,6 +219,8 @@ function CertificateOfEnrollment() {
                         </div>
                         <div className="coe-letterhead-rule" aria-hidden="true" />
 
+                        <div className="coe-spacer" aria-hidden="true" />
+
                         <h2 className="coe-title">C E R T I F I C A T I O N</h2>
 
                         <p className="coe-salutation">TO WHOM IT MAY CONCERN:</p>
@@ -250,6 +252,8 @@ function CertificateOfEnrollment() {
                                 <span>Registrar</span>
                             </div>
                         </div>
+
+                        <div className="coe-spacer" aria-hidden="true" />
 
                         <div className="coe-page-footer">
                             <div className="coe-accreditation-rule" aria-hidden="true" />

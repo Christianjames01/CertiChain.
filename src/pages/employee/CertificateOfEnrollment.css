@@ -45,6 +45,13 @@
     overflow-x: auto;
 }
 
+/* Splits the leftover vertical space evenly above and below the
+   certification body, so it sits centered between the letterhead and
+   the page footer instead of stacked right under the header. */
+.coe-spacer {
+    flex: 1 1 auto;
+}
+
 .coe-preview {
     display: flex;
     flex-direction: column;
