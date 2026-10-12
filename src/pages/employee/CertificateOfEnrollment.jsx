@@ -196,7 +196,7 @@ function CertificateOfEnrollment() {
                     <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" />
 
                     <div className="coe-letterhead-text">
-                        <h1>Holy Cross of Davao College</h1>
+                        <h1>Holy Cross of Davao College, Inc.</h1>
                         <p className="coe-letterhead-office">Office of&nbsp; Registrar and Records Management</p>
                         <p>Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
                         <p>Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>

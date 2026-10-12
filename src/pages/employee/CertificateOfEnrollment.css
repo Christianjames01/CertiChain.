@@ -111,6 +111,10 @@
     font-weight: 700;
     font-variant: small-caps;
     line-height: 1.2;
+    /* The app's global h1 rule tightens letter-spacing (-1.68px), which
+       squeezed the school name -- reset it. */
+    letter-spacing: normal;
+    white-space: nowrap;
     color: #000;
 }
 
@@ -133,13 +137,12 @@
     text-decoration: underline;
 }
 
-/* Thick blue rule with a hairline red one under it -- used under the
-   letterhead and above the accreditation strip. */
+/* A single plain black line -- under the letterhead and above the
+   accreditation strip. */
 .coe-rule {
     flex-shrink: 0;
-    height: 1.5pt;
-    border-top: 3.5pt solid #5b9bd5;
-    border-bottom: 0.75pt solid #e00000;
+    height: 0;
+    border-top: 1pt solid #000;
 }
 
 .coe-letterhead + .coe-rule {
