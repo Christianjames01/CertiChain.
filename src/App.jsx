@@ -64,6 +64,7 @@ const EmployeeNotifications = lazy(() => import('./pages/employee/Notifications'
 const ActivityLogs = lazy(() => import('./pages/employee/ActivityLogs'))
 const EmployeeQueue = lazy(() => import('./pages/employee/Queue'))
 const EmployeeProfile = lazy(() => import('./pages/employee/Profile'))
+const CertificateOfEnrollment = lazy(() => import('./pages/employee/CertificateOfEnrollment'))
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'))
@@ -395,6 +396,11 @@ function App() {
           <Route
             path="/employee/documents"
             element={<AdminDocuments />}
+          />
+
+          <Route
+            path="/employee/certificate-of-enrollment"
+            element={<RequireFullEmployeeAccess><CertificateOfEnrollment /></RequireFullEmployeeAccess>}
           />
 
           <Route
