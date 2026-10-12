@@ -5,28 +5,48 @@ import { notifyError, notifySuccess } from '../../lib/notify'
 import { friendlyError } from '../../lib/friendlyError'
 import PageStats from '../../components/PageStats'
 import { IconFileStack, IconCalendarCheck } from '../admin/icons'
-import hcdcLogo from '../../assets/hcdc-logo.png'
-import hcdc75Logo from '../../assets/hcdc-75-logo.png'
-import pacucoaLogo from '../../assets/footer-pacucoa.png'
-import ceapLogo from '../../assets/footer-ceap.png'
-import davaoChamberLogo from '../../assets/footer-davao-chamber.png'
-import dacsLogo from '../../assets/footer-dacs.png'
-import tuvnordLogo from '../../assets/footer-tuvnord.png'
-import eccpLogo from '../../assets/footer-eccp.png'
-import erasmusLogo from '../../assets/footer-erasmus.png'
+import sealImg from '../../assets/coe/seal.png'
+import hcdc75Img from '../../assets/coe/hcdc-75.png'
+import pacuImg from '../../assets/coe/pacu.png'
+import pacucoaImg from '../../assets/coe/pacucoa.png'
+import aunQaImg from '../../assets/coe/aun-qa.png'
+import erasmusImg from '../../assets/coe/erasmus.png'
+import eccpImg from '../../assets/coe/eccp.png'
+import jccmiImg from '../../assets/coe/jccmi.png'
+import ceapImg from '../../assets/coe/ceap.png'
+import dacsImg from '../../assets/coe/dacs.png'
+import tuvnordImg from '../../assets/coe/tuvnord.png'
 import './EmployeePages.css'
 import './CertificateOfEnrollment.css'
 
-// Same order as the Registrar's printed letterhead, left to right.
-// TODO: the Registrar's letterhead starts this row with the AUN-QA logo --
-// add it first once the image is in src/assets.
-const MEMBERSHIP_LOGOS = [
-    { src: erasmusLogo, alt: 'Erasmus+' },
-    { src: eccpLogo, alt: 'European Chamber of Commerce of the Philippines' },
-    { src: davaoChamberLogo, alt: 'Davao City Chamber of Commerce and Industry Foundation' },
-    { src: ceapLogo, alt: 'Catholic Educational Association of the Philippines' },
-    { src: dacsLogo, alt: 'Davao Association of Catholic Schools' },
+// The letterhead and footer images are the Registrar's own (cut from the
+// ORRM stationery template with Word's crops applied), each placed where
+// the Registrar's PDF puts it: [left, top, width, height] in points from
+// the page's top-left corner. Sizes are stretched to the box like Word does.
+const PLACED_IMAGES = [
+    { src: sealImg, alt: 'Holy Cross of Davao College seal', box: [45.0, 37.0, 78.0, 84.1] },
+    { src: hcdc75Img, alt: 'HCDC 75 Years of Grace and Growth', box: [480.2, 32.2, 96.1, 96.1] },
+    { src: pacuImg, alt: 'PACU', box: [43.9, 720.2, 37.1, 36.0] },
+    { src: pacucoaImg, alt: 'PACUCOA', box: [81.5, 719.9, 35.3, 36.0] },
+    { src: aunQaImg, alt: 'ASEAN University Network / AUN-QA', box: [136.6, 719.5, 65.6, 35.4] },
+    { src: erasmusImg, alt: 'Erasmus+', box: [196.8, 719.9, 109.6, 36.1] },
+    { src: eccpImg, alt: 'European Chamber of Commerce of the Philippines', box: [304.8, 720.5, 50.4, 35.2] },
+    { src: jccmiImg, alt: 'The Japanese Chamber of Commerce of Mindanao', box: [357.1, 720.1, 36.5, 36.0] },
+    { src: ceapImg, alt: 'Catholic Educational Association of the Philippines', box: [395.8, 720.0, 36.0, 36.0] },
+    { src: dacsImg, alt: 'Davao Association of Catholic Schools', box: [435.0, 720.2, 36.0, 36.0] },
+    { src: tuvnordImg, alt: 'TÜV NORD', box: [503.8, 720.0, 63.6, 36.2] },
 ]
+
+const placedStyle = ([left, top, width, height]) => ({
+    left: `${left}pt`,
+    top: `${top}pt`,
+    width: `${width}pt`,
+    height: `${height}pt`,
+})
+
+// Word's small caps: capitals at full size, lowercase as smaller capitals.
+const smallCaps = (text) =>
+    text.split(/([a-z]+)/).map((part, i) => (i % 2 ? <span key={i} className="coe-sc">{part.toUpperCase()}</span> : part))
 
 // The preview is laid out at real US Letter size (8.5in = 816 CSS px) so
 // the printout matches it exactly; on screen it's zoomed to fit its column.
@@ -188,24 +208,29 @@ function CertificateOfEnrollment() {
     // from inside them, which left the printout blank.
     const sheet = (
         <>
-                <div className="coe-letterhead">
-                    <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" />
+                {/* Letterhead, footer and their images are pinned to the
+                    Registrar's PDF coordinates; only the body flows. */}
+                <div className="coe-fixed">
+                    {PLACED_IMAGES.map((img) => (
+                        <img key={img.alt} src={img.src} alt={img.alt} className="coe-placed" style={placedStyle(img.box)} />
+                    ))}
 
-                    <div className="coe-letterhead-text">
-                        <h1>Holy Cross of Davao College, Inc.</h1>
-                        <p className="coe-letterhead-office">Office of&nbsp; Registrar and Records Management</p>
-                        <p>Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
-                        <p>Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>
-                        <p>
-                            Email: : registrar<span className="coe-link">@hcdc.edu.ph </span> • Website:{' '}
-                            <span className="coe-link">http://www.hcdc.edu.ph/</span>
-                        </p>
-                    </div>
+                    <p className="coe-lh coe-lh-name">{smallCaps('Holy Cross of Davao College, Inc.')}</p>
+                    <p className="coe-lh coe-lh-office">OFFICE OF REGISTRATION AND RECORDS MANAGEMENT</p>
+                    <p className="coe-lh coe-lh-1">Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
+                    <p className="coe-lh coe-lh-2">Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>
+                    <p className="coe-lh coe-lh-3">Cellphone No.: (+63) 9468108617 &amp; (+63) 9061509582</p>
+                    <p className="coe-lh coe-lh-4">
+                        Email: <span className="coe-link">registrar@hcdc.edu.ph&nbsp;</span> • Website:{' '}
+                        <span className="coe-link">http://www.hcdc.edu.ph/</span>
+                    </p>
+                    <div className="coe-rule coe-rule-top" aria-hidden="true" />
 
-                    <img src={hcdc75Logo} alt="HCDC 75th Diamond Jubilee" className="coe-letterhead-75" />
+                    <div className="coe-rule coe-rule-bottom" aria-hidden="true" />
+                    <span className="coe-footer-label" style={{ left: '53.5pt' }}>Accredited:</span>
+                    <span className="coe-footer-label" style={{ left: '246.1pt' }}>Institutional Membership:</span>
+                    <span className="coe-footer-label" style={{ left: '470.6pt' }}>Certified: ISO 21001:2018</span>
                 </div>
-
-                <div className="coe-rule" aria-hidden="true" />
 
                 <h2 className="coe-title">C E R T I F I C A T I O N</h2>
 
@@ -238,31 +263,6 @@ function CertificateOfEnrollment() {
                 <div className="coe-signature">
                     <strong>{REGISTRAR_NAME}</strong>
                     <span>Registrar</span>
-                </div>
-
-                <div className="coe-page-footer">
-                    <div className="coe-rule" aria-hidden="true" />
-
-                    <div className="coe-accreditation">
-                        <div className="coe-accreditation-col">
-                            <span className="coe-accreditation-label">Accredited:</span>
-                            <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-pacucoa" />
-                        </div>
-
-                        <div className="coe-accreditation-col">
-                            <span className="coe-accreditation-label">Institutional Membership:</span>
-                            <div className="coe-accreditation-row">
-                                {MEMBERSHIP_LOGOS.map((logo) => (
-                                    <img key={logo.alt} src={logo.src} alt={logo.alt} />
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="coe-accreditation-col">
-                            <span className="coe-accreditation-label">Certified: ISO 21001:2018</span>
-                            <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-tuv" />
-                        </div>
-                    </div>
                 </div>
         </>
     )
