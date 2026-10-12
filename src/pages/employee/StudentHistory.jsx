@@ -11,7 +11,11 @@ import { generateTempPassword, resetStudentPassword } from '../../lib/resetStude
 import { updateStudentEmail } from '../../lib/updateStudentEmail'
 import { SkeletonPage } from '../../components/Skeleton'
 import Modal from '../../components/Modal'
-import { IconUserCircle } from '../student/icons'
+import { IconUserCircle, IconMail } from '../student/icons'
+import { IconIdCard, IconFileStack, IconHourglass, IconCheckCircle, IconClipboardCheck } from '../admin/icons'
+import { ProfileHero, ProfileSection, ProfileFields, SecurityRow, IconShield, IconKey } from '../../components/ProfileParts'
+import PageStats from '../../components/PageStats'
+import DocumentThumb from '../../components/DocumentThumb'
 import '../auth/Auth.css'
 import './EmployeePages.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
@@ -23,24 +27,35 @@ function formatDate(value) {
     return new Date(value).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+function formatTime(time) {
+    if (!time) return ''
+    const [hours, minutes] = time.split(':')
+    const date = new Date()
+    date.setHours(Number(hours), Number(minutes), 0, 0)
+    return date.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })
+}
+
+// Same layout as the registrar head's Student Details page.
 function StudentHistory() {
     const { studentId } = useParams()
     const navigate = useNavigate()
 
     const [student, setStudent] = useState(null)
     const [requests, setRequests] = useState([])
+    const [requirements, setRequirements] = useState([])
     const [colleges, setColleges] = useState([])
     const [programs, setPrograms] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    const [editing, setEditing] = useState(false)
+    // 'personal' | 'student' | null -- which section is being edited.
+    const [editingSection, setEditingSection] = useState(null)
     const [form, setForm] = useState(null)
     const [saving, setSaving] = useState(false)
     const [resettingPassword, setResettingPassword] = useState(false)
     const [changingEmail, setChangingEmail] = useState(false)
 
-    useLiveRefresh(['students', 'document_requests'], (options) => loadHistory(options))
+    useLiveRefresh(['students', 'document_requests', 'request_requirements'], (options) => loadHistory(options))
 
     useEffect(() => {
         loadHistory()
@@ -119,14 +134,55 @@ function StudentHistory() {
             const documentTypeIds = [...new Set(rows.map((r) => r.document_type_id).filter(Boolean))]
 
             const { data: documentTypes } = documentTypeIds.length
-                ? await supabase.from('document_types').select('document_type_id, document_name').in('document_type_id', documentTypeIds)
+                ? await supabase.from('document_types').select('document_type_id, document_name, preview_image_url').in('document_type_id', documentTypeIds)
                 : { data: [] }
 
-            const documentNameById = Object.fromEntries(
-                (documentTypes || []).map((d) => [d.document_type_id, d.document_name])
-            )
+            const documentNameById = Object.fromEntries((documentTypes || []).map((d) => [d.document_type_id, d.document_name]))
+            const documentPreviewById = Object.fromEntries((documentTypes || []).map((d) => [d.document_type_id, d.preview_image_url || null]))
 
-            setRequests(rows.map((r) => ({ ...r, documentName: documentNameById[r.document_type_id] || 'Document' })))
+            const requestIds = rows.map((r) => r.request_id)
+
+            const { data: scheduleRows } = requestIds.length
+                ? await supabase
+                    .from('claim_schedules')
+                    .select('request_id, status, scheduled_date, scheduled_time, claim_date, claim_time, created_at')
+                    .in('request_id', requestIds)
+                    .neq('status', 'cancelled')
+                    .order('created_at', { ascending: false })
+                : { data: [] }
+
+            // Most recent non-cancelled schedule per request -- a
+            // rescheduled request can have more than one row.
+            const claimScheduleByRequestId = {}
+            for (const sch of scheduleRows || []) {
+                if (!claimScheduleByRequestId[sch.request_id]) {
+                    claimScheduleByRequestId[sch.request_id] = sch
+                }
+            }
+
+            setRequests(rows.map((r) => ({
+                ...r,
+                documentName: documentNameById[r.document_type_id] || 'Document',
+                documentPreview: documentPreviewById[r.document_type_id] || null,
+                claimSchedule: claimScheduleByRequestId[r.request_id] || null,
+            })))
+
+            const { data: requirementRows } = requestIds.length
+                ? await supabase
+                    .from('request_requirements')
+                    .select(`
+                        request_requirement_id, request_id, status, uploaded_at, file_name,
+                        document_requirements ( requirement_name, is_required )
+                    `)
+                    .in('request_id', requestIds)
+                : { data: [] }
+
+            setRequirements(
+                (requirementRows || []).map((r) => ({
+                    ...r,
+                    requestNumber: rows.find((req) => req.request_id === r.request_id)?.request_number || 'N/A',
+                }))
+            )
 
         } catch (err) {
             console.error('STUDENT HISTORY ERROR:', err)
@@ -136,7 +192,7 @@ function StudentHistory() {
         }
     }
 
-    const startEditing = () => {
+    const startEditing = (section) => {
         setForm({
             firstName: student.firstName,
             middleName: student.middleName,
@@ -155,7 +211,7 @@ function StudentHistory() {
             emergencyContactName: student.emergency_contact_name || '',
             emergencyContactNumber: student.emergency_contact_number || '',
         })
-        setEditing(true)
+        setEditingSection(section)
     }
 
     const onCollegeChange = async (collegeId) => {
@@ -278,8 +334,8 @@ function StudentHistory() {
             })
 
             notifySuccess('Student information updated.')
-            setEditing(false)
-            await loadHistory()
+            setEditingSection(null)
+            await loadHistory({ silent: true })
 
         } catch (err) {
             console.error('SAVE STUDENT EDIT ERROR:', err)
@@ -389,7 +445,7 @@ function StudentHistory() {
             })
 
             notifySuccess(`Login email changed to ${newEmail}.`)
-            await loadHistory()
+            await loadHistory({ silent: true })
 
         } catch (err) {
             console.error('CHANGE STUDENT LOGIN EMAIL ERROR:', err)
@@ -398,6 +454,34 @@ function StudentHistory() {
             setChangingEmail(false)
         }
     }
+
+    const cancelEditing = () => {
+        if (saving) return
+        setEditingSection(null)
+    }
+
+    const submitEdits = (e) => {
+        e.preventDefault()
+        saveEdits()
+    }
+
+    const editField = (label, control) => (
+        <label className="form-group">
+            <span className="form-label">{label}</span>
+            {control}
+        </label>
+    )
+
+    const editActions = (
+        <div className="app-modal-actions" style={{ marginTop: 18 }}>
+            <button type="button" className="employee-secondary-button" onClick={cancelEditing} disabled={saving}>
+                Cancel
+            </button>
+            <button type="submit" className="employee-primary-button" disabled={saving}>
+                {saving ? 'Saving...' : 'Save changes'}
+            </button>
+        </div>
+    )
 
     if (loading) {
         return (
@@ -419,283 +503,256 @@ function StudentHistory() {
         return <div className="employee-error-box">{error}</div>
     }
 
+    const activeRequests = requests.filter((r) => !['completed', 'cancelled', 'rejected'].includes(r.status)).length
+    const completedRequests = requests.filter((r) => r.status === 'completed').length
+    const pendingRequirements = requirements.filter((r) => !['verified', 'approved'].includes(r.status)).length
+    const isAlumni = student.student_type === 'alumni'
+
     return (
         <div>
             <button className="employee-link-button" style={{ marginBottom: 16 }} onClick={() => navigate('/employee/students')}>
                 ← Back to Students
             </button>
 
-            <div className="ui-detail-hero">
-                <div className="ui-detail-avatar">
-                    {student.photoUrl ? (
-                        <img src={student.photoUrl} alt={student.fullName} />
-                    ) : (
-                        student.initials || 'ST'
-                    )}
-                </div>
-                <div className="ui-detail-main">
-                    <span className="ui-detail-eyebrow">{(!student.year_level && student.graduation_year) ? 'Alumni record' : 'Student record'}</span>
-                    <h1>{student.fullName}</h1>
-                    <p>{student.student_number} · {student.email}</p>
-                    <div className="ui-detail-tags">
-                        {student.programName && <span>{student.programName}</span>}
-                        {(!student.year_level && student.graduation_year)
-                            ? student.graduation_year && <span>Class of {student.graduation_year}</span>
-                            : student.year_level && <span>Year {student.year_level}</span>}
+            <div className="pf-page">
+                <ProfileHero
+                    photoUrl={student.photoUrl}
+                    name={student.fullName}
+                    initials={student.initials || 'ST'}
+                    eyebrow={isAlumni ? 'Alumni' : 'Student'}
+                    subtitle={[student.student_number, student.email].filter(Boolean).join(' · ')}
+                    tags={[
+                        student.programName,
+                        isAlumni ? `Class of ${student.graduation_year || '—'}` : student.year_level && `Year ${student.year_level}`,
+                        student.status && student.status.charAt(0).toUpperCase() + student.status.slice(1),
+                    ]}
+                />
+
+                <PageStats
+                    stats={[
+                        { label: 'Requests', value: requests.length, note: 'All time', Icon: IconFileStack },
+                        { label: 'In progress', value: activeRequests, note: activeRequests ? 'Not yet completed' : 'Nothing pending', Icon: IconHourglass, warn: activeRequests > 0 },
+                        { label: 'Completed', value: completedRequests, note: 'Claimed documents', Icon: IconCheckCircle },
+                        { label: 'Requirements', value: requirements.length, note: pendingRequirements ? `${pendingRequirements} to review` : 'All reviewed', Icon: IconClipboardCheck },
+                    ]}
+                />
+
+                <div className="pf-layout">
+                    <div className="pf-column">
+                        <ProfileSection
+                            icon={IconUserCircle}
+                            title="Personal Information"
+                            subtitle="Name, birth date and email addresses."
+                            actionLabel="Edit"
+                            onAction={() => startEditing('personal')}
+                        >
+                            <ProfileFields
+                                fields={[
+                                    { label: 'First Name', value: student.firstName },
+                                    { label: 'Middle Name', value: student.middleName },
+                                    { label: 'Last Name', value: student.lastName },
+                                    { label: 'Suffix', value: student.suffix },
+                                    { label: 'Birth Date', value: student.birth_date ? formatDate(student.birth_date) : '' },
+                                    { label: 'Phone Number', value: student.phoneNumber },
+                                    { label: 'Login Email', value: student.email, wide: true },
+                                    { label: 'Personal Email', value: student.alternate_email, wide: true },
+                                ]}
+                            />
+                        </ProfileSection>
+
+                        <ProfileSection
+                            icon={IconIdCard}
+                            title="Student Information"
+                            subtitle="School record and contact details."
+                            actionLabel="Edit"
+                            onAction={() => startEditing('student')}
+                        >
+                            <ProfileFields
+                                fields={[
+                                    { label: 'Student Number', value: student.student_number },
+                                    { label: 'Status', value: student.status, capitalize: true },
+                                    { label: 'College', value: student.collegeName, wide: true },
+                                    { label: 'Program', value: student.programName, wide: true },
+                                    { label: 'Year Level', value: student.year_level },
+                                    { label: 'Graduation Year', value: student.graduation_year },
+                                    { label: 'Address', value: student.address, wide: true },
+                                    { label: 'Alternate Phone', value: student.alternate_phone_number },
+                                    { label: 'Emergency Contact', value: [student.emergency_contact_name, student.emergency_contact_number].filter(Boolean).join(' · ') },
+                                ]}
+                            />
+                        </ProfileSection>
+                    </div>
+
+                    <div className="pf-column">
+                        <ProfileSection icon={IconShield} title="Account" subtitle="Help this student sign in.">
+                            <div className="pf-rows">
+                                <SecurityRow
+                                    icon={IconKey}
+                                    title="Reset password"
+                                    text="Sets a new temporary password when the student can't use Forgot Password."
+                                    actionLabel={resettingPassword ? 'Resetting...' : 'Reset'}
+                                    onAction={handleResetPassword}
+                                    actionDisabled={resettingPassword}
+                                />
+
+                                <SecurityRow
+                                    icon={IconMail}
+                                    title="Login email"
+                                    text={`${student.email || 'No email'}. Change it only if the student's HCDC account was deactivated (e.g. after graduation).`}
+                                    actionLabel={changingEmail ? 'Changing...' : 'Change'}
+                                    onAction={handleChangeLoginEmail}
+                                    actionDisabled={changingEmail}
+                                />
+                            </div>
+                        </ProfileSection>
                     </div>
                 </div>
             </div>
 
-            <div className="employee-card">
-                <div className="employee-page-header-row" style={{ marginBottom: 16 }}>
-                    <h2 style={{ fontSize: 16 }}>Personal Information</h2>
-                    <button className="employee-link-button" onClick={startEditing}>
-                        Edit →
-                    </button>
-                </div>
-
-                <div className="employee-info-grid">
-                    <div className="employee-info-field"><span>First Name</span><strong>{student.firstName || 'N/A'}</strong></div>
-                    <div className="employee-info-field"><span>Middle Name</span><strong>{student.middleName || 'N/A'}</strong></div>
-                    <div className="employee-info-field"><span>Last Name</span><strong>{student.lastName || 'N/A'}</strong></div>
-                    <div className="employee-info-field"><span>Suffix</span><strong>{student.suffix || 'N/A'}</strong></div>
-                    <div className="employee-info-field"><span>Birth Date</span><strong>{formatDate(student.birth_date)}</strong></div>
-                    <div className="employee-info-field"><span>Login Email</span><strong>{student.email || 'N/A'}</strong></div>
-                    <div className="employee-info-field"><span>Personal Email</span><strong>{student.alternate_email || 'N/A'}</strong></div>
-                </div>
-            </div>
-
-            <div className="employee-card">
-                <div className="employee-page-header-row" style={{ marginBottom: 16 }}>
-                    <h2 style={{ fontSize: 16 }}>Student Information</h2>
-                    <button className="employee-link-button" onClick={startEditing}>
-                        Edit →
-                    </button>
-                </div>
-
-                <div className="employee-info-grid">
-                    <div className="employee-info-field">
-                        <span>Student Number</span>
-                        <strong>{student.student_number}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>College</span>
-                        <strong>{student.collegeName || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Program</span>
-                        <strong>{student.programName || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Year Level</span>
-                        <strong>{student.year_level || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Graduation Year</span>
-                        <strong>{student.graduation_year || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Phone Number</span>
-                        <strong>{student.phoneNumber || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Status</span>
-                        <strong style={{ textTransform: 'capitalize' }}>{student.status}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Address</span>
-                        <strong>{student.address || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Alternate Phone Number</span>
-                        <strong>{student.alternate_phone_number || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Emergency Contact</span>
-                        <strong>{student.emergency_contact_name || 'N/A'} {student.emergency_contact_number ? `(${student.emergency_contact_number})` : ''}</strong>
-                    </div>
-                </div>
-            </div>
-
-            {editing && form && (
+            {editingSection && form && (
                 <Modal
-                    title="Edit Student Information"
+                    title={editingSection === 'personal' ? 'Edit Personal Information' : 'Edit Student Information'}
                     subtitle="Changes are recorded in the activity log."
-                    icon={IconUserCircle}
-                    maxWidth={720}
-                    onClose={() => !saving && setEditing(false)}
+                    icon={IconIdCard}
+                    maxWidth={editingSection === 'personal' ? 640 : 760}
+                    onClose={cancelEditing}
                 >
-                    <div className="employee-info-grid" style={{ marginBottom: 14, gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))' }}>
-                        <div className="form-group">
-                            <label className="form-label">First Name</label>
-                            <input className="employee-search-input" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Middle Name</label>
-                            <input className="employee-search-input" value={form.middleName} onChange={(e) => setForm({ ...form, middleName: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Last Name</label>
-                            <input className="employee-search-input" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Suffix</label>
-                            <input className="employee-search-input" placeholder="e.g. Jr., III" value={form.suffix} onChange={(e) => setForm({ ...form, suffix: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Birth Date</label>
-                            <input className="employee-search-input" type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Student Number</label>
-                            <input className="employee-search-input" inputMode="numeric" value={form.studentNumber} onChange={(e) => setForm({ ...form, studentNumber: e.target.value.replace(/\D/g, '').slice(0, 9) })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Phone Number</label>
-                            <input className="employee-search-input" type="tel" inputMode="numeric" maxLength={11} value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: digitsOnly(e.target.value) })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">College</label>
-                            <select className="employee-search-input" value={form.collegeId} onChange={(e) => onCollegeChange(e.target.value)} disabled={saving}>
-                                <option value="">-- None --</option>
-                                {colleges.map((c) => (
-                                    <option key={c.college_id} value={c.college_id}>{c.college_name}</option>
+                    {editingSection === 'personal' ? (
+                        <form onSubmit={submitEdits}>
+                            <div className="employee-info-grid employee-edit-grid">
+                                {editField('First Name', <input className="employee-search-input" value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} disabled={saving} autoFocus />)}
+                                {editField('Middle Name', <input className="employee-search-input" value={form.middleName} onChange={(e) => setForm({ ...form, middleName: e.target.value })} disabled={saving} />)}
+                                {editField('Last Name', <input className="employee-search-input" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} disabled={saving} />)}
+                                {editField('Suffix', <input className="employee-search-input" placeholder="e.g. Jr., III" value={form.suffix} onChange={(e) => setForm({ ...form, suffix: e.target.value })} disabled={saving} />)}
+                                {editField('Birth Date', <input className="employee-search-input" type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} disabled={saving} />)}
+                                <div className="employee-info-field"><span>Login Email</span><strong>{student.email || 'N/A'}</strong></div>
+                                {editField('Personal Email', <input className="employee-search-input" type="email" value={form.alternateEmail} onChange={(e) => setForm({ ...form, alternateEmail: e.target.value })} disabled={saving} />)}
+                            </div>
+                            {editActions}
+                        </form>
+                    ) : (
+                        <form onSubmit={submitEdits}>
+                            <div className="employee-info-grid employee-edit-grid">
+                                {editField('Student Number', <input className="employee-search-input" inputMode="numeric" value={form.studentNumber} onChange={(e) => setForm({ ...form, studentNumber: e.target.value.replace(/\D/g, '').slice(0, 9) })} disabled={saving} autoFocus />)}
+                                {editField('College', (
+                                    <select className="employee-search-input" value={form.collegeId} onChange={(e) => onCollegeChange(e.target.value)} disabled={saving}>
+                                        <option value="">-- None --</option>
+                                        {colleges.map((c) => (
+                                            <option key={c.college_id} value={c.college_id}>{c.college_name}</option>
+                                        ))}
+                                    </select>
                                 ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Program</label>
-                            <select className="employee-search-input" value={form.programId} onChange={(e) => setForm({ ...form, programId: e.target.value })} disabled={saving || !form.collegeId}>
-                                <option value="">{form.collegeId ? '-- None --' : 'Select a college first'}</option>
-                                {programs.map((p) => (
-                                    <option key={p.program_id} value={p.program_id}>{p.program_name}</option>
+                                {editField('Program', (
+                                    <select className="employee-search-input" value={form.programId} onChange={(e) => setForm({ ...form, programId: e.target.value })} disabled={saving || !form.collegeId}>
+                                        <option value="">{form.collegeId ? '-- None --' : 'Select a college first'}</option>
+                                        {programs.map((p) => (
+                                            <option key={p.program_id} value={p.program_id}>{p.program_name}</option>
+                                        ))}
+                                    </select>
                                 ))}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Year Level</label>
-                            <select className="employee-search-input" value={form.yearLevel} onChange={(e) => setForm({ ...form, yearLevel: e.target.value })} disabled={saving}>
-                                <option value="">-- None --</option>
-                                <option value="1">1st Year</option>
-                                <option value="2">2nd Year</option>
-                                <option value="3">3rd Year</option>
-                                <option value="4">4th Year</option>
-                                <option value="5">5th Year</option>
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Graduation Year</label>
-                            <input className="employee-search-input" inputMode="numeric" placeholder="e.g. 2026" value={form.graduationYear} onChange={(e) => setForm({ ...form, graduationYear: e.target.value.replace(/\D/g, '').slice(0, 4) })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Address</label>
-                            <input className="employee-search-input" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Alternate Phone Number</label>
-                            <input className="employee-search-input" type="tel" inputMode="numeric" maxLength={11} value={form.alternatePhoneNumber} onChange={(e) => setForm({ ...form, alternatePhoneNumber: digitsOnly(e.target.value) })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Personal Email</label>
-                            <input className="employee-search-input" type="email" value={form.alternateEmail} onChange={(e) => setForm({ ...form, alternateEmail: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Emergency Contact Name</label>
-                            <input className="employee-search-input" value={form.emergencyContactName} onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })} disabled={saving} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Emergency Contact Number</label>
-                            <input className="employee-search-input" type="tel" inputMode="numeric" maxLength={11} value={form.emergencyContactNumber} onChange={(e) => setForm({ ...form, emergencyContactNumber: digitsOnly(e.target.value) })} disabled={saving} />
-                        </div>
-                    </div>
-
-                    <div className="app-modal-actions">
-                        <button className="employee-primary-button" onClick={saveEdits} disabled={saving}>
-                            {saving ? 'Saving...' : 'Save'}
-                        </button>
-                        <button className="employee-secondary-button" onClick={() => setEditing(false)} disabled={saving}>
-                            Cancel
-                        </button>
-                    </div>
+                                {editField('Year Level', (
+                                    <select className="employee-search-input" value={form.yearLevel} onChange={(e) => setForm({ ...form, yearLevel: e.target.value })} disabled={saving}>
+                                        <option value="">-- None --</option>
+                                        <option value="1">1st Year</option>
+                                        <option value="2">2nd Year</option>
+                                        <option value="3">3rd Year</option>
+                                        <option value="4">4th Year</option>
+                                        <option value="5">5th Year</option>
+                                    </select>
+                                ))}
+                                {editField('Graduation Year', <input className="employee-search-input" inputMode="numeric" placeholder="e.g. 2026" value={form.graduationYear} onChange={(e) => setForm({ ...form, graduationYear: e.target.value.replace(/\D/g, '').slice(0, 4) })} disabled={saving} />)}
+                                {editField('Phone Number', <input className="employee-search-input" type="tel" inputMode="numeric" maxLength={11} value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: digitsOnly(e.target.value) })} disabled={saving} />)}
+                                <div className="employee-info-field"><span>Status</span><strong style={{ textTransform: 'capitalize' }}>{student.status}</strong></div>
+                                {editField('Address', <input className="employee-search-input" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} disabled={saving} />)}
+                                {editField('Alternate Phone Number', <input className="employee-search-input" type="tel" inputMode="numeric" maxLength={11} value={form.alternatePhoneNumber} onChange={(e) => setForm({ ...form, alternatePhoneNumber: digitsOnly(e.target.value) })} disabled={saving} />)}
+                                {editField('Emergency Contact Name', <input className="employee-search-input" value={form.emergencyContactName} onChange={(e) => setForm({ ...form, emergencyContactName: e.target.value })} disabled={saving} />)}
+                                {editField('Emergency Contact Number', <input className="employee-search-input" type="tel" inputMode="numeric" maxLength={11} value={form.emergencyContactNumber} onChange={(e) => setForm({ ...form, emergencyContactNumber: digitsOnly(e.target.value) })} disabled={saving} />)}
+                            </div>
+                            {editActions}
+                        </form>
+                    )}
                 </Modal>
             )}
 
-            <div className="employee-card">
-                <h2 style={{ fontSize: 16, marginBottom: 6 }}>Account</h2>
-                <p style={{ fontSize: 13, color: 'var(--slate)', marginBottom: 14 }}>
-                    Set a new login password for this student if they can't use the email-based Forgot Password link.
-                </p>
-                <button
-                    className="employee-primary-button"
-                    onClick={handleResetPassword}
-                    disabled={resettingPassword}
-                >
-                    {resettingPassword ? 'Resetting...' : 'Reset Password'}
-                </button>
-
-                <p style={{ fontSize: 13, color: 'var(--slate)', margin: '18px 0 14px' }}>
-                    Current login email: <strong>{student.email || 'N/A'}</strong>. Change it if this student's HCDC
-                    account has been deactivated (e.g. after graduation) and they can no longer log in or
-                    self-serve the change themselves.
-                </p>
-                <button
-                    className="employee-primary-button"
-                    onClick={handleChangeLoginEmail}
-                    disabled={changingEmail}
-                >
-                    {changingEmail ? 'Changing...' : 'Change Login Email'}
-                </button>
-            </div>
-
-            <h2 style={{ fontSize: 17, margin: '24px 0 14px' }}>Request History</h2>
+            <h2 className="ui-section-title sd-section-title">
+                Request History
+                <span className="ui-chip-count">{requests.length}</span>
+            </h2>
 
             {requests.length === 0 ? (
                 <div className="employee-empty">This student has no document requests yet.</div>
             ) : (
-                requests.map((request) => (
-                    <div className="employee-list-card" key={request.request_id}>
-                        <div className="employee-list-card-header">
-                            <div>
-                                <h3>{request.documentName}</h3>
-                                <p>{request.request_number}</p>
+                requests.map((request) => {
+                    const claim = request.claimSchedule
+                    const claimTime = claim && (claim.claim_time || claim.scheduled_time)
+                    return (
+                        <div className="employee-list-card" key={request.request_id}>
+                            <div className="employee-list-card-header">
+                                <div className="ui-card-title" style={{ alignItems: 'center' }}>
+                                    <DocumentThumb url={request.documentPreview} name={request.documentName} size={46} />
+                                    <div>
+                                        <h3>{request.documentName}</h3>
+                                        <p>{request.request_number}</p>
+                                    </div>
+                                </div>
+                                <span className={`employee-status-pill status-${request.status}`}>
+                                    {request.status.replace(/_/g, ' ')}
+                                </span>
                             </div>
 
-                            <span className={`employee-status-pill status-${request.status}`}>
-                                {request.status.replace(/_/g, ' ')}
-                            </span>
+                            <div className="employee-info-grid">
+                                <div className="employee-info-field">
+                                    <span>Total</span>
+                                    <strong>₱{Number(request.total_amount || 0).toFixed(2)}</strong>
+                                </div>
+                                <div className="employee-info-field">
+                                    <span>Requested</span>
+                                    <strong>{formatDisplayDateTime(request.requested_at) || '-'}</strong>
+                                </div>
+                                {claim && (
+                                    <div className="employee-info-field">
+                                        <span>Claiming</span>
+                                        <strong>
+                                            {formatDate(claim.claim_date || claim.scheduled_date)}
+                                            {claimTime && ` · ${formatTime(claimTime)}`}
+                                        </strong>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="ui-card-actions">
+                                <button className="employee-link-button" onClick={() => navigate(`/employee/requests/${request.request_id}`)}>
+                                    Open request →
+                                </button>
+                            </div>
                         </div>
+                    )
+                })
+            )}
 
-                        <div className="employee-info-grid">
-                            <div className="employee-info-field">
-                                <span>Total</span>
-                                <strong>₱{Number(request.total_amount || 0).toFixed(2)}</strong>
-                            </div>
+            <h2 className="ui-section-title sd-section-title">
+                Submitted Requirements
+                <span className="ui-chip-count">{requirements.length}</span>
+            </h2>
 
-                            <div className="employee-info-field">
-                                <span>Requested</span>
-                                <strong>
-                                    {request.requested_at ? formatDisplayDateTime(request.requested_at) : '-'}
-                                </strong>
+            {requirements.length === 0 ? (
+                <div className="employee-empty">No requirements have been submitted by this student.</div>
+            ) : (
+                <div className="employee-card sd-requirements">
+                    {requirements.map((r) => (
+                        <div className="sd-requirement" key={r.request_requirement_id}>
+                            <span className="ui-avatar" aria-hidden="true"><IconClipboardCheck /></span>
+                            <div className="sd-requirement-main">
+                                <strong>{r.document_requirements?.requirement_name || 'Requirement'}</strong>
+                                <span>
+                                    {r.requestNumber}
+                                    {r.uploaded_at && ` · Uploaded ${formatDisplayDateTime(r.uploaded_at)}`}
+                                </span>
                             </div>
+                            <span className={`employee-status-pill status-${r.status}`}>{r.status.replace(/_/g, ' ')}</span>
                         </div>
-
-                        <button
-                            className="employee-link-button"
-                            onClick={() => navigate(`/employee/requests/${request.request_id}`)}
-                        >
-                            Open request →
-                        </button>
-                    </div>
-                ))
+                    ))}
+                </div>
             )}
         </div>
     )
