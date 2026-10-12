@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
-import { notifyError, notifySuccess } from '../../lib/notify'
+import { confirmModal, notifyError, notifySuccess } from '../../lib/notify'
 import { friendlyError } from '../../lib/friendlyError'
 import PageStats from '../../components/PageStats'
 import { IconFileStack, IconCalendarCheck } from '../admin/icons'
@@ -163,6 +163,20 @@ function CertificateOfEnrollment() {
             return
         }
 
+        // Print first, before any SweetAlert modal is open: while one is open
+        // it aria-hides the rest of <body>, and its print CSS then hides
+        // those elements -- the certificate included. Browsers don't say
+        // whether the print dialog was cancelled, so ask, and only log the
+        // certificate once the employee confirms it printed.
+        window.print()
+
+        const printed = await confirmModal('Only certificates that actually printed are saved to the log.', {
+            title: 'Did the certificate print?',
+            confirmButtonText: 'Yes, save it',
+            cancelButtonText: 'No, don’t save',
+        })
+        if (!printed) return
+
         try {
             setSaving(true)
             const { data: { user } } = await supabase.auth.getUser()
@@ -183,10 +197,6 @@ function CertificateOfEnrollment() {
 
             if (error) throw error
 
-            // Print before showing the notice: while a SweetAlert modal is
-            // open it aria-hides the rest of <body>, and its print CSS then
-            // hides those elements -- the certificate included.
-            window.print()
             loadMyCounts()
             notifySuccess('Certificate logged.')
         } catch (err) {

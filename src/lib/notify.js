@@ -64,14 +64,14 @@ export function notifyWarning(message, title = 'Warning') {
     })
 }
 
-export async function confirmModal(message, { title = 'Are you sure?', confirmButtonText = 'Yes', icon = 'question' } = {}) {
+export async function confirmModal(message, { title = 'Are you sure?', confirmButtonText = 'Yes', cancelButtonText = 'Cancel', icon = 'question' } = {}) {
     const result = await Swal.fire({
         icon,
         title,
         text: message,
         showCancelButton: true,
         confirmButtonText,
-        cancelButtonText: 'Cancel',
+        cancelButtonText,
         confirmButtonColor: CONFIRM_COLOR,
         cancelButtonColor: CANCEL_COLOR,
     })
