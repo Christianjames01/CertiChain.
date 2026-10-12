@@ -72,6 +72,22 @@
     print-color-adjust: exact;
 }
 
+/* The certificate is paper: it never follows the app's dark mode. Dark mode
+   swaps the layout's colour tokens, and rules like `.employee-layout p
+   { color: var(--slate) }` would turn the letterhead text light grey on the
+   white sheet. The doubled class outranks those (0,2,0 > 0,1,1). */
+.coe-preview.coe-preview {
+    color-scheme: light;
+    background: #fff;
+}
+
+.coe-preview.coe-preview * {
+    color: #000;
+}
+
+.coe-preview.coe-preview .coe-link {
+    color: #0563c1;
+}
 
 /* Keeps hyphenated fill-ins like "CHED-TDP" from splitting across lines. */
 .coe-nowrap {
