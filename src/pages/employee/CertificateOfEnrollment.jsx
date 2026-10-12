@@ -121,8 +121,7 @@ function CertificateOfEnrollment() {
     }
 
     const issuedDateObj = form.issuedDate ? new Date(`${form.issuedDate}T00:00:00`) : new Date()
-    const issuedOrdinal = ordinal(issuedDateObj.getDate())
-    const issuedRestOfDate = `day of ${issuedDateObj.toLocaleDateString('en-PH', { month: 'long' })}, ${issuedDateObj.getFullYear()}`
+    const issuedDayLabel = `${ordinal(issuedDateObj.getDate())} day of ${issuedDateObj.toLocaleDateString('en-PH', { month: 'long' })}, ${issuedDateObj.getFullYear()}`
     const yearAdjective = form.yearLevel.toLowerCase().replace(' ', '-')
 
     return (
@@ -225,20 +224,17 @@ function CertificateOfEnrollment() {
                         <p className="coe-salutation">TO WHOM IT MAY CONCERN:</p>
 
                         <p className="coe-body">
-                            THIS IS TO CERTIFY that <strong className="coe-highlight">{form.studentName.trim() || '_______________'}</strong>, a{' '}
-                            <span className="coe-highlight">{yearAdjective}</span> student in{' '}
-                            <strong className="coe-highlight">{(form.program || '_______________').toUpperCase()}</strong>{' '}
-                            of HOLY CROSS OF DAVAO COLLEGE, INC., is officially enrolled{' '}
-                            <span className="coe-highlight">this {form.semester}, S.Y. {form.schoolYear || '_______'}</span>.
+                            THIS IS TO CERTIFY that <strong>{form.studentName.trim() || '_______________'}</strong>, a{' '}
+                            {yearAdjective} student in <strong>{(form.program || '_______________').toUpperCase()}</strong>{' '}
+                            of HOLY CROSS OF DAVAO COLLEGE, INC., is officially enrolled this {form.semester}, S.Y. {form.schoolYear || '_______'}.
                         </p>
 
                         <p className="coe-body">
-                            This certification is issued upon the request of the aforesaid person for{' '}
-                            <span className="coe-highlight">{form.purpose.trim() || '_______________'}</span>.
+                            This certification is issued upon the request of the aforesaid person for {form.purpose.trim() || '_______________'}.
                         </p>
 
                         <p className="coe-body">
-                            Issued this <span className="coe-highlight">{issuedOrdinal}</span> {issuedRestOfDate} in Davao City, Philippines.
+                            Issued this {issuedDayLabel} in Davao City, Philippines.
                         </p>
 
                         <div className="coe-spacer" aria-hidden="true" />

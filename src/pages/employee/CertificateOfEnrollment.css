@@ -148,12 +148,6 @@
     text-align: justify;
 }
 
-/* The variable/fill-in parts of the certification -- matches the
-   reference document's red emphasis on student-specific details. */
-.coe-highlight {
-    color: #c00000;
-}
-
 .coe-signoff {
     display: flex;
     align-items: flex-end;
