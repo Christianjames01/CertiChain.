@@ -31,6 +31,7 @@ function SystemWorkflow() {
     const sceneRef = useRef(null)
     const audioRef = useRef(null)
     const narratorRef = useRef(null)
+    const timelineRef = useRef(null)
 
     const [started, setStarted] = useState(false)
     const [shotIndex, setShotIndex] = useState(0)
@@ -258,6 +259,11 @@ function SystemWorkflow() {
         document.title = 'System Workflow · CertiChain'
     }, [])
 
+    // Keep the current step visible when the timeline is wider than the screen.
+    useEffect(() => {
+        timelineRef.current?.querySelector('.wf-chip.active')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
+    }, [shotIndex])
+
     const currentVoice = voices.find((v) => v.name === voiceName)
     const voiceLabel = hasRecording
         ? 'Recorded narration'
@@ -300,7 +306,7 @@ function SystemWorkflow() {
             {/* Subtitle + stage */}
             {started && !ended && shot.id !== 'finale' && (
                 <section className="wf-caption" key={shot.id}>
-                    {shot.step > 0 && <span className="wf-caption-step">Step {shot.step} of 9</span>}
+                    {shot.step > 0 && <span className="wf-caption-step">Step {shot.step} of {STEPS.length}</span>}
                     <h2>{shot.title}</h2>
                     {shot.narration && <p>{shot.narration}</p>}
                 </section>
@@ -308,7 +314,7 @@ function SystemWorkflow() {
 
             {/* Timeline */}
             {started && (
-                <nav className="wf-timeline" aria-label="Workflow steps">
+                <nav className="wf-timeline" aria-label="Workflow steps" ref={timelineRef}>
                     {STEPS.map((label, i) => {
                         const n = i + 1
                         const state = ended || shot.id === 'finale' ? 'done' : shot.step === n ? 'active' : shot.step > n ? 'done' : ''

@@ -1,7 +1,13 @@
 // The System Workflow presentation, shot by shot: what the narrator says,
 // which station the camera visits, and the sound cues (seconds into the shot).
+// It follows a student's request from start to finish: request ->
+// requirements -> pay at the Finance Office and upload the Official Receipt ->
+// registrar review -> processing -> document ready -> notified and picked
+// up -> completed.
 //
 // step: the numbered stage shown on the timeline (0 = intro/outro).
+// spoken (optional): the line for the browser voice when it differs from the
+// subtitle (e.g. "I.D." so it isn't read as a word).
 // audio: optional recorded narration in /public/workflow-narration/ -- when
 // every file is there, the recording is used instead of the browser voice.
 
@@ -10,7 +16,7 @@ export const SHOTS = [
         id: 'intro',
         step: 0,
         title: 'CertiChain System Workflow',
-        narration: 'Here is how an academic document request moves through the online registrar system, from the first click to the final release.',
+        narration: "Here is how a student's request for an academic document moves through CertiChain, from the first click until it is completed.",
         audio: '00-intro.mp3',
         minMs: 7000,
         cues: [],
@@ -19,90 +25,83 @@ export const SHOTS = [
         id: 'request',
         step: 1,
         title: 'Student Request',
-        narration: 'First, the student submits a request for the academic document they need through the online registrar system.',
+        narration: 'The student signs in, chooses the document they need, enters the number of copies and the purpose, and submits the request. It gets a reference number right away.',
         audio: '01-request.mp3',
-        minMs: 9000,
+        minMs: 10000,
         cues: [[2.2, 'panel'], [4.6, 'click'], [5.4, 'transfer']],
     },
     {
         id: 'upload',
         step: 2,
-        title: 'Upload Required Credentials',
-        narration: 'The student then provides the required information, and uploads the necessary credentials for verification.',
+        title: 'Upload Requirements',
+        narration: 'Next, the student uploads the requirements for that document, such as a valid ID.',
+        spoken: 'Next, the student uploads the requirements for that document, such as a valid I.D.',
         audio: '02-upload.mp3',
-        minMs: 9000,
+        minMs: 8500,
         cues: [[1.8, 'upload'], [6.3, 'confirm']],
     },
     {
-        id: 'record',
+        id: 'payment',
         step: 3,
-        title: 'Employee Checks Student Record',
-        narration: "Once the request is received, the registrar employee checks the student's academic record, and verifies the submitted information.",
-        audio: '03-record.mp3',
-        minMs: 9500,
-        cues: [[1.4, 'server'], [2.4, 'tick'], [3.1, 'tick'], [3.8, 'tick'], [4.5, 'tick'], [6.2, 'confirm']],
+        title: 'Pay & Upload Official Receipt',
+        narration: 'The student pays the fee at the HCDC Finance Office, then uploads a photo of the Official Receipt to the request.',
+        audio: '03-payment.mp3',
+        minMs: 10000,
+        cues: [[1.6, 'click'], [3.2, 'panel'], [4.6, 'upload'], [7.4, 'confirm']],
+    },
+    {
+        id: 'record',
+        step: 4,
+        title: 'Registrar Review',
+        narration: "A registrar employee checks the requirements and the receipt. If something is missing, the request is sent back to the student with the reason. Once everything is complete, the payment is verified.",
+        audio: '04-review.mp3',
+        minMs: 10500,
+        cues: [[1.4, 'panel'], [2.4, 'tick'], [3.1, 'tick'], [3.8, 'tick'], [4.5, 'tick'], [6.2, 'confirm']],
     },
     {
         id: 'process',
-        step: 4,
-        title: 'Employee Processes Request',
-        narration: 'After the records are confirmed, the registrar employee processes the request, and prepares the requested academic document.',
-        audio: '04-process.mp3',
+        step: 5,
+        title: 'Document Processing',
+        narration: 'The employee then prepares the document, and passes the request along to production, and then to the claiming section.',
+        audio: '05-process.mp3',
         minMs: 9500,
         cues: [[2.0, 'tick'], [3.0, 'tick'], [4.0, 'tick'], [5.0, 'tick'], [5.8, 'transfer']],
     },
     {
-        id: 'verify',
-        step: 5,
-        title: 'Credential Verification',
-        narration: 'The system then verifies the academic credential, to help ensure that the document information is authentic, and has not been altered.',
-        audio: '05-verify.mp3',
-        minMs: 9500,
-        cues: [[1.6, 'scan'], [6.4, 'confirm']],
-    },
-    {
         id: 'generate',
         step: 6,
-        title: 'Digital Credential Generation',
-        narration: 'After verification, the requested academic credential is generated, and prepared for release.',
-        audio: '06-generate.mp3',
-        minMs: 8500,
+        title: 'Document Ready',
+        narration: 'The finished document is checked, sealed, and made ready for release.',
+        audio: '06-ready.mp3',
+        minMs: 8000,
         cues: [[1.4, 'transfer'], [4.6, 'confirm']],
     },
     {
-        id: 'secure',
-        step: 7,
-        title: 'Secure Verification',
-        narration: 'A unique verification value is generated for the document, allowing its digital integrity to be checked later.',
-        audio: '07-secure.mp3',
-        minMs: 9000,
-        cues: [[1.2, 'shimmer'], [6.0, 'confirm']],
-    },
-    {
         id: 'digital',
-        step: 8,
-        title: 'Credential Release · Digital',
-        narration: 'For digital release, the student receives a notification, and can securely access the completed credential.',
-        audio: '08a-digital.mp3',
+        step: 7,
+        title: 'Student Notified',
+        narration: 'The student gets a notification that the document is ready, with the pickup date and time.',
+        audio: '07a-notified.mp3',
         minMs: 8500,
-        cues: [[1.6, 'notify'], [4.4, 'click'], [4.8, 'transfer'], [6.6, 'confirm']],
+        cues: [[1.6, 'notify'], [4.4, 'click'], [6.6, 'confirm']],
     },
     {
         id: 'physical',
-        step: 8,
-        title: 'Credential Release · Physical',
-        narration: "For physical release, the student receives a scheduled date and time, for claiming the document at the registrar's office.",
-        audio: '08b-physical.mp3',
-        minMs: 9000,
+        step: 7,
+        title: "Pickup at the Registrar's Office",
+        narration: "On the scheduled day, the student claims the document at the Registrar's Office, bringing a valid ID and the Official Receipt, or sends an approved representative.",
+        spoken: "On the scheduled day, the student claims the document at the Registrar's Office, bringing a valid I.D. and the Official Receipt, or sends an approved representative.",
+        audio: '07b-pickup.mp3',
+        minMs: 10000,
         cues: [[2.0, 'calendar'], [3.4, 'click'], [5.2, 'confirm']],
     },
     {
         id: 'complete',
-        step: 9,
-        title: 'Completion',
-        narration: 'Once the credential has been released, the transaction is recorded in the system, and the request is marked as completed.',
-        audio: '09-complete.mp3',
-        minMs: 9500,
+        step: 8,
+        title: 'Completed',
+        narration: 'Once the document is released, the request is marked completed, and the student can see it in their request history.',
+        audio: '08-complete.mp3',
+        minMs: 9000,
         cues: [[1.2, 'tick'], [1.8, 'tick'], [2.4, 'tick'], [3.0, 'tick'], [3.6, 'tick'], [5.0, 'complete']],
     },
     {
@@ -116,17 +115,16 @@ export const SHOTS = [
     },
 ]
 
-// The nine stages on the timeline.
+// The eight stages on the timeline.
 export const STEPS = [
     'Student Request',
-    'Upload Credentials',
-    'Academic Record',
-    'Registrar Processing',
-    'Verification',
-    'Digital Credential',
-    'Secure Verification',
+    'Requirements',
+    'Payment & Receipt',
+    'Registrar Review',
+    'Processing',
+    'Document Ready',
     'Release',
     'Completed',
 ]
 
-export const FLOW = ['Student Request', 'Credentials', 'Academic Record', 'Registrar Processing', 'Verification', 'Digital Credential', 'Release', 'Completed']
+export const FLOW = ['Request', 'Requirements', 'Official Receipt', 'Registrar Review', 'Processing', 'Document Ready', 'Release', 'Completed']

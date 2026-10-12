@@ -142,7 +142,9 @@ export function createNarrator() {
             const mySession = session
             if (!shot.narration) return Promise.resolve()
             if (mode === 'recording' && shot.audio) return playRecording(shot.audio, mySession)
-            return speakWithVoice(shot.narration, mySession)
+            // `spoken` (optional) spells out acronyms for the browser voice;
+            // the subtitles keep showing `narration`.
+            return speakWithVoice(shot.spoken || shot.narration, mySession)
         },
         stop,
     }
