@@ -2398,6 +2398,41 @@
 .lpx-now-cycle > i:nth-child(2) { animation: lpx-now 6.5s ease 2.2s both; }
 .lpx-now-cycle > i:nth-child(3) { animation: lpx-fade-in 0.4s ease 4.4s both; }
 
+/* Static tracker for the review / processing / completed scenes: each one
+   marks its own step instead of the filling animation above. */
+.lpx-journey.is-static li.lpx-step::before { animation: none; background: var(--line); }
+.lpx-journey.is-static li.lpx-step.is-done::before,
+.lpx-journey.is-static li.lpx-step.is-now::before { background: var(--green); }
+.lpx-journey.is-static li.lpx-step > span { animation: none; }
+.lpx-journey.is-static li.lpx-step > span svg { animation: none; opacity: 1; }
+.lpx-journey.is-static li.lpx-step.is-done > span { border-color: var(--green); background: var(--green); color: #fff; }
+.lpx-journey.is-static li.lpx-step.is-now > span {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: #fff;
+    animation: lpx-step-now 1.6s ease-in-out 0.6s infinite;
+}
+.lpx-journey.is-static li.lpx-step.is-now > small { color: var(--blue); }
+
+@keyframes lpx-step-now {
+    0%, 100% { box-shadow: 0 0 0 0.2em var(--blue-tint); }
+    50% { box-shadow: 0 0 0 0.5em var(--blue-tint); }
+}
+
+.lpx-pill {
+    padding: 0.35em 0.8em;
+    border-radius: 999px;
+    background: var(--blue-tint);
+    color: var(--blue);
+    font-size: 0.75em;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.lpx-pill.is-ok { background: var(--green-tint); color: var(--green); }
+
+.lpx-now-text { font-size: 0.86em; color: var(--ink); }
+
 @keyframes lpx-now {
     0% { opacity: 0; }
     6% { opacity: 1; }

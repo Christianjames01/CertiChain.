@@ -1,8 +1,8 @@
 import certichainLogo from '../../assets/certichain-logo.png'
 import { Icon } from './icons'
-import { CtaButton, QrMark, Window } from './parts'
+import { CtaButton, Window } from './parts'
 
-// Student story scenes, following the real request journey:
+// Student story scenes, one per stage of the real request journey:
 // Submitted -> Payment & requirements -> Registrar review -> Processing ->
 // Ready for release -> Completed (the same six steps the student portal shows).
 
@@ -26,7 +26,7 @@ export function SceneIntro() {
                 <strong>CertiChain</strong>
                 <small>HCDC Registrar Services</small>
                 <div className="lpx-intro-tags">
-                    <span>Request</span><span>Track</span><span>Verify</span>
+                    <span>Request</span><span>Track</span><span>Claim</span>
                 </div>
             </div>
         </div>
@@ -148,35 +148,69 @@ export function ScenePayment() {
 
 const JOURNEY = ['Submitted', 'Payment & requirements', 'Registrar review', 'Processing', 'Ready for release', 'Completed']
 
-export function SceneTracking() {
+// The request as it shows on My Requests: document, number and status pill.
+function TrackHead({ status, done = false }) {
+    return (
+        <div className="lpx-track-head">
+            <span className="lpx-doc-ic">{Icon.doc}</span>
+            <div><strong>Transcript of Records</strong><small>REQ-000124 · 2 copies</small></div>
+            <span className={`lpx-pill${done ? ' is-ok' : ''}`}>{status}</span>
+        </div>
+    )
+}
+
+// The six steps from the student's request page: earlier steps done, the
+// current one highlighted; once completed, every step is done.
+function StepTrack({ current }) {
+    return (
+        <ol className="lpx-journey is-static">
+            {JOURNEY.map((label, i) => {
+                const completed = current === JOURNEY.length - 1
+                const state = i < current || completed ? 'is-done' : i === current ? 'is-now' : ''
+                return (
+                    <li key={label} className={`lpx-step ${state}`}>
+                        <span>{state === 'is-done' ? Icon.check : i + 1}</span>
+                        <small>{label}</small>
+                    </li>
+                )
+            })}
+        </ol>
+    )
+}
+
+export function SceneReview() {
     return (
         <div className="lpx-scene lpx-tracking">
             <Window title="My requests · REQ-000124" className="lpx-pop lpx-journey-win">
-                <div className="lpx-track-head">
-                    <span className="lpx-doc-ic">{Icon.doc}</span>
-                    <div><strong>Transcript of Records</strong><small>REQ-000124 · 2 copies</small></div>
-                    <span className="lpx-pill-cycle"><i>Under review</i><i>Processing</i><i>Ready</i></span>
-                </div>
-                <ol className="lpx-journey">
-                    {JOURNEY.map((label, i) => (
-                        <li key={label} style={{ "--i": i }}>
-                            <span>{i < 5 ? Icon.check : i + 1}</span>
-                            <small>{label}</small>
-                        </li>
-                    ))}
-                </ol>
+                <TrackHead status="Under review" />
+                <StepTrack current={2} />
                 <div className="lpx-now">
                     <small>What's happening now?</small>
-                    <span className="lpx-now-cycle">
-                        <i>The Registrar is checking your receipt and requirements.</i>
-                        <i>The Registrar is preparing your document.</i>
-                        <i>Your document is ready — pickup on Oct 2, 9:00 AM.</i>
-                    </span>
+                    <span className="lpx-now-text">The Registrar is checking your Official Receipt and requirements.</span>
                 </div>
             </Window>
             <div className="lpx-notes">
-                <div className="lpx-note" style={{ "--delay": "1.6s" }}><span>{Icon.bell}</span><div><strong>Payment verified</strong><small>Your request is now being processed.</small></div></div>
-                <div className="lpx-note" style={{ "--delay": "4.2s" }}><span>{Icon.bell}</span><div><strong>Ready for pickup</strong><small>Thu, Oct 2 · 9:00 AM · Window 2</small></div></div>
+                <div className="lpx-note" style={{ "--delay": "1.8s" }}><span>{Icon.check}</span><div><strong>Requirements approved</strong><small>Clearance form and school ID</small></div></div>
+                <div className="lpx-note" style={{ "--delay": "3.6s" }}><span>{Icon.bell}</span><div><strong>Payment verified</strong><small>Your request is now being processed.</small></div></div>
+            </div>
+        </div>
+    )
+}
+
+export function SceneProcessing() {
+    return (
+        <div className="lpx-scene lpx-tracking">
+            <Window title="My requests · REQ-000124" className="lpx-pop lpx-journey-win">
+                <TrackHead status="Processing" />
+                <StepTrack current={3} />
+                <div className="lpx-now">
+                    <small>What's happening now?</small>
+                    <span className="lpx-now-text">The Registrar is preparing your document.</span>
+                </div>
+            </Window>
+            <div className="lpx-notes">
+                <div className="lpx-note" style={{ "--delay": "1.8s" }}><span>{Icon.doc}</span><div><strong>Document being prepared</strong><small>Transcript of Records · 2 copies</small></div></div>
+                <div className="lpx-note" style={{ "--delay": "3.6s" }}><span>{Icon.bell}</span><div><strong>Sent to the claiming section</strong><small>You'll be notified when it's ready.</small></div></div>
             </div>
         </div>
     )
@@ -201,30 +235,19 @@ export function SceneSchedule() {
     )
 }
 
-export function SceneClaim() {
+export function SceneComplete() {
     return (
-        <div className="lpx-scene lpx-claim">
-            <div className="lpx-badge-pop" style={{ "--delay": "0.3s" }}>
-                <span>{Icon.check}</span>
-                <div><strong>Claimed · request completed</strong><small>Released at the Registrar's Office</small></div>
-            </div>
-
-            <div className="lpx-doc-final" style={{ "--delay": "1s" }}>
-                <div className="lpx-doc-paper">
-                    <img src={certichainLogo} alt="" />
-                    <strong>Transcript of Records</strong>
-                    <i /><i /><i />
-                    <div className="lpx-doc-qr"><QrMark size={46} /></div>
+        <div className="lpx-scene lpx-tracking">
+            <Window title="My requests · REQ-000124" className="lpx-pop lpx-journey-win">
+                <TrackHead status="Completed" done />
+                <StepTrack current={5} />
+                <div className="lpx-now">
+                    <small>Released</small>
+                    <span className="lpx-now-text">Claimed at the Registrar's Office on Thu, Oct 2. This request stays in your history.</span>
                 </div>
-                <div className="lpx-scan-phone" style={{ "--delay": "2.2s" }}>
-                    <span className="lpx-scan-beam" />
-                    {Icon.phone}
-                </div>
-            </div>
-
-            <div className="lpx-result" style={{ "--delay": "3.6s" }}>
-                <span>{Icon.check}</span>
-                <div><strong>Verified credential</strong><small>CERT-000124 · Signature valid</small></div>
+            </Window>
+            <div className="lpx-notes">
+                <div className="lpx-note" style={{ "--delay": "1.4s" }}><span>{Icon.check}</span><div><strong>Claimed · request completed</strong><small>Transcript of Records · 2 copies released</small></div></div>
             </div>
         </div>
     )
@@ -234,7 +257,7 @@ export function SceneCta({ cta }) {
     return (
         <div className="lpx-scene lpx-cta">
             <div className="lpx-cta-ring"><img src={certichainLogo} alt="" /></div>
-            <strong>{cta?.title || <>Your records, <em>verified and provable.</em></>}</strong>
+            <strong>{cta?.title || <>Request, track and <em>claim, all online.</em></>}</strong>
             <div className="lpx-cta-buttons">
                 <CtaButton action={cta?.primary} className="lpx-cta-primary" />
                 <CtaButton action={cta?.secondary} className="lpx-cta-secondary" />

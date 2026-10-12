@@ -5,17 +5,18 @@ import * as Student from './StudentScenes'
 // Scene lists for ExplainerPlayer. Each scene: key, the View component,
 // chapter label, title, caption text and how long it plays (ms).
 
-// Student story: from the counter line to a verified credential.
+// Student story: from the first request to a completed, claimed document.
 export const STUDENT_SCENES = [
-    { key: "intro", View: Student.SceneIntro, chapter: "Intro", title: "Registrar documents, tracked online", text: "CertiChain is HCDC’s online registrar service. Once you're assessed, paid and verified at the Registrar's Office, track and verify your documents from one account — no more trips just to check your status.", ms: 6000 },
+    { key: "intro", View: Student.SceneIntro, chapter: "Intro", title: "Registrar documents, tracked online", text: "CertiChain is HCDC’s online registrar service. Once you're assessed, paid and verified at the Registrar's Office, track your documents from one account — no more trips just to check your status.", ms: 6000 },
     { key: "account", View: Student.SceneAccount, chapter: "Account", title: "Create your account", text: "Register with your student details. The Registrar verifies your record, so only real students can request.", ms: 5500 },
     { key: "request", View: Student.SceneRequest, chapter: "Step 1", title: "Request a document", text: "Already assessed, paid and verified in person? Choose the document online, type the copies and purpose, then submit. Your request number appears right away.", ms: 7000 },
     { key: "requirements", View: Student.SceneRequirements, chapter: "Step 2", title: "Upload your requirements", text: "Upload a clear photo or PDF of each requirement. If one is rejected, you see the reason and upload it again.", ms: 6500 },
     { key: "payment", View: Student.ScenePayment, chapter: "Step 3", title: "Upload your verified receipt", text: "Upload a photo of the Official Receipt you already paid and had verified in person. The Registrar checks it online.", ms: 6500 },
-    { key: "tracking", View: Student.SceneTracking, chapter: "Step 4", title: "Registrar review and processing", text: "Follow your request through six steps. You always see what is happening now and what to do next, with a notification at every change.", ms: 7000 },
-    { key: "schedule", View: Student.SceneSchedule, chapter: "Step 5", title: "Get your pickup schedule", text: "When it is ready you get a date, time and window. Bring a valid ID and your Official Receipt, or send a representative.", ms: 6000 },
-    { key: "claim", View: Student.SceneClaim, chapter: "Result", title: "Claim it — and prove it’s genuine", text: "Claim it at the Registrar’s Office and your request is completed. Its QR code lets any school or employer verify it in seconds.", ms: 6500 },
-    { key: "cta", View: Student.SceneCta, chapter: "Start", title: "Your records, verified and provable", text: "Create a free account and request your first document today.", ms: 5000 },
+    { key: "review", View: Student.SceneReview, chapter: "Step 4", title: "Registrar review", text: "The Registrar checks your receipt and requirements. If something is missing, you see the reason. Once everything is complete, your payment is verified.", ms: 6500 },
+    { key: "processing", View: Student.SceneProcessing, chapter: "Step 5", title: "Your document is prepared", text: "The Registrar prepares your document. You can follow each step on your request, with a notification at every change.", ms: 6000 },
+    { key: "schedule", View: Student.SceneSchedule, chapter: "Step 6", title: "Ready for pickup", text: "When it is ready you get a date, time and window. Bring a valid ID and your Official Receipt, or send a representative.", ms: 6000 },
+    { key: "claim", View: Student.SceneComplete, chapter: "Step 7", title: "Claim it, and you're done", text: "Claim your document at the Registrar’s Office. Your request is marked completed and stays in your request history.", ms: 6000 },
+    { key: "cta", View: Student.SceneCta, chapter: "Start", title: "Request, track and claim, all online", text: "Create a free account and request your first document today.", ms: 5000 },
 ]
 
 // Employee story: an assigned request from receipt to release.
