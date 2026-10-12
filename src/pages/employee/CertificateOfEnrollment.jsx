@@ -219,7 +219,7 @@ function CertificateOfEnrollment() {
                     THIS IS TO CERTIFY that <Fill bold>{form.studentName.trim().toUpperCase() || '_______________'}</Fill>,{' '}
                     <Fill>{keepHyphens(yearAdjective)}</Fill> student in <Fill bold>{(form.program.trim() || '_______________').toUpperCase()}</Fill>{' '}
                     of HOLY CROSS OF DAVAO COLLEGE, INC., <Fill>is</Fill> officially enrolled{' '}
-                    <Fill>this {form.semester}, S.Y. {form.schoolYear.trim() || '_______'}</Fill>.
+                    <Fill>this {form.semester}, <span className="coe-nowrap">S.Y. {form.schoolYear.trim() || '_______'}.</span></Fill>
                 </p>
 
                 <p className="coe-body">
