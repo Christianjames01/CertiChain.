@@ -232,7 +232,7 @@ function Students() {
     const loadPendingProfiles = async (studentRows) => {
         const { data: studentProfiles, error: profilesError } = await supabase
             .from('profiles')
-            .select('user_id, first_name, last_name, email, created_at, status, profile_photo_url')
+            .select('user_id, first_name, middle_name, last_name, suffix, email, phone_number, created_at, status, profile_photo_url')
             .eq('role', 'student')
             .order('created_at', { ascending: false })
 
@@ -652,10 +652,33 @@ function Students() {
                                 )}
                             </div>
 
+                            <div className="admin-info-grid">
+                                <div className="admin-info-field">
+                                    <span>Full name</span>
+                                    <strong>{[p.first_name, p.middle_name, p.last_name, p.suffix].filter(Boolean).join(' ') || 'N/A'}</strong>
+                                </div>
+                                <div className="admin-info-field">
+                                    <span>Email</span>
+                                    <strong>{p.email || 'N/A'}</strong>
+                                </div>
+                                <div className="admin-info-field">
+                                    <span>Phone</span>
+                                    <strong>{p.phone_number || 'Not given yet'}</strong>
+                                </div>
+                                <div className="admin-info-field">
+                                    <span>Missing</span>
+                                    <strong>Student number, college and program</strong>
+                                </div>
+                                <div className="admin-info-field">
+                                    <span>Account</span>
+                                    <strong>{p.status === 'inactive' ? 'Deactivated after 3 working days' : 'Active, waiting to finish'}</strong>
+                                </div>
+                            </div>
+
                             <div className="admin-list-card-header" style={{ marginTop: 10 }}>
                                 <p style={{ fontSize: 12.5, color: 'var(--slate)' }}>
                                     Signed up {new Date(p.created_at).toLocaleString('en-PH', {
-                                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+                                        year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
                                     })}
                                 </p>
                                 <button

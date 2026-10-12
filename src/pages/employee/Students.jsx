@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { logActivity } from '../../lib/activityLog'
-import { notifyStudentByStudentId, notifyError, confirmModal } from '../../lib/notify'
+import { notifyStudentByStudentId, notifyError, notifySuccess, confirmModal } from '../../lib/notify'
+import { deleteStudentAccount } from '../../lib/deleteStudentAccount'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import Swal from 'sweetalert2'
 import { SkeletonList } from '../../components/Skeleton'
@@ -28,6 +29,7 @@ function Students() {
 
     const [pendingVerifications, setPendingVerifications] = useState([])
     const [incompleteProfiles, setIncompleteProfiles] = useState([])
+    const [deletingProfileId, setDeletingProfileId] = useState(null)
     const [reviewingId, setReviewingId] = useState(null)
     const [selectedProgramKey, setSelectedProgramKey] = useState(null)
 
@@ -234,7 +236,7 @@ function Students() {
     const loadIncompleteProfiles = async (studentRows) => {
         const { data: studentProfiles, error: profilesError } = await supabase
             .from('profiles')
-            .select('user_id, first_name, last_name, email, created_at, status, profile_photo_url')
+            .select('user_id, first_name, middle_name, last_name, suffix, email, phone_number, created_at, status, profile_photo_url')
             .eq('role', 'student')
             .order('created_at', { ascending: false })
 
@@ -248,6 +250,41 @@ function Students() {
     }
 
     const incompleteName = (p) => `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email || 'Unknown'
+    const incompleteFullName = (p) =>
+        [p.first_name, p.middle_name, p.last_name, p.suffix].filter(Boolean).join(' ') || p.email || 'Unknown'
+
+    // An incomplete account has no student record, requests or files, so
+    // deleting it only removes the login and profile. Confirmed with the
+    // employee's own password, like the head's delete.
+    const deleteIncompleteProfile = async (profile) => {
+        const name = incompleteName(profile)
+
+        try {
+            setDeletingProfileId(profile.user_id)
+
+            const confirmed = await confirmModal(
+                `Permanently delete ${name}'s account? They never finished their registration, so there are no requests or files -- this removes their login and profile. This cannot be undone.`,
+                { title: 'Delete this account?', confirmButtonText: 'Delete account', icon: 'warning' }
+            )
+            if (!confirmed) return
+
+            const passwordConfirmed = await confirmWithPassword({
+                title: 'Confirm your password',
+                text: 'For your security, enter your own password to permanently delete this account.',
+            })
+            if (!passwordConfirmed) return
+
+            await deleteStudentAccount({ studentUserId: profile.user_id })
+
+            setIncompleteProfiles((prev) => prev.filter((p) => p.user_id !== profile.user_id))
+            notifySuccess(`${name}'s account has been permanently deleted.`)
+        } catch (err) {
+            console.error('DELETE INCOMPLETE PROFILE ERROR:', err)
+            notifyError(friendlyError(err, 'Failed to delete this account.'))
+        } finally {
+            setDeletingProfileId(null)
+        }
+    }
 
     // Live search while typing: every word must appear in the student's
     // name or student number.
@@ -421,7 +458,7 @@ function Students() {
                                     <span className="ui-avatar is-muted" aria-hidden="true"><AvatarFace photo={p.profile_photo_url} name={incompleteName(p)} /></span>
                                     <div>
                                         <h3>{incompleteName(p)}</h3>
-                                        <p>{p.email} · signed up {new Date(p.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+                                        <p>{p.email}</p>
                                     </div>
                                 </div>
                                 {p.status === 'inactive' ? (
@@ -429,6 +466,43 @@ function Students() {
                                 ) : (
                                     <span className="employee-status-pill status-pending">Setup incomplete</span>
                                 )}
+                            </div>
+
+                            <div className="employee-info-grid">
+                                <div className="employee-info-field">
+                                    <span>Full name</span>
+                                    <strong>{incompleteFullName(p)}</strong>
+                                </div>
+                                <div className="employee-info-field">
+                                    <span>Email</span>
+                                    <strong>{p.email || 'N/A'}</strong>
+                                </div>
+                                <div className="employee-info-field">
+                                    <span>Phone</span>
+                                    <strong>{p.phone_number || 'Not given yet'}</strong>
+                                </div>
+                                <div className="employee-info-field">
+                                    <span>Signed up</span>
+                                    <strong>{new Date(p.created_at).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</strong>
+                                </div>
+                                <div className="employee-info-field">
+                                    <span>Missing</span>
+                                    <strong>Student number, college and program</strong>
+                                </div>
+                                <div className="employee-info-field">
+                                    <span>Account</span>
+                                    <strong>{p.status === 'inactive' ? 'Deactivated after 3 working days' : 'Active, waiting to finish'}</strong>
+                                </div>
+                            </div>
+
+                            <div className="ui-card-actions">
+                                <button
+                                    className="employee-link-button is-danger"
+                                    onClick={() => deleteIncompleteProfile(p)}
+                                    disabled={deletingProfileId === p.user_id}
+                                >
+                                    {deletingProfileId === p.user_id ? 'Deleting...' : 'Delete account'}
+                                </button>
                             </div>
                         </div>
                     ))}
