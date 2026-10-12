@@ -472,8 +472,8 @@ function Employees() {
                     userId: employee.user_id,
                     title: next ? 'You are now in the claiming section' : 'You now have full access',
                     message: next
-                        ? 'The registrar head moved you to the claiming section. You will handle requests at the claiming stage and release documents. Sign in again if your menu does not update.'
-                        : 'The registrar head gave you full employee access. Sign in again if your menu does not update.',
+                        ? 'The registrar head moved you to the claiming section. You will handle requests at the claiming stage and release documents.'
+                        : 'The registrar head gave you full employee access. All pages are back in your menu.',
                     notificationType: 'account',
                 })
             }

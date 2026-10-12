@@ -48,6 +48,11 @@ function EmployeeLayout() {
     const [loggingOut, setLoggingOut] = useState(false)
 
     useLiveRefresh(['notifications', 'messages', 'students', 'employee_assignments'], () => loadBadgeCounts())
+    // The head can move this employee to the claiming section or back to
+    // full access (and allow certificates) at any time: re-read so the
+    // sidebar updates without signing in again. The head's change also
+    // sends a notification, so this fires right away.
+    useLiveRefresh(['employees', 'notifications'], () => loadProfile())
 
     useEffect(() => {
         document.body.style.overflow = mobileNavOpen ? 'hidden' : ''

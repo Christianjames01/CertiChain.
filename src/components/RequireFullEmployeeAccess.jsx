@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useLiveRefresh } from '../lib/useLiveRefresh'
 import { SkeletonPageContent } from './Skeleton'
 
 function RequireFullEmployeeAccess({ children }) {
@@ -25,12 +26,14 @@ function RequireFullEmployeeAccess({ children }) {
             .eq('user_id', user.id)
             .maybeSingle()
 
-        if (employee?.access_scope === 'releasing') {
-            setAllowed(false)
-        }
+        setAllowed(employee?.access_scope !== 'releasing')
 
         setLoading(false)
     }
+
+    // Re-check when the head changes this employee's access, so a page
+    // they lose access to sends them to the dashboard right away.
+    useLiveRefresh(['employees', 'notifications'], () => checkAccess())
 
     if (loading) {
         return <SkeletonPageContent />
