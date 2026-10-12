@@ -181,7 +181,7 @@ function CertificateOfEnrollment() {
             setSaving(true)
             const { data: { user } } = await supabase.auth.getUser()
 
-            const { error } = await supabase.from('enrollment_certificates').insert({
+            const certificate = {
                 student_name: form.studentName.trim(),
                 program: form.program.trim(),
                 year_level: form.yearLevel,
@@ -191,9 +191,18 @@ function CertificateOfEnrollment() {
                 registrar_name: REGISTRAR_NAME,
                 or_number: form.orNumber.trim() || null,
                 cert_number: form.certNumber.trim() || null,
+                encoder_initials: form.encoderInitials.trim() || null,
                 issued_date: form.issuedDate,
                 issued_by: user.id,
-            })
+            }
+
+            let { error } = await supabase.from('enrollment_certificates').insert(certificate)
+
+            // Until the encoder_initials migration reaches the database, log
+            // the certificate without the initials rather than not at all.
+            if (error && /encoder_initials/.test(error.message || '')) {
+                ;({ error } = await supabase.from('enrollment_certificates').insert({ ...certificate, encoder_initials: undefined }))
+            }
 
             if (error) throw error
 

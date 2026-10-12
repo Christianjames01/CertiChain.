@@ -41,11 +41,20 @@ function IssuedCertificates() {
             if (!silent) setLoading(true)
             setError('')
 
-            const { data, error: certError } = await supabase
+            const columns = 'certificate_id, student_name, program, year_level, semester, school_year, purpose, or_number, cert_number, issued_date, issued_by, created_at'
+            const fetchCertificates = (select) => supabase
                 .from('enrollment_certificates')
-                .select('certificate_id, student_name, program, year_level, semester, school_year, purpose, or_number, cert_number, issued_date, issued_by, created_at')
+                .select(select)
                 .order('created_at', { ascending: false })
                 .limit(5000)
+
+            let { data, error: certError } = await fetchCertificates(`${columns}, encoder_initials`)
+
+            // Until the encoder_initials migration reaches the database,
+            // still list the certificates, just without the initials.
+            if (certError && /encoder_initials/.test(certError.message || '')) {
+                ;({ data, error: certError } = await fetchCertificates(columns))
+            }
 
             if (certError) {
                 throw new Error('Failed to load issued certificates: ' + certError.message)
@@ -110,7 +119,7 @@ function IssuedCertificates() {
         if (issuerFilter && cert.issued_by !== issuerFilter) return false
         if (!search.trim()) return true
         const term = search.trim().toLowerCase()
-        return [cert.student_name, cert.program, cert.purpose, cert.or_number, cert.cert_number, cert.issuerName]
+        return [cert.student_name, cert.program, cert.purpose, cert.or_number, cert.cert_number, cert.issuerName, cert.encoder_initials]
             .some((value) => (value || '').toLowerCase().includes(term))
     })
 
@@ -194,7 +203,7 @@ function IssuedCertificates() {
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search by student, program, purpose, OR or cert number"
+                            placeholder="Search by student, program, purpose, OR / cert number or encoder initials"
                             aria-label="Search issued certificates"
                         />
 
@@ -239,7 +248,12 @@ function IssuedCertificates() {
                                             <td>{cert.purpose}</td>
                                             <td>{cert.or_number || '—'}</td>
                                             <td>{cert.cert_number || '—'}</td>
-                                            <td>{cert.issuerName}</td>
+                                            <td>
+                                                {cert.issuerName}
+                                                {cert.encoder_initials && (
+                                                    <div style={{ fontSize: 12, opacity: 0.75 }}>Encoder initials: {cert.encoder_initials}</div>
+                                                )}
+                                            </td>
                                             <td style={{ whiteSpace: 'nowrap' }}>{formatDate(cert.created_at)}</td>
                                         </tr>
                                     ))}
