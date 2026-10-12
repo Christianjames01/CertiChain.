@@ -1417,60 +1417,52 @@ function EmployeeRequestDetails() {
                 </div>
             )}
 
-            <div className="employee-card">
-                <h3 style={{ fontSize: 15, marginBottom: 14 }}>Student Information</h3>
+            <div className="employee-card" style={{ marginTop: 24 }}>
+                <h2 style={{ fontSize: 16, marginBottom: 16 }}>Request Information</h2>
 
-                <div className="employee-info-grid">
-                    <div className="employee-info-field">
-                        <span>Document Requested</span>
-                        <strong>{documentName || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Student Name</span>
-                        <strong>{student?.name || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Student Number</span>
-                        <strong>{student?.student_number || 'N/A'}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Quantity</span>
-                        <strong>{request.quantity}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Unit Fee</span>
-                        <strong>₱{Number(request.unit_fee || 0).toFixed(2)}</strong>
-                    </div>
-
-                    <div className="employee-info-field">
-                        <span>Total Amount</span>
-                        <strong>₱{Number(request.total_amount || 0).toFixed(2)}</strong>
-                    </div>
-                </div>
-
-                <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: '20px 0 16px' }} />
-
-                <h3 style={{ fontSize: 15, marginBottom: 14 }}>Request Information</h3>
-
-                <div className="employee-info-field" style={{ marginBottom: 16 }}>
-                    <span>Purpose</span>
-                    <strong>{request.purpose || 'No purpose specified'}</strong>
-                </div>
-
-                {request.student_remarks && (
-                    <div className="employee-info-field" style={{ marginBottom: 16 }}>
-                        <span>Student Remarks</span>
-                        <strong>{request.student_remarks}</strong>
-                    </div>
-                )}
-
-                <div className="employee-info-field">
-                    <span>Requested At</span>
-                    <strong>{formatDisplayDateTime(request.requested_at)}</strong>
+                <div className="employee-table-wrapper">
+                    <table className="employee-table employee-fact-table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">Document Requested</th>
+                                <td>{documentName || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Student Name</th>
+                                <td>{student?.name || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Student Number</th>
+                                <td>{student?.student_number || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Quantity</th>
+                                <td>{request.quantity}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Unit Fee</th>
+                                <td>₱{Number(request.unit_fee || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Total Amount</th>
+                                <td>₱{Number(request.total_amount || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Requested</th>
+                                <td>{request.requested_at ? formatDisplayDateTime(request.requested_at) : 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Purpose</th>
+                                <td>{request.purpose || 'Not specified'}</td>
+                            </tr>
+                            {request.student_remarks && (
+                                <tr>
+                                    <th scope="row">Student Remarks</th>
+                                    <td>{request.student_remarks}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
 
                 {request.cancellation_reason && (
@@ -1519,21 +1511,23 @@ function EmployeeRequestDetails() {
                         </div>
                     ) : (
                         <>
-                            <div className="employee-info-grid">
-                                <div className="employee-info-field">
-                                    <span>Amount Paid</span>
-                                    <strong>₱{Number(receipt.amount_paid || 0).toFixed(2)}</strong>
-                                </div>
-
-                                <div className="employee-info-field">
-                                    <span>Uploaded At</span>
-                                    <strong>{receipt.uploaded_at ? formatDisplayDateTime(receipt.uploaded_at) : 'N/A'}</strong>
-                                </div>
-
-                                <div className="employee-info-field">
-                                    <span>Receipt Status</span>
-                                    <span className={`employee-status-pill status-${receipt.status}`}>{receipt.status}</span>
-                                </div>
+                            <div className="employee-table-wrapper">
+                                <table className="employee-table employee-fact-table">
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Amount Paid</th>
+                                            <td>₱{Number(receipt.amount_paid || 0).toFixed(2)}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Uploaded</th>
+                                            <td>{receipt.uploaded_at ? formatDisplayDateTime(receipt.uploaded_at) : 'N/A'}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Status</th>
+                                            <td><span className={`employee-status-pill status-${receipt.status}`}>{receipt.status}</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <ReceiptChecks receipt={receipt} />

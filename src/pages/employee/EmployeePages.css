@@ -572,3 +572,39 @@ select.employee-textarea {
         margin-left: 50px;
     }
 }
+
+/* Two-column fact tables (label | value), as on the head's Request Details. */
+.employee-fact-table {
+    table-layout: fixed;
+}
+
+.employee-fact-table th[scope="row"] {
+    width: 200px;
+    color: var(--slate);
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 13px;
+    white-space: normal;
+}
+
+.employee-fact-table td {
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+.employee-fact-table tbody tr:hover {
+    background: transparent;
+}
+
+.employee-fact-table tbody tr:last-child th,
+.employee-fact-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+@media (max-width: 560px) {
+    .employee-fact-table th[scope="row"] {
+        width: 128px;
+    }
+}

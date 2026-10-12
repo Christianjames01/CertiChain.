@@ -7,6 +7,8 @@ import { deleteStudentAccount } from '../../lib/deleteStudentAccount'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import Swal from 'sweetalert2'
 import { SkeletonList } from '../../components/Skeleton'
+import PageStats from '../../components/PageStats'
+import { IconIdCard, IconHourglass, IconLayers, IconBuilding } from '../admin/icons'
 import './EmployeePages.css'
 import AvatarFace from '../../components/AvatarFace'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
@@ -32,6 +34,7 @@ function Students() {
     const [deletingProfileId, setDeletingProfileId] = useState(null)
     const [reviewingId, setReviewingId] = useState(null)
     const [selectedProgramKey, setSelectedProgramKey] = useState(null)
+    const [yearLevelFilter, setYearLevelFilter] = useState('all')
 
     useLiveRefresh(['students'], () => { loadPendingVerifications(); loadAllStudents({ silent: true }) })
 
@@ -289,8 +292,14 @@ function Students() {
     // Live search while typing: every word must appear in the student's
     // name or student number.
     const searchWords = term.trim().toLowerCase().split(/\s+/).filter(Boolean)
+    const yearFilteredStudents = yearLevelFilter === 'all'
+        ? results
+        : yearLevelFilter === 'alumni'
+            ? results.filter((st) => st.student_type === 'alumni')
+            : results.filter((st) => st.student_type !== 'alumni' && String(st.year_level) === yearLevelFilter)
+
     const matches = searchWords.length
-        ? results.filter((student) => {
+        ? yearFilteredStudents.filter((student) => {
             const haystack = `${student.fullName} ${student.student_number || ''}`.toLowerCase()
             return searchWords.every((word) => haystack.includes(word))
         })
@@ -305,7 +314,7 @@ function Students() {
     const groupedResults = (() => {
         const groups = {}
 
-        for (const student of results) {
+        for (const student of yearFilteredStudents) {
             const key = student.program_id || 'unassigned'
 
             if (!groups[key]) {
@@ -378,6 +387,17 @@ function Students() {
                 <h1>Students</h1>
                 <p>All enrolled students. Search to narrow the list, or view a student's information and request history.</p>
             </div>
+
+            {!loading && (
+                <PageStats
+                    stats={[
+                        { label: 'Students', value: results.length, note: 'Registered and verified', Icon: IconIdCard },
+                        { label: 'Pending verification', value: pendingVerifications.length, note: pendingVerifications.length ? 'Waiting for your approval' : 'Nothing to review', Icon: IconHourglass, warn: pendingVerifications.length > 0 },
+                        { label: 'Setup incomplete', value: incompleteProfiles.length, note: 'Signed in, profile not finished', Icon: IconLayers },
+                        { label: 'Programs', value: new Set(results.map((st) => st.program_id).filter(Boolean)).size, note: 'With enrolled students', Icon: IconBuilding },
+                    ]}
+                />
+            )}
 
             {pendingVerifications.length > 0 && (
                 <>
@@ -513,7 +533,7 @@ function Students() {
                 <h2 style={{ fontSize: 17, margin: '28px 0 14px' }}>Students</h2>
             )}
 
-            <form onSubmit={(e) => e.preventDefault()} style={{ marginBottom: 24 }}>
+            <form onSubmit={(e) => e.preventDefault()} style={{ marginBottom: 16 }}>
                 <input
                     className="employee-search-input ui-search-field"
                     type="search"
@@ -524,6 +544,31 @@ function Students() {
                     style={{ width: '100%' }}
                 />
             </form>
+
+            <div className="employee-filter-row" style={{ marginBottom: 24 }}>
+                {[
+                    { key: 'all', label: 'All Years' },
+                    { key: '1', label: '1st Year' },
+                    { key: '2', label: '2nd Year' },
+                    { key: '3', label: '3rd Year' },
+                    { key: '4', label: '4th Year' },
+                    { key: '5', label: '5th Year' },
+                    { key: 'alumni', label: 'Alumni' },
+                ].map((chip) => (
+                    <button
+                        key={chip.key}
+                        type="button"
+                        className={`employee-filter-chip${yearLevelFilter === chip.key ? ' active' : ''}`}
+                        onClick={() => { setYearLevelFilter(chip.key); setSelectedProgramKey(null) }}
+                    >
+                        {chip.label}<span className="ui-chip-count">{chip.key === 'all'
+                            ? results.length
+                            : chip.key === 'alumni'
+                                ? results.filter((st) => st.student_type === 'alumni').length
+                                : results.filter((st) => st.student_type !== 'alumni' && String(st.year_level) === chip.key).length}</span>
+                    </button>
+                ))}
+            </div>
 
             {error && <div className="employee-error-box">{error}</div>}
 
