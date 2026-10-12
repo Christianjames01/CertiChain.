@@ -24,14 +24,14 @@ function Students() {
     const [term, setTerm] = useState('')
     const [results, setResults] = useState([])
     const [loading, setLoading] = useState(false)
-    const [searched, setSearched] = useState(false)
     const [error, setError] = useState('')
 
     const [pendingVerifications, setPendingVerifications] = useState([])
+    const [incompleteProfiles, setIncompleteProfiles] = useState([])
     const [reviewingId, setReviewingId] = useState(null)
     const [selectedProgramKey, setSelectedProgramKey] = useState(null)
 
-    useLiveRefresh(['students'], () => { loadPendingVerifications(); if (!term.trim()) loadAllStudents({ silent: true }) })
+    useLiveRefresh(['students'], () => { loadPendingVerifications(); loadAllStudents({ silent: true }) })
 
     useEffect(() => {
         loadAllStudents()
@@ -218,7 +218,7 @@ function Students() {
             }
 
             setResults(await enrichStudents(onlyListedStudents(rows || [])))
-            setSearched(true)
+            await loadIncompleteProfiles(rows || [])
 
         } catch (err) {
             console.error('LOAD STUDENTS ERROR:', err)
@@ -228,59 +228,42 @@ function Students() {
         }
     }
 
-    const search = async (e) => {
-        e.preventDefault()
+    // Accounts that signed in but never finished "Complete your profile":
+    // they have no student record yet, so they can't request anything.
+    // Every student row (any verification status) counts as finished.
+    const loadIncompleteProfiles = async (studentRows) => {
+        const { data: studentProfiles, error: profilesError } = await supabase
+            .from('profiles')
+            .select('user_id, first_name, last_name, email, created_at, status, profile_photo_url')
+            .eq('role', 'student')
+            .order('created_at', { ascending: false })
 
-        const query = term.trim()
-
-        if (!query) {
-            setSelectedProgramKey(null)
-            await loadAllStudents()
+        if (profilesError) {
+            console.error('LOAD INCOMPLETE PROFILES ERROR:', profilesError)
             return
         }
 
-        setSelectedProgramKey(null)
-
-        try {
-            setLoading(true)
-            setError('')
-            setSearched(true)
-
-            const { data: byNumber } = await supabase
-                .from('students')
-                .select('*')
-                .ilike('student_number', `%${query}%`)
-                .limit(20)
-
-            const { data: matchingProfiles } = await supabase
-                .from('profiles')
-                .select('user_id, first_name, last_name, email')
-                .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
-                .limit(20)
-
-            const matchingUserIds = (matchingProfiles || []).map((p) => p.user_id)
-
-            const { data: byName } = matchingUserIds.length
-                ? await supabase
-                    .from('students')
-                    .select('*')
-                    .in('user_id', matchingUserIds)
-                : { data: [] }
-
-            const merged = [...(byNumber || []), ...(byName || [])]
-            const uniqueByStudentId = Object.values(
-                Object.fromEntries(merged.map((s) => [s.student_id, s]))
-            )
-
-            setResults(await enrichStudents(onlyListedStudents(uniqueByStudentId)))
-
-        } catch (err) {
-            console.error('STUDENT SEARCH ERROR:', err)
-            setError(err.message || 'Search failed.')
-        } finally {
-            setLoading(false)
-        }
+        const studentUserIds = new Set(studentRows.map((s) => s.user_id))
+        setIncompleteProfiles((studentProfiles || []).filter((p) => !studentUserIds.has(p.user_id)))
     }
+
+    const incompleteName = (p) => `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.email || 'Unknown'
+
+    // Live search while typing: every word must appear in the student's
+    // name or student number.
+    const searchWords = term.trim().toLowerCase().split(/\s+/).filter(Boolean)
+    const matches = searchWords.length
+        ? results.filter((student) => {
+            const haystack = `${student.fullName} ${student.student_number || ''}`.toLowerCase()
+            return searchWords.every((word) => haystack.includes(word))
+        })
+        : []
+    const incompleteMatches = searchWords.length
+        ? incompleteProfiles.filter((p) => {
+            const haystack = `${incompleteName(p)} ${p.email || ''}`.toLowerCase()
+            return searchWords.every((word) => haystack.includes(word))
+        })
+        : []
 
     const groupedResults = (() => {
         const groups = {}
@@ -420,54 +403,96 @@ function Students() {
                             </div>
                         </div>
                     ))}
-
-                    <h2 style={{ fontSize: 17, margin: '28px 0 14px' }}>Students</h2>
                 </>
             )}
 
-            <form onSubmit={search} style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+            {incompleteProfiles.length > 0 && (
+                <>
+                    <h2 className="ui-section-title" style={{ marginBottom: 6, marginTop: pendingVerifications.length > 0 ? 28 : 0 }}>Setup Incomplete <span className="ui-chip-count">{incompleteProfiles.length}</span></h2>
+                    <p style={{ fontSize: 13, color: 'var(--slate)', marginBottom: 14 }}>
+                        These students signed in but haven't finished the "Complete your profile" step, so they don't have a student record yet and can't submit requests.
+                        Accounts left incomplete for 3 working days are automatically deactivated.
+                    </p>
+
+                    {incompleteProfiles.map((p) => (
+                        <div className="employee-list-card" key={p.user_id}>
+                            <div className="employee-list-card-header">
+                                <div className="ui-card-title" style={{ alignItems: 'center' }}>
+                                    <span className="ui-avatar is-muted" aria-hidden="true"><AvatarFace photo={p.profile_photo_url} name={incompleteName(p)} /></span>
+                                    <div>
+                                        <h3>{incompleteName(p)}</h3>
+                                        <p>{p.email} · signed up {new Date(p.created_at).toLocaleString('en-PH', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+                                    </div>
+                                </div>
+                                {p.status === 'inactive' ? (
+                                    <span className="employee-status-pill status-rejected">Auto-declined</span>
+                                ) : (
+                                    <span className="employee-status-pill status-pending">Setup incomplete</span>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </>
+            )}
+
+            {(pendingVerifications.length > 0 || incompleteProfiles.length > 0) && (
+                <h2 style={{ fontSize: 17, margin: '28px 0 14px' }}>Students</h2>
+            )}
+
+            <form onSubmit={(e) => e.preventDefault()} style={{ marginBottom: 24 }}>
                 <input
                     className="employee-search-input ui-search-field"
-                    type="text"
+                    type="search"
                     value={term}
-                    onChange={(e) => setTerm(e.target.value)}
-                    placeholder="Search by student number or name"
+                    onChange={(e) => { setTerm(e.target.value); setSelectedProgramKey(null) }}
+                    placeholder="Type a student's name or student number"
+                    aria-label="Search students by name or student number"
+                    style={{ width: '100%' }}
                 />
-
-                <button
-                    type="submit"
-                    className="employee-card"
-                    style={{ margin: 0, padding: '11px 20px', background: 'var(--blue)', color: 'var(--white)', fontWeight: 600, fontSize: 14 }}
-                    disabled={loading}
-                >
-                    {loading ? 'Searching...' : 'Search'}
-                </button>
             </form>
 
             {error && <div className="employee-error-box">{error}</div>}
 
             {loading ? (
                 <SkeletonList count={3} />
-            ) : !searched ? null : results.length === 0 ? (
-                <div className="employee-empty">
-                    {term.trim() ? `No students matched "${term}".` : 'No students found.'}
-                </div>
             ) : term.trim() ? (
-                groupedResults.map((group) => (
-                    <div key={group.key} style={{ marginBottom: 28 }}>
-                        <div className="employee-page-header-row" style={{ marginBottom: 14 }}>
-                            <h2 style={{ fontSize: 16 }}>
-                                {group.programName}
-                                {group.collegeName && <span style={{ color: 'var(--slate)', fontWeight: 400 }}> · {group.collegeName}</span>}
-                            </h2>
-                            <span className="employee-status-pill status-pending">
-                                {group.students.length} student{group.students.length === 1 ? '' : 's'}
-                            </span>
-                        </div>
-
-                        {group.students.map(renderStudentCard)}
+                matches.length === 0 && incompleteMatches.length === 0 ? (
+                    <div className="employee-empty">No students matched "{term.trim()}".</div>
+                ) : (
+                    <div className="employee-table-wrapper">
+                        <table className="employee-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Student No.</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {matches.map((student) => (
+                                    <tr
+                                        key={student.student_id}
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => navigate(`/employee/students/${student.student_id}`)}
+                                    >
+                                        <td><strong>{student.fullName}</strong></td>
+                                        <td>{student.student_number || '—'}</td>
+                                        <td><span className="employee-link-button">View →</span></td>
+                                    </tr>
+                                ))}
+                                {incompleteMatches.map((p) => (
+                                    <tr key={p.user_id}>
+                                        <td><strong>{incompleteName(p)}</strong></td>
+                                        <td><span className="employee-status-pill status-pending">Setup incomplete</span></td>
+                                        <td style={{ color: 'var(--slate)', fontSize: 12.5 }}>No student record yet</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                ))
+                )
+            ) : results.length === 0 ? (
+                <div className="employee-empty">No students found.</div>
             ) : selectedGroup ? (
                 <>
                     <button
