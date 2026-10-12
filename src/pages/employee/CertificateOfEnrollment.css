@@ -284,25 +284,25 @@
     object-fit: contain;
 }
 
-/* ---- Printing: only the certificate itself, one full Letter page.
-   The zero-margin @page rule lives in the component (PRINT_PAGE_RULE) so it
-   only applies while this page is mounted -- other pages print normally. */
+/* ---- Printing: only the print copy of the sheet (portalled under <body>,
+   outside the dashboard), one full Letter page. The zero-margin @page rule
+   lives in the component (PRINT_PAGE_RULE) so it only applies while this
+   page is mounted -- other pages print normally. ---- */
+.coe-print-root {
+    display: none;
+}
+
 @media print {
-    body * {
-        visibility: hidden;
+    body > *:not(.coe-print-root) {
+        display: none !important;
     }
 
-    #coe-print-area,
-    #coe-print-area * {
-        visibility: visible;
+    .coe-print-root {
+        display: block;
     }
 
-    #coe-print-area {
-        position: absolute;
-        top: 0;
-        left: 0;
-        zoom: 1 !important;
-        overflow: hidden;
+    .coe-print-root .coe-preview {
         box-shadow: none;
+        overflow: hidden;
     }
 }

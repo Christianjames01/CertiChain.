@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { friendlyError } from '../../lib/friendlyError'
@@ -159,6 +160,91 @@ function CertificateOfEnrollment() {
     const issuedMonthYear = `${issuedDateObj.toLocaleDateString('en-PH', { month: 'long' })}, ${issuedDateObj.getFullYear()}`
     const yearAdjective = form.yearLevel.toLowerCase().replace(' ', '-')
 
+    // The sheet is rendered twice: zoomed in the on-screen preview, and at
+    // full size in a print-only copy portalled straight under <body>. The
+    // dashboard's sticky / overflow-hidden containers clip anything printed
+    // from inside them, which left the printout blank.
+    const sheet = (
+        <>
+                <div className="coe-letterhead">
+                    <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" />
+
+                    <div className="coe-letterhead-text">
+                        <h1>Holy Cross of Davao College</h1>
+                        <p className="coe-letterhead-office">Office of&nbsp; Registrar and Records Management</p>
+                        <p>Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
+                        <p>Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>
+                        <p>
+                            Email: : registrar<span className="coe-link">@hcdc.edu.ph </span> • Website:{' '}
+                            <span className="coe-link">http://www.hcdc.edu.ph/</span>
+                        </p>
+                    </div>
+
+                    <img src={hcdc75Logo} alt="HCDC 75th Diamond Jubilee" className="coe-letterhead-75" />
+                </div>
+
+                <div className="coe-rule" aria-hidden="true" />
+
+                <h2 className="coe-title">C E R T I F I C A T I O N</h2>
+
+                <p className="coe-salutation">TO WHOM IT MAY CONCERN:</p>
+
+                <p className="coe-body">
+                    THIS IS TO CERTIFY that <Fill bold>{form.studentName.trim().toUpperCase() || '_______________'}</Fill>,{' '}
+                    <Fill>{keepHyphens(yearAdjective)}</Fill> student in <Fill bold>{(form.program.trim() || '_______________').toUpperCase()}</Fill>{' '}
+                    of HOLY CROSS OF DAVAO COLLEGE, INC., <Fill>is</Fill> officially enrolled{' '}
+                    <Fill>this {form.semester}, S.Y. {form.schoolYear.trim() || '_______'}</Fill>.
+                </p>
+
+                <p className="coe-body">
+                    This certification is issued upon the request of the aforesaid person for{' '}
+                    <Fill>{purposeText ? keepHyphens(purposeText) : '_______________'}</Fill> purposes only.
+                </p>
+
+                <p className="coe-body">
+                    Issued this <Fill>{issuedDay}<sup>{ordinal(issuedDay).slice(-2)}</sup> day of {issuedMonthYear}</Fill> in Davao City, Philippines.
+                </p>
+
+                <div className="coe-note">
+                    <p>Not Valid w/out</p>
+                    <p>School Seal</p>
+                    <p>OR No.: <Fill>{form.orNumber.trim() || '__________'}</Fill></p>
+                    <p>Cert No.: <Fill>{form.certNumber.trim() || '__________'}</Fill></p>
+                    {form.encoderInitials.trim() && <p><em>//{form.encoderInitials.trim()}</em></p>}
+                </div>
+
+                <div className="coe-signature">
+                    <strong>{REGISTRAR_NAME}</strong>
+                    <span>Registrar</span>
+                </div>
+
+                <div className="coe-page-footer">
+                    <div className="coe-rule" aria-hidden="true" />
+
+                    <div className="coe-accreditation">
+                        <div className="coe-accreditation-col">
+                            <span className="coe-accreditation-label">Accredited:</span>
+                            <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-pacucoa" />
+                        </div>
+
+                        <div className="coe-accreditation-col">
+                            <span className="coe-accreditation-label">Institutional Member of:</span>
+                            <div className="coe-accreditation-row">
+                                {MEMBERSHIP_LOGOS.map((logo) => (
+                                    <img key={logo.alt} src={logo.src} alt={logo.alt} />
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="coe-accreditation-col">
+                            <span className="coe-accreditation-label">Certified: ISO 21001:2018</span>
+                            <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-tuv" />
+                        </div>
+                    </div>
+                </div>
+        </>
+    )
+
     return (
         <div>
             <style>{PRINT_PAGE_RULE}</style>
@@ -249,86 +335,18 @@ function CertificateOfEnrollment() {
                 </section>
 
                 <section className="coe-preview-wrap" ref={previewWrapRef}>
-                    <div className="coe-preview" id="coe-print-area" style={{ zoom: previewScale }}>
-                        <div className="coe-letterhead">
-                            <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" />
-
-                            <div className="coe-letterhead-text">
-                                <h1>Holy Cross of Davao College</h1>
-                                <p className="coe-letterhead-office">Office of&nbsp; Registrar and Records Management</p>
-                                <p>Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
-                                <p>Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>
-                                <p>
-                                    Email: : registrar<span className="coe-link">@hcdc.edu.ph </span> • Website:{' '}
-                                    <span className="coe-link">http://www.hcdc.edu.ph/</span>
-                                </p>
-                            </div>
-
-                            <img src={hcdc75Logo} alt="HCDC 75th Diamond Jubilee" className="coe-letterhead-75" />
-                        </div>
-
-                        <div className="coe-rule" aria-hidden="true" />
-
-                        <h2 className="coe-title">C E R T I F I C A T I O N</h2>
-
-                        <p className="coe-salutation">TO WHOM IT MAY CONCERN:</p>
-
-                        <p className="coe-body">
-                            THIS IS TO CERTIFY that <Fill bold>{form.studentName.trim().toUpperCase() || '_______________'}</Fill>,{' '}
-                            <Fill>{keepHyphens(yearAdjective)}</Fill> student in <Fill bold>{(form.program.trim() || '_______________').toUpperCase()}</Fill>{' '}
-                            of HOLY CROSS OF DAVAO COLLEGE, INC., <Fill>is</Fill> officially enrolled{' '}
-                            <Fill>this {form.semester}, S.Y. {form.schoolYear.trim() || '_______'}</Fill>.
-                        </p>
-
-                        <p className="coe-body">
-                            This certification is issued upon the request of the aforesaid person for{' '}
-                            <Fill>{purposeText ? keepHyphens(purposeText) : '_______________'}</Fill> purposes only.
-                        </p>
-
-                        <p className="coe-body">
-                            Issued this <Fill>{issuedDay}<sup>{ordinal(issuedDay).slice(-2)}</sup> day of {issuedMonthYear}</Fill> in Davao City, Philippines.
-                        </p>
-
-                        <div className="coe-note">
-                            <p>Not Valid w/out</p>
-                            <p>School Seal</p>
-                            <p>OR No.: <Fill>{form.orNumber.trim() || '__________'}</Fill></p>
-                            <p>Cert No.: <Fill>{form.certNumber.trim() || '__________'}</Fill></p>
-                            {form.encoderInitials.trim() && <p><em>//{form.encoderInitials.trim()}</em></p>}
-                        </div>
-
-                        <div className="coe-signature">
-                            <strong>{REGISTRAR_NAME}</strong>
-                            <span>Registrar</span>
-                        </div>
-
-                        <div className="coe-page-footer">
-                            <div className="coe-rule" aria-hidden="true" />
-
-                            <div className="coe-accreditation">
-                                <div className="coe-accreditation-col">
-                                    <span className="coe-accreditation-label">Accredited:</span>
-                                    <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-pacucoa" />
-                                </div>
-
-                                <div className="coe-accreditation-col">
-                                    <span className="coe-accreditation-label">Institutional Member of:</span>
-                                    <div className="coe-accreditation-row">
-                                        {MEMBERSHIP_LOGOS.map((logo) => (
-                                            <img key={logo.alt} src={logo.src} alt={logo.alt} />
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="coe-accreditation-col">
-                                    <span className="coe-accreditation-label">Certified: ISO 21001:2018</span>
-                                    <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-tuv" />
-                                </div>
-                            </div>
-                        </div>
+                    <div className="coe-preview" style={{ zoom: previewScale }}>
+                        {sheet}
                     </div>
                 </section>
             </div>
+
+            {createPortal(
+                <div className="coe-print-root">
+                    <div className="coe-preview">{sheet}</div>
+                </div>,
+                document.body,
+            )}
         </div>
     )
 }
