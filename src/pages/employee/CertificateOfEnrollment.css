@@ -233,7 +233,7 @@
 /* "Not Valid w/out" block, small, under the last paragraph and out at
    the page's 36pt margin like the PDF. */
 .coe-preview .coe-note {
-    margin-top: -2.9pt;
+    margin-top: 11.1pt;
     margin-left: 3.6pt;
     font-size: 8pt;
     line-height: 9.7pt;
@@ -251,7 +251,7 @@
     flex-direction: column;
     align-items: center;
     align-self: flex-end;
-    margin: 70.3pt 72.4pt 0 0;
+    margin: 56.3pt 72.4pt 0 0;
     font-size: 12pt;
     /* Name and "Registrar" on consecutive lines, spaced as in the PDF. */
     line-height: 15.7pt;
