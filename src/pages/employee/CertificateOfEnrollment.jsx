@@ -193,7 +193,7 @@ function CertificateOfEnrollment() {
                 <section className="coe-preview-wrap">
                     <div className="coe-preview" id="coe-print-area">
                         <div className="coe-header">
-                            <img src={hcdcLogo} alt="Holy Cross of Davao College" />
+                            <img src={hcdcLogo} alt="Holy Cross of Davao College" width="84" height="84" />
                         </div>
 
                         <h2 className="coe-title">C E R T I F I C A T I O N</h2>
@@ -220,9 +220,12 @@ function CertificateOfEnrollment() {
                         </div>
 
                         <div className="coe-footer">
-                            <p>Not Valid w/out School Seal</p>
-                            <p>OR No.: {form.orNumber || '__________'}</p>
-                            <p>Cert No.: {form.certNumber || '__________'}</p>
+                            <img src={hcdcLogo} alt="" className="coe-footer-seal" aria-hidden="true" />
+                            <div className="coe-footer-text">
+                                <p>Not Valid w/out School Seal</p>
+                                <p>OR No.: {form.orNumber || '__________'}</p>
+                                <p>Cert No.: {form.certNumber || '__________'}</p>
+                            </div>
                         </div>
                     </div>
                 </section>

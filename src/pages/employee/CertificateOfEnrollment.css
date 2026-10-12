@@ -65,6 +65,7 @@
 }
 
 .coe-header img {
+    width: 84px;
     height: 84px;
     object-fit: contain;
 }
@@ -107,11 +108,22 @@
 }
 
 .coe-footer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     font-size: 12px;
     line-height: 1.5;
 }
 
-.coe-footer p {
+.coe-footer-seal {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    object-fit: contain;
+    opacity: 0.85;
+}
+
+.coe-footer-text p {
     margin: 0;
 }
 
