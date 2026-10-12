@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { notifyError, notifySuccess } from '../../lib/notify'
 import { friendlyError } from '../../lib/friendlyError'
@@ -17,16 +17,24 @@ import dacunLogo from '../../assets/footer-dacun.png'
 import './EmployeePages.css'
 import './CertificateOfEnrollment.css'
 
+// Same order as the Registrar's printed letterhead, left to right.
 const MEMBERSHIP_LOGOS = [
-    { src: cocopeaLogo, alt: 'COCOPEA' },
     { src: ceapLogo, alt: 'Catholic Educational Association of the Philippines' },
+    { src: cocopeaLogo, alt: 'COCOPEA' },
+    { src: davaoChamberLogo, alt: 'Davao City Chamber of Commerce and Industry Foundation' },
     { src: dacsLogo, alt: 'Davao Association of Catholic Schools' },
     { src: dacunLogo, alt: 'Davao Colleges and Universities Network' },
     { src: umapLogo, alt: 'University Mobility in Asia and the Pacific' },
-    { src: erasmusLogo, alt: 'Erasmus+' },
     { src: eccpLogo, alt: 'European Chamber of Commerce of the Philippines' },
-    { src: davaoChamberLogo, alt: 'Davao City Chamber of Commerce and Industry Foundation' },
+    { src: erasmusLogo, alt: 'Erasmus+' },
 ]
+
+// The preview is laid out at real US Letter size (8.5in = 816 CSS px) so
+// the printout matches it exactly; on screen it's zoomed to fit its column.
+const PAGE_WIDTH_PX = 816
+
+// The sheet carries its own margins, so the printer page must have none.
+const PRINT_PAGE_RULE = '@page { size: letter; margin: 0; }'
 
 const YEAR_LEVELS = ['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Fifth Year']
 const SEMESTERS = ['First Semester', 'Second Semester', 'Summer']
@@ -50,9 +58,23 @@ const ordinal = (n) => {
 // includes non-signatory admin/dev accounts too).
 const REGISTRAR_NAME = 'MRS. JENNIFER C. YEE'
 
+// "purposes only." is fixed text on the form, so drop it if typed in.
+const stripPurposeSuffix = (text) => text.trim().replace(/\s*purposes?\s+only\.?$/i, '')
+
+// Wraps hyphenated words so the line never breaks at the hyphen.
+const keepHyphens = (text) =>
+    text.split(/(\S*-\S*)/).map((part, i) => (i % 2 ? <span key={i} className="coe-nowrap">{part}</span> : part))
+
+// Fill-in values print red, like the Registrar's template.
+const Fill = ({ children, bold }) => (
+    <span className="coe-fill">{bold ? <strong>{children}</strong> : children}</span>
+)
+
 function CertificateOfEnrollment() {
     const [programs, setPrograms] = useState([])
     const [saving, setSaving] = useState(false)
+    const [previewScale, setPreviewScale] = useState(1)
+    const previewWrapRef = useRef(null)
 
     const [form, setForm] = useState({
         studentName: '',
@@ -64,10 +86,21 @@ function CertificateOfEnrollment() {
         issuedDate: new Date().toISOString().slice(0, 10),
         orNumber: '',
         certNumber: '',
+        encoderInitials: '',
     })
 
     useEffect(() => {
         loadLookups()
+    }, [])
+
+    useEffect(() => {
+        const wrap = previewWrapRef.current
+        if (!wrap) return
+        const observer = new ResizeObserver(([entry]) => {
+            setPreviewScale(Math.min(1, entry.contentRect.width / PAGE_WIDTH_PX))
+        })
+        observer.observe(wrap)
+        return () => observer.disconnect()
     }, [])
 
     const loadLookups = async () => {
@@ -82,7 +115,8 @@ function CertificateOfEnrollment() {
 
     const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
-    const canSave = form.studentName.trim() && form.program.trim() && form.purpose.trim()
+    const purposeText = stripPurposeSuffix(form.purpose)
+    const canSave = form.studentName.trim() && form.program.trim() && purposeText
 
     const saveAndPrint = async () => {
         if (!canSave) {
@@ -100,7 +134,7 @@ function CertificateOfEnrollment() {
                 year_level: form.yearLevel,
                 semester: form.semester,
                 school_year: form.schoolYear.trim(),
-                purpose: form.purpose.trim(),
+                purpose: `${purposeText} purposes only`,
                 registrar_name: REGISTRAR_NAME,
                 or_number: form.orNumber.trim() || null,
                 cert_number: form.certNumber.trim() || null,
@@ -121,11 +155,14 @@ function CertificateOfEnrollment() {
     }
 
     const issuedDateObj = form.issuedDate ? new Date(`${form.issuedDate}T00:00:00`) : new Date()
-    const issuedDayLabel = `${ordinal(issuedDateObj.getDate())} day of ${issuedDateObj.toLocaleDateString('en-PH', { month: 'long' })}, ${issuedDateObj.getFullYear()}`
+    const issuedDay = issuedDateObj.getDate()
+    const issuedMonthYear = `${issuedDateObj.toLocaleDateString('en-PH', { month: 'long' })}, ${issuedDateObj.getFullYear()}`
     const yearAdjective = form.yearLevel.toLowerCase().replace(' ', '-')
 
     return (
         <div>
+            <style>{PRINT_PAGE_RULE}</style>
+
             <header className="employee-page-header">
                 <h1>Certificate of Enrollment</h1>
                 <p>Fill in the student's details, then save and print — matches the Registrar's standard certification format (ORRM CF-004C).</p>
@@ -177,10 +214,11 @@ function CertificateOfEnrollment() {
                     <input
                         id="coe-purpose"
                         className="employee-search-input"
-                        placeholder="e.g. CHED-TDP scholarship purposes only"
+                        placeholder="e.g. CHED-TDP scholarship"
                         value={form.purpose}
                         onChange={update('purpose')}
                     />
+                    <span className="coe-hint">Printed as “for ___ purposes only.”</span>
 
                     <label className="coe-label" htmlFor="coe-date">Issued Date</label>
                     <input id="coe-date" type="date" className="employee-search-input" value={form.issuedDate} onChange={update('issuedDate')} />
@@ -196,74 +234,85 @@ function CertificateOfEnrollment() {
                         </div>
                     </div>
 
+                    <label className="coe-label" htmlFor="coe-initials">Encoder Initials</label>
+                    <input
+                        id="coe-initials"
+                        className="employee-search-input"
+                        placeholder="e.g. yul"
+                        value={form.encoderInitials}
+                        onChange={update('encoderInitials')}
+                    />
+
                     <button className="employee-primary-button" style={{ marginTop: 20 }} onClick={saveAndPrint} disabled={saving || !canSave}>
                         {saving ? 'Saving...' : 'Save & Print'}
                     </button>
                 </section>
 
-                <section className="coe-preview-wrap">
-                    <div className="coe-preview" id="coe-print-area">
+                <section className="coe-preview-wrap" ref={previewWrapRef}>
+                    <div className="coe-preview" id="coe-print-area" style={{ zoom: previewScale }}>
                         <div className="coe-letterhead">
-                            <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" width="84" height="84" />
+                            <img src={hcdcLogo} alt="Holy Cross of Davao College" className="coe-letterhead-seal" />
 
                             <div className="coe-letterhead-text">
-                                <h1>Holy Cross of Davao College, Inc.</h1>
-                                <p className="coe-letterhead-office">Office of Registration and Records Management</p>
+                                <h1>Holy Cross of Davao College</h1>
+                                <p className="coe-letterhead-office">Office of&nbsp; Registrar and Records Management</p>
                                 <p>Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines</p>
                                 <p>Tel. No. (082) 221 – 9071 to 79 loc. 116 &amp; 167 • Telefax: (082) 221-3008</p>
-                                <p>Cellphone No.: (+63) 9468108617 &amp; (+63) 9061509582</p>
-                                <p>Email: registrar@hcdc.edu.ph • Website: http://www.hcdc.edu.ph/</p>
+                                <p>
+                                    Email: : registrar<span className="coe-link">@hcdc.edu.ph </span> • Website:{' '}
+                                    <span className="coe-link">http://www.hcdc.edu.ph/</span>
+                                </p>
                             </div>
 
-                            <img src={hcdc75Logo} alt="HCDC 75th Diamond Jubilee" className="coe-letterhead-75" width="64" height="70" />
+                            <img src={hcdc75Logo} alt="HCDC 75th Diamond Jubilee" className="coe-letterhead-75" />
                         </div>
-                        <div className="coe-letterhead-rule" aria-hidden="true" />
+
+                        <div className="coe-rule" aria-hidden="true" />
 
                         <h2 className="coe-title">C E R T I F I C A T I O N</h2>
 
                         <p className="coe-salutation">TO WHOM IT MAY CONCERN:</p>
 
                         <p className="coe-body">
-                            THIS IS TO CERTIFY that <strong>{form.studentName.trim() || '_______________'}</strong>, a{' '}
-                            {yearAdjective} student in <strong>{(form.program || '_______________').toUpperCase()}</strong>{' '}
-                            of HOLY CROSS OF DAVAO COLLEGE, INC., is officially enrolled this {form.semester}, S.Y. {form.schoolYear || '_______'}.
+                            THIS IS TO CERTIFY that <Fill bold>{form.studentName.trim().toUpperCase() || '_______________'}</Fill>,{' '}
+                            <Fill>{keepHyphens(yearAdjective)}</Fill> student in <Fill bold>{(form.program.trim() || '_______________').toUpperCase()}</Fill>{' '}
+                            of HOLY CROSS OF DAVAO COLLEGE, INC., <Fill>is</Fill> officially enrolled{' '}
+                            <Fill>this {form.semester}, S.Y. {form.schoolYear.trim() || '_______'}</Fill>.
                         </p>
 
                         <p className="coe-body">
-                            This certification is issued upon the request of the aforesaid person for {form.purpose.trim() || '_______________'}.
+                            This certification is issued upon the request of the aforesaid person for{' '}
+                            <Fill>{purposeText ? keepHyphens(purposeText) : '_______________'}</Fill> purposes only.
                         </p>
 
                         <p className="coe-body">
-                            Issued this {issuedDayLabel} in Davao City, Philippines.
+                            Issued this <Fill>{issuedDay}<sup>{ordinal(issuedDay).slice(-2)}</sup> day of {issuedMonthYear}</Fill> in Davao City, Philippines.
                         </p>
 
-                        <div className="coe-spacer" aria-hidden="true" />
+                        <div className="coe-note">
+                            <p>Not Valid w/out</p>
+                            <p>School Seal</p>
+                            <p>OR No.: <Fill>{form.orNumber.trim() || '__________'}</Fill></p>
+                            <p>Cert No.: <Fill>{form.certNumber.trim() || '__________'}</Fill></p>
+                            {form.encoderInitials.trim() && <p><em>//{form.encoderInitials.trim()}</em></p>}
+                        </div>
 
-                        <div className="coe-signoff">
-                            <div className="coe-footer">
-                                <p>Not Valid w/out:</p>
-                                <p>School Seal</p>
-                                <p>OR No.: {form.orNumber || '__________'}</p>
-                                <p>Cert No.: {form.certNumber || '__________'}</p>
-                            </div>
-
-                            <div className="coe-signature">
-                                <strong>{REGISTRAR_NAME}</strong>
-                                <span>Registrar</span>
-                            </div>
+                        <div className="coe-signature">
+                            <strong>{REGISTRAR_NAME}</strong>
+                            <span>Registrar</span>
                         </div>
 
                         <div className="coe-page-footer">
-                            <div className="coe-accreditation-rule" aria-hidden="true" />
+                            <div className="coe-rule" aria-hidden="true" />
 
                             <div className="coe-accreditation">
                                 <div className="coe-accreditation-col">
                                     <span className="coe-accreditation-label">Accredited:</span>
-                                    <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-wide" />
+                                    <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-pacucoa" />
                                 </div>
 
-                                <div className="coe-accreditation-col is-wide">
-                                    <span className="coe-accreditation-label">Institutional Membership:</span>
+                                <div className="coe-accreditation-col">
+                                    <span className="coe-accreditation-label">Institutional Member of:</span>
                                     <div className="coe-accreditation-row">
                                         {MEMBERSHIP_LOGOS.map((logo) => (
                                             <img key={logo.alt} src={logo.src} alt={logo.alt} />
@@ -273,7 +322,7 @@ function CertificateOfEnrollment() {
 
                                 <div className="coe-accreditation-col">
                                     <span className="coe-accreditation-label">Certified: ISO 21001:2018</span>
-                                    <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-wide" />
+                                    <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-tuv" />
                                 </div>
                             </div>
                         </div>
