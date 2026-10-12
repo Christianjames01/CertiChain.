@@ -139,11 +139,28 @@
     text-align: justify;
 }
 
+.coe-signoff {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 56px 0 24px;
+}
+
+.coe-footer {
+    font-size: 10.5px;
+    line-height: 1.5;
+}
+
+.coe-footer p {
+    margin: 0;
+}
+
 .coe-signature {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 56px 0 48px;
+    margin-left: auto;
     text-align: center;
 }
 
@@ -154,26 +171,6 @@
 
 .coe-signature span {
     margin-top: 4px;
-}
-
-.coe-footer {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    font-size: 12px;
-    line-height: 1.5;
-}
-
-.coe-footer-seal {
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    object-fit: contain;
-    opacity: 0.85;
-}
-
-.coe-footer-text p {
-    margin: 0;
 }
 
 /* ---- Accreditation / membership / certification strip ---- */

@@ -248,17 +248,17 @@ function CertificateOfEnrollment() {
                             Issued this {issuedDayLabel} in Davao City, Philippines.
                         </p>
 
-                        <div className="coe-signature">
-                            <strong>{form.registrarName || '_______________'}</strong>
-                            <span>Registrar</span>
-                        </div>
-
-                        <div className="coe-footer">
-                            <img src={hcdcLogo} alt="" className="coe-footer-seal" aria-hidden="true" />
-                            <div className="coe-footer-text">
-                                <p>Not Valid w/out School Seal</p>
+                        <div className="coe-signoff">
+                            <div className="coe-footer">
+                                <p>Not Valid w/out:</p>
+                                <p>School Seal</p>
                                 <p>OR No.: {form.orNumber || '__________'}</p>
                                 <p>Cert No.: {form.certNumber || '__________'}</p>
+                            </div>
+
+                            <div className="coe-signature">
+                                <strong>{form.registrarName || '_______________'}</strong>
+                                <span>Registrar</span>
                             </div>
                         </div>
 
