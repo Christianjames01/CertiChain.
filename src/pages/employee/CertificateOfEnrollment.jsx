@@ -45,9 +45,13 @@ const ordinal = (n) => {
     return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th'}`
 }
 
+// The Registrar's signature is always Mrs. Yee -- not a choice of
+// whichever registrar_head account happens to be active (that list
+// includes non-signatory admin/dev accounts too).
+const REGISTRAR_NAME = 'MRS. JENNIFER C. YEE'
+
 function CertificateOfEnrollment() {
     const [programs, setPrograms] = useState([])
-    const [registrarOptions, setRegistrarOptions] = useState([])
     const [saving, setSaving] = useState(false)
 
     const [form, setForm] = useState({
@@ -57,7 +61,6 @@ function CertificateOfEnrollment() {
         semester: SEMESTERS[0],
         schoolYear: defaultSchoolYear(),
         purpose: '',
-        registrarName: '',
         issuedDate: new Date().toISOString().slice(0, 10),
         orNumber: '',
         certNumber: '',
@@ -68,27 +71,22 @@ function CertificateOfEnrollment() {
     }, [])
 
     const loadLookups = async () => {
-        const [{ data: programRows }, { data: profiles }] = await Promise.all([
-            supabase.from('programs').select('program_name').eq('status', 'active').order('program_name'),
-            supabase.from('profiles').select('first_name, last_name').eq('role', 'registrar_head').eq('status', 'active'),
-        ])
+        const { data: programRows } = await supabase
+            .from('programs')
+            .select('program_name')
+            .eq('status', 'active')
+            .order('program_name')
 
         setPrograms((programRows || []).map((p) => p.program_name))
-
-        const names = (profiles || []).map((p) => `${p.first_name} ${p.last_name}`.trim().toUpperCase())
-        setRegistrarOptions(names)
-        if (names.length > 0) {
-            setForm((f) => (f.registrarName ? f : { ...f, registrarName: names[0] }))
-        }
     }
 
     const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
-    const canSave = form.studentName.trim() && form.program.trim() && form.purpose.trim() && form.registrarName.trim()
+    const canSave = form.studentName.trim() && form.program.trim() && form.purpose.trim()
 
     const saveAndPrint = async () => {
         if (!canSave) {
-            notifyError('Fill in the student name, program, purpose, and registrar name first.')
+            notifyError('Fill in the student name, program, and purpose first.')
             return
         }
 
@@ -103,7 +101,7 @@ function CertificateOfEnrollment() {
                 semester: form.semester,
                 school_year: form.schoolYear.trim(),
                 purpose: form.purpose.trim(),
-                registrar_name: form.registrarName.trim(),
+                registrar_name: REGISTRAR_NAME,
                 or_number: form.orNumber.trim() || null,
                 cert_number: form.certNumber.trim() || null,
                 issued_date: form.issuedDate,
@@ -187,15 +185,6 @@ function CertificateOfEnrollment() {
                     <label className="coe-label" htmlFor="coe-date">Issued Date</label>
                     <input id="coe-date" type="date" className="employee-search-input" value={form.issuedDate} onChange={update('issuedDate')} />
 
-                    <label className="coe-label" htmlFor="coe-registrar">Registrar Name</label>
-                    {registrarOptions.length > 0 ? (
-                        <select id="coe-registrar" className="employee-search-input" value={form.registrarName} onChange={update('registrarName')}>
-                            {registrarOptions.map((n) => <option key={n} value={n}>{n}</option>)}
-                        </select>
-                    ) : (
-                        <input id="coe-registrar" className="employee-search-input" value={form.registrarName} onChange={update('registrarName')} />
-                    )}
-
                     <div className="coe-row-2">
                         <div>
                             <label className="coe-label" htmlFor="coe-or">OR Number</label>
@@ -257,7 +246,7 @@ function CertificateOfEnrollment() {
                             </div>
 
                             <div className="coe-signature">
-                                <strong>{form.registrarName || '_______________'}</strong>
+                                <strong>{REGISTRAR_NAME}</strong>
                                 <span>Registrar</span>
                             </div>
                         </div>
