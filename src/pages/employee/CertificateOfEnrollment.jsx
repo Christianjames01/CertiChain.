@@ -262,26 +262,28 @@ function CertificateOfEnrollment() {
                             </div>
                         </div>
 
-                        <div className="coe-accreditation-rule" aria-hidden="true" />
+                        <div className="coe-page-footer">
+                            <div className="coe-accreditation-rule" aria-hidden="true" />
 
-                        <div className="coe-accreditation">
-                            <div className="coe-accreditation-col">
-                                <span className="coe-accreditation-label">Accredited:</span>
-                                <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-wide" />
-                            </div>
-
-                            <div className="coe-accreditation-col is-wide">
-                                <span className="coe-accreditation-label">Institutional Membership:</span>
-                                <div className="coe-accreditation-row">
-                                    {MEMBERSHIP_LOGOS.map((logo) => (
-                                        <img key={logo.alt} src={logo.src} alt={logo.alt} />
-                                    ))}
+                            <div className="coe-accreditation">
+                                <div className="coe-accreditation-col">
+                                    <span className="coe-accreditation-label">Accredited:</span>
+                                    <img src={pacucoaLogo} alt="PACU / PACUCOA" className="coe-accreditation-wide" />
                                 </div>
-                            </div>
 
-                            <div className="coe-accreditation-col">
-                                <span className="coe-accreditation-label">Certified: ISO 21001:2018</span>
-                                <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-wide" />
+                                <div className="coe-accreditation-col is-wide">
+                                    <span className="coe-accreditation-label">Institutional Membership:</span>
+                                    <div className="coe-accreditation-row">
+                                        {MEMBERSHIP_LOGOS.map((logo) => (
+                                            <img key={logo.alt} src={logo.src} alt={logo.alt} />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="coe-accreditation-col">
+                                    <span className="coe-accreditation-label">Certified: ISO 21001:2018</span>
+                                    <img src={tuvnordLogo} alt="TÜV NORD" className="coe-accreditation-wide" />
+                                </div>
                             </div>
                         </div>
                     </div>

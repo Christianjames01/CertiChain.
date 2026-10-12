@@ -46,10 +46,12 @@
 }
 
 .coe-preview {
+    display: flex;
+    flex-direction: column;
     width: 100%;
     max-width: 700px;
     min-height: 780px;
-    padding: 64px 56px;
+    padding: 64px 56px 0;
     background: #fff;
     color: #111;
     box-shadow: 0 10px 30px -14px rgba(10, 20, 40, 0.3);
@@ -173,10 +175,19 @@
     margin-top: 4px;
 }
 
-/* ---- Accreditation / membership / certification strip ---- */
+/* ---- Accreditation / membership / certification strip: pinned to the
+   bottom edge of the page, full-bleed (breaks out of the body's side
+   padding), matching the real letterhead's footer. ---- */
+.coe-page-footer {
+    margin-top: auto;
+    margin-left: -56px;
+    margin-right: -56px;
+    padding: 0 24px 20px;
+}
+
 .coe-accreditation-rule {
     height: 1px;
-    margin: 20px 0 14px;
+    margin: 0 0 14px;
     background: #999;
 }
 
@@ -244,7 +255,16 @@
         top: 0;
         left: 0;
         width: 100%;
+        min-height: auto;
         box-shadow: none;
         padding: 0.5in;
+    }
+
+    /* The on-screen full-bleed treatment assumes the preview's own 56px
+       side padding; print already uses a safe page margin instead, so
+       the footer stays within it rather than breaking out further. */
+    .coe-page-footer {
+        margin: auto 0 0;
+        padding: 0;
     }
 }
