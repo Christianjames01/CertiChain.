@@ -576,6 +576,7 @@ function StudentDetails() {
                             <ProfileFields
                                 fields={[
                                     { label: 'Student Number', value: student.student_number },
+                                    { label: 'Student Type', value: isAlumni ? 'Alumni' : 'Student' },
                                     { label: 'Status', value: student.status, capitalize: true },
                                     { label: 'College', value: student.collegeName, wide: true },
                                     { label: 'Program', value: student.programName, wide: true },

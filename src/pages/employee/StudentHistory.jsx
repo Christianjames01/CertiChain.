@@ -68,7 +68,7 @@ function StudentHistory() {
 
             const { data: studentData, error: studentError } = await supabase
                 .from('students')
-                .select('student_id, user_id, student_number, college_id, program_id, year_level, status, address, alternate_phone_number, alternate_email, emergency_contact_name, emergency_contact_number, graduation_year, birth_date')
+                .select('student_id, user_id, student_number, student_type, college_id, program_id, year_level, status, address, alternate_phone_number, alternate_email, emergency_contact_name, emergency_contact_number, graduation_year, birth_date')
                 .eq('student_id', studentId)
                 .single()
 
@@ -570,6 +570,7 @@ function StudentHistory() {
                             <ProfileFields
                                 fields={[
                                     { label: 'Student Number', value: student.student_number },
+                                    { label: 'Student Type', value: isAlumni ? 'Alumni' : 'Student' },
                                     { label: 'Status', value: student.status, capitalize: true },
                                     { label: 'College', value: student.collegeName, wide: true },
                                     { label: 'Program', value: student.programName, wide: true },
