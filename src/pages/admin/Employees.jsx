@@ -69,7 +69,7 @@ function Employees() {
 
             const { data: employeeRows, error: employeeError } = await supabase
                 .from('employees')
-                .select('employee_id, user_id, employee_number, position_title, display_name, assigned_college_id, status, can_add_employees, created_at')
+                .select('employee_id, user_id, employee_number, position_title, display_name, assigned_college_id, status, can_add_employees, access_scope, created_at')
                 .order('created_at', { ascending: false })
 
             if (employeeError) {
@@ -128,6 +128,7 @@ function Employees() {
                         openCount: openCountByEmployee[e.employee_id] || 0,
                         canAddEmployees: !!e.can_add_employees,
                         canIssueCertificates: !!canIssueById[e.employee_id],
+                        isClaimingSection: e.access_scope === 'releasing',
                     }
                 })
             )
@@ -421,6 +422,67 @@ function Employees() {
         } catch (err) {
             console.error('TOGGLE STATUS ERROR:', err)
             notifyError(friendlyError(err, 'Failed to update employee status.'))
+        } finally {
+            setUpdating(null)
+        }
+    }
+
+    // Claiming-section ("releasing") staff only handle release: requests at
+    // the claiming stage, pickup schedules and the queue. They can't edit
+    // student records or reset passwords. Requests are passed to them at
+    // the claiming stage (Request Details > Pass this request).
+    const toggleClaimingSection = async (employee) => {
+        if (blockedForReadOnlyViewer(role)) return
+        const next = !employee.isClaimingSection
+
+        const confirmed = await confirmModal(
+            next
+                ? `${employee.name} will work in the claiming section: they'll handle requests at the claiming stage, pickup schedules and releasing, and can't edit student records or reset passwords.${employee.openCount ? ` They still have ${employee.openCount} open request(s) assigned -- pass or reassign those first if they aren't at the claiming stage.` : ''}`
+                : `${employee.name} will get full employee access again (verifying, processing and releasing requests).`,
+            { title: next ? 'Move to the claiming section?' : 'Give full access?', confirmButtonText: next ? 'Move to claiming' : 'Give full access' }
+        )
+        if (!confirmed) return
+
+        try {
+            setUpdating(employee.employee_id)
+
+            const { data: { user } } = await supabase.auth.getUser()
+
+            const { error: updateError } = await supabase
+                .from('employees')
+                .update({ access_scope: next ? 'releasing' : 'full', updated_at: new Date().toISOString() })
+                .eq('employee_id', employee.employee_id)
+
+            if (updateError) {
+                throw new Error('Failed to update access: ' + updateError.message)
+            }
+
+            await logActivity({
+                userId: user?.id,
+                action: next ? 'set_claiming_section' : 'set_full_access',
+                tableName: 'employees',
+                recordId: employee.employee_id,
+                description: next
+                    ? `Moved "${employee.name}" (${employee.employee_number}) to the claiming section.`
+                    : `Gave "${employee.name}" (${employee.employee_number}) full employee access.`,
+            })
+
+            if (employee.user_id) {
+                await notify({
+                    userId: employee.user_id,
+                    title: next ? 'You are now in the claiming section' : 'You now have full access',
+                    message: next
+                        ? 'The registrar head moved you to the claiming section. You will handle requests at the claiming stage and release documents. Sign in again if your menu does not update.'
+                        : 'The registrar head gave you full employee access. Sign in again if your menu does not update.',
+                    notificationType: 'account',
+                })
+            }
+
+            notifySuccess(next ? `${employee.name} is now claiming section staff.` : `${employee.name} now has full access.`)
+            await loadEmployees()
+        } catch (err) {
+            console.error('CLAIMING SECTION ERROR:', err)
+            notifyError(friendlyError(err, 'Failed to update access.'))
         } finally {
             setUpdating(null)
         }
@@ -797,6 +859,7 @@ function Employees() {
                                         {employee.displayName && <span className="admin-card-badge">Shown to students as “{employee.displayName}”</span>}
                                         {employee.canAddEmployees && <span className="admin-card-badge">Can add employees</span>}
                                         {employee.canIssueCertificates && <span className="admin-card-badge">Can create certificates</span>}
+                                        {employee.isClaimingSection && <span className="admin-card-badge">Claiming section</span>}
                                     </h3>
                                     <p>{employee.employee_number} · {employee.position_title} · {employee.email}</p>
                                 </div>
@@ -834,6 +897,14 @@ function Employees() {
                                     {employee.canIssueCertificates ? 'Revoke creating certificates' : 'Allow creating certificates'}
                                 </button>
                             )}
+
+                            <button
+                                className={`admin-link-button${employee.isClaimingSection ? ' is-warning' : ' is-success'}`}
+                                onClick={() => toggleClaimingSection(employee)}
+                                disabled={updating === employee.employee_id}
+                            >
+                                {employee.isClaimingSection ? 'Give full access' : 'Move to claiming section'}
+                            </button>
 
                             <button
                                 className="admin-link-button"
