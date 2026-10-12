@@ -164,10 +164,10 @@
 }
 
 .coe-preview .coe-title {
-    margin: 0.93in 0 0;
-    font-size: 14pt;
+    margin: 0.905in 0 0;
+    font-size: 16pt;
     font-weight: 700;
-    line-height: 0.2in;
+    line-height: 0.25in;
     letter-spacing: 1pt;
     text-align: center;
     white-space: pre;
@@ -187,7 +187,7 @@
 }
 
 .coe-preview .coe-salutation {
-    margin-top: 0.9in;
+    margin-top: 0.875in;
     margin-bottom: 0.365in;
 }
 
