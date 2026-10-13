@@ -128,7 +128,6 @@ export const IconPhone = () => (
     </svg>
 )
 
-// User Guide (all portals).
 export const IconBook = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z" />

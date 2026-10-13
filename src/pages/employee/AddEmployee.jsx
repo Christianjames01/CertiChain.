@@ -25,11 +25,6 @@ const BLANK_FORM = {
     password: '',
 }
 
-// A focused version of the Registrar Head's "Add Employee" form, for an
-// employee a registrar head/admin has granted can_add_employees. Reuses the
-// shared Modal so the form gets the exact same styling as Employees.jsx.
-// Creates the login, the employees row, and (if a college/program is
-// picked) the assignment too -- the same three steps Employees.jsx does.
 function AddEmployee() {
     const navigate = useNavigate()
 

@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase'
 import certichainLogo from '../../assets/certichain-logo.png'
 import { IconHome, IconCalendar, IconBell, IconUserCircle, IconLogout, IconMenu, IconX, IconBook } from '../student/icons'
 import { IconClipboardList, IconShieldCheck, IconGear, IconMessage, IconHistory } from './icons'
-// Same icons as the Registrar Head's sidebar for the same pages.
 import { IconIdCard, IconTicket, IconUsers, IconDocument, IconClipboardCheck } from '../admin/icons'
 import ThemeToggle from '../../components/ThemeToggle'
 import '../../components/DashboardStats.css'
@@ -15,7 +14,6 @@ import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
 import { loadCanIssueCertificates } from '../../lib/canIssueCertificates'
 
-// Grouped into work stages like an Agile board (see NAV_STAGES).
 const NAV_ITEMS = [
     { to: '/employee/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
     { to: '/employee/requests', label: 'Assigned Requests', icon: <IconClipboardList />, stage: 'overview' },
@@ -60,10 +58,6 @@ function EmployeeLayout() {
     const [loggingOut, setLoggingOut] = useState(false)
 
     useLiveRefresh(['notifications', 'messages', 'students', 'employee_assignments'], () => loadBadgeCounts())
-    // The head can move this employee to the claiming section or back to
-    // full access (and allow certificates) at any time: re-read so the
-    // sidebar updates without signing in again. The head's change also
-    // sends a notification, so this fires right away.
     useLiveRefresh(['employees', 'notifications'], () => loadProfile())
 
     useEffect(() => {
@@ -115,7 +109,6 @@ function EmployeeLayout() {
             setCanAddEmployees(!!employee.can_add_employees)
         }
 
-        // Granted per employee by the head (see lib/canIssueCertificates).
         setCanIssueCertificates(await loadCanIssueCertificates())
     }
 
@@ -142,9 +135,6 @@ function EmployeeLayout() {
 
         setUnreadMessages(messageCount || 0)
 
-        // Scoped the same way as employee/Students.jsx's own pending list:
-        // only registrations in a college/program this employee is actively
-        // assigned to, not every pending student system-wide.
         const { data: employee } = await supabase
             .from('employees')
             .select('employee_id')

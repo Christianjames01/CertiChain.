@@ -152,7 +152,6 @@ function AllRequests() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests', 'credentials'], loadRequests)
 
     const visibleRequests = (requests
@@ -216,12 +215,6 @@ function AllRequests() {
         }
     }
 
-    // Deletes one finished request now instead of waiting for the 30-day
-    // auto-purge -- to free up storage sooner. Always backs it up to Excel
-    // first, same as the student-deletion flow; nothing is deleted if that
-    // export fails. The database function (delete_resolved_request) also
-    // deletes the actual receipt/requirement/claim files from storage, and
-    // refuses anything not already completed/rejected/cancelled.
     const deleteRequest = async (request) => {
         if (blockedForReadOnlyViewer(role)) return
         if (!FINISHED_STATUSES.includes(request.status)) {

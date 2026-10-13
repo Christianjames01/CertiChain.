@@ -31,7 +31,6 @@ function EmployeeDashboard() {
     const [requests, setRequests] = useState([])
     const [documentNames, setDocumentNames] = useState({})
     const [studentNames, setStudentNames] = useState({})
-    // One clock reading per page load, so every "waiting N days" agrees.
     const [now] = useState(() => new Date())
     const [todaySchedules, setTodaySchedules] = useState([])
     const [missedCount, setMissedCount] = useState(0)
@@ -100,8 +99,6 @@ function EmployeeDashboard() {
                 .order('requested_at', { ascending: false })
 
             if (isReleasingScope) {
-                // Releasing is a front-desk job: show claiming-relevant
-                // requests office-wide, not just ones assigned to this account.
                 requestQuery = requestQuery.in('status', ['ready_for_claiming', 'scheduled', 'claimed', 'completed'])
             } else {
                 requestQuery = requestQuery.eq('assigned_employee_id', employeeData.employee_id)
@@ -208,7 +205,6 @@ function EmployeeDashboard() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests', 'claim_schedules'], loadDashboard)
 
     const isReleasingOnly = employee?.access_scope === 'releasing'
@@ -370,7 +366,6 @@ function EmployeeDashboard() {
                     ))}
                 </div>
             </section>
-
 
             <div className="dash-two-col" style={{ marginBottom: 28 }}>
                 <section>

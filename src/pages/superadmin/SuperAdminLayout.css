@@ -1,6 +1,3 @@
-/* ===================================================
-   SIDEBAR
-=================================================== */
 .sa-sidebar {
     width: 264px;
     flex-shrink: 0;
@@ -81,7 +78,6 @@
     display: none;
 }
 
-/* ===== Nav groups ===== */
 .sa-nav-group {
     display: flex;
     flex-direction: column;
@@ -143,7 +139,6 @@
     display: none;
 }
 
-/* ===== Collapse toggle ===== */
 .sa-collapse-toggle {
     display: flex;
     align-items: center;
@@ -170,7 +165,6 @@
     height: 16px;
 }
 
-/* ===== Bottom block ===== */
 .sa-sidebar-bottom {
     display: flex;
     flex-direction: column;
@@ -240,7 +234,6 @@
     color: #fff;
 }
 
-/* ===== Collapsed state (desktop only) ===== */
 @media (min-width: 961px) {
     .sa-portal.is-collapsed .sa-sidebar {
         width: 72px;
@@ -266,9 +259,6 @@
         transform: rotate(180deg);
     }
 
-    /* CSS-only tooltip, shown on hover/focus only while collapsed. Native
-       title= attribute already gives every item an accessible name; this is
-       a purely visual bubble on top of it. */
     .sa-portal.is-collapsed .sa-nav-link {
         position: relative;
     }
@@ -298,17 +288,12 @@
     }
 }
 
-/* ===== Content ===== */
 .sa-content {
     flex: 1;
     min-width: 0;
     padding: 36px 40px;
 }
 
-/* ===================================================
-   RESPONSIVE (mobile drawer -- same pattern as the other
-   three portal layouts; collapse is desktop-only)
-=================================================== */
 @media (max-width: 960px) {
     .sa-mobile-topbar {
         display: flex;

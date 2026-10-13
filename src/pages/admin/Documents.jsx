@@ -95,12 +95,6 @@ function Documents() {
         setCurrentRole(profile?.role || '')
     }
 
-    // `silent` skips the loading/skeleton state for refreshes after a save,
-    // availability toggle, or import. Swapping the list for the skeleton
-    // mid-edit shrinks the page and makes the browser clamp scroll back
-    // near the top, so once the full list re-renders it looks like the
-    // page jumped up even though nothing intentionally scrolled the admin
-    // away from their spot.
     const loadDocuments = async ({ silent = false } = {}) => {
         try {
             if (!silent) setLoading(true)
@@ -196,10 +190,6 @@ function Documents() {
         try {
             setSaving(true)
 
-            // The form's own preview_image_url may already be cleared (the
-            // Remove image button does that immediately, before Save), so
-            // the saved record -- not the in-progress form -- is the only
-            // reliable source for "what was the old file, if any".
             const original = form.document_type_id
                 ? documents.find((d) => d.document_type_id === form.document_type_id)
                 : null
@@ -237,14 +227,9 @@ function Documents() {
 
                 previewImageUrl = publicUrlData?.publicUrl || null
 
-                // Replacing an image otherwise leaves the old one behind
-                // forever (uploads never overwrite). Best-effort: the new
-                // image is already saved either way.
                 if (previousImageUrl) await deleteStorageImage(previousImageUrl)
 
             } else if (previousImageUrl && !previewImageUrl) {
-                // "Remove image" was clicked (no replacement chosen) --
-                // the old file needs deleting too, not just unlinked.
                 await deleteStorageImage(previousImageUrl)
             }
 
@@ -378,7 +363,6 @@ function Documents() {
 
             if (deleteError) throw new Error(deleteError.message)
 
-            // Best-effort: the document type is already gone either way.
             if (doc.preview_image_url) {
                 const marker = `/${PREVIEW_IMAGE_BUCKET}/`
                 const i = doc.preview_image_url.indexOf(marker)

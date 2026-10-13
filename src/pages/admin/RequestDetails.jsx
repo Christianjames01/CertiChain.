@@ -37,7 +37,6 @@ const OVERDUE_ELIGIBLE_STATUSES = [
 ]
 const OVERDUE_DAYS = 2
 
-// What a request with no required uploads is waiting on, for the overdue reminder.
 const NO_REQUIREMENT_NEXT_STEP = {
     pending: 'It needs no requirements, so it is only waiting for the student to pay.',
     payment_pending: 'It needs no requirements, so it is only waiting for the student to pay.',
@@ -111,7 +110,6 @@ function AdminRequestDetails() {
     const [selectedRequirement, setSelectedRequirement] = useState(null)
 
     useLiveRefresh(['document_requests', 'request_requirements', 'official_receipts', 'claim_schedules', 'credentials', 'request_ratings'], (options) => loadRequest(options))
-    // Deadline before the request is rejected automatically (if it applies).
     const autoReject = useAutoReject(request)
 
     useEffect(() => {
@@ -137,7 +135,6 @@ function AdminRequestDetails() {
             if (!silent) setNewStatus(requestData.status)
             if (!silent) setReassignTo(requestData.assigned_employee_id || '')
 
-            // Everything below only needs the request, so load it all at once (each round trip is ~0.3 s from Davao).
             await Promise.all([
                 (async () => {
                     const { data: studentData } = await supabase
@@ -353,9 +350,6 @@ function AdminRequestDetails() {
     const getAdminActor = async () => {
         const user = await getAdminUser()
 
-        // Best-effort -- a registrar head/admin may or may not also have an
-        // employees row. verified_by/reviewed_by/generated_by have no NOT
-        // NULL constraint, so this is allowed to come back null.
         const { data: employee } = await supabase
             .from('employees')
             .select('employee_id')
@@ -370,8 +364,6 @@ function AdminRequestDetails() {
             (requirement) => requirement.document_requirements?.is_required === true
         )
 
-        // A document with no required uploads is ready as soon as payment is
-        // verified -- same as the employee's page.
         if (requiredRequirements.length === 0) {
             return { hasRequirements: true, allApproved: true, pending: false, rejected: false, uploaded: false }
         }
@@ -962,7 +954,6 @@ function AdminRequestDetails() {
         )
         if (!confirmed) return
 
-        // Manual changes skip the normal workflow: confirm who is making it.
         const verified = await confirmWithPassword({
             text: `Enter your password to change ${request.request_number} to "${newStatus.replace(/_/g, ' ')}".`,
         })
@@ -1079,7 +1070,6 @@ function AdminRequestDetails() {
         : 0
 
     const isOverdue = daysSinceRequested >= OVERDUE_DAYS && OVERDUE_ELIGIBLE_STATUSES.includes(request.status)
-    // No required uploads: nothing can be "lacking", so don't offer that flag.
     const needsRequirements = requirements.some((requirement) => requirement.document_requirements?.is_required === true)
 
     return (

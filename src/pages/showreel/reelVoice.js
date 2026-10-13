@@ -1,7 +1,3 @@
-// Female voice-over for the showreel, using the browser's speech voices.
-// Prefers natural/neural female English voices (Edge: Aria, Jenny, Ava, Emma,
-// Michelle, Sonia, Libby; Chrome: Google UK English Female; Apple: Samantha).
-
 const FEMALE = /aria|jenny|ava|emma|michelle|sonia|libby|natasha|clara|aria|zira|samantha|karen|moira|tessa|fiona|victoria|serena|female|woman|girl|salli|joanna|kendra|kimberly|ivy|hazel|susan|catherine|nicky/i
 const MALE = /david|mark|guy|andrew|brian|ryan|william|daniel|george|james|fred|alex\b|tom\b|male\b/i
 
@@ -36,7 +32,6 @@ export function speakLine(text, { onStart, onEnd } = {}) {
     } else {
         u.lang = 'en-US'
     }
-    // Brighter and a touch quicker, like a promo read.
     u.pitch = voice && /natural|neural|online/i.test(voice.name) ? 1.05 : 1.2
     u.rate = 1.05
     u.onstart = () => onStart?.()
@@ -49,7 +44,6 @@ export function stopVoice() {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel()
 }
 
-// Voices load asynchronously in Chrome.
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     window.speechSynthesis.getVoices()
     window.speechSynthesis.addEventListener?.('voiceschanged', () => window.speechSynthesis.getVoices())

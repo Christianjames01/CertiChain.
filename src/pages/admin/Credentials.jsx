@@ -116,8 +116,6 @@ function Credentials() {
             return
         }
 
-        // Revoking is permanent and public (the verify page shows it):
-        // confirm who is making it.
         const verified = await confirmWithPassword({
             title: 'Confirm with your password',
             text: `Enter your password to revoke credential ${revokeTarget.credential_number}.`,

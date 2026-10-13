@@ -16,9 +16,6 @@ const formatDate = (value) =>
 
 const isToday = (value) => new Date(value).toDateString() === new Date().toDateString()
 
-// Every change of who handles a request -- the head's assignments and the
-// employees' hand-offs (processing -> production -> claiming section) --
-// newest first. Per-request trails are also on each request's page.
 function RequestHandling() {
     const [rows, setRows] = useState([])
     const [loading, setLoading] = useState(true)

@@ -1,16 +1,3 @@
-// The System Workflow presentation, shot by shot: what the narrator says,
-// which station the camera visits, and the sound cues (seconds into the shot).
-// It follows a student's request from start to finish: request ->
-// requirements -> pay at the Finance Office and upload the Official Receipt ->
-// registrar review -> processing -> document ready -> notified and picked
-// up -> completed.
-//
-// step: the numbered stage shown on the timeline (0 = intro/outro).
-// spoken (optional): the line for the browser voice when it differs from the
-// subtitle (e.g. "I.D." so it isn't read as a word).
-// audio: optional recorded narration in /public/workflow-narration/ -- when
-// every file is there, the recording is used instead of the browser voice.
-
 export const SHOTS = [
     {
         id: 'intro',
@@ -115,7 +102,6 @@ export const SHOTS = [
     },
 ]
 
-// The eight stages on the timeline.
 export const STEPS = [
     'Student Request',
     'Requirements',

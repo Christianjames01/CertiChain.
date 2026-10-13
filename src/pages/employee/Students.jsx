@@ -14,9 +14,6 @@ import AvatarFace from '../../components/AvatarFace'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import { friendlyError } from '../../lib/friendlyError'
 
-// Pending registrations are reviewed in their own section and rejected ones
-// aren't real students, so only verified (or pre-verification) students
-// appear in the student list and search results.
 function onlyListedStudents(rows) {
     return rows.filter((s) => s.verification_status !== 'pending' && s.verification_status !== 'rejected')
 }
@@ -233,9 +230,6 @@ function Students() {
         }
     }
 
-    // Accounts that signed in but never finished "Complete your profile":
-    // they have no student record yet, so they can't request anything.
-    // Every student row (any verification status) counts as finished.
     const loadIncompleteProfiles = async (studentRows) => {
         const { data: studentProfiles, error: profilesError } = await supabase
             .from('profiles')
@@ -256,9 +250,6 @@ function Students() {
     const incompleteFullName = (p) =>
         [p.first_name, p.middle_name, p.last_name, p.suffix].filter(Boolean).join(' ') || p.email || 'Unknown'
 
-    // An incomplete account has no student record, requests or files, so
-    // deleting it only removes the login and profile. Confirmed with the
-    // employee's own password, like the head's delete.
     const deleteIncompleteProfile = async (profile) => {
         const name = incompleteName(profile)
 
@@ -289,8 +280,6 @@ function Students() {
         }
     }
 
-    // Live search while typing: every word must appear in the student's
-    // name or student number.
     const searchWords = term.trim().toLowerCase().split(/\s+/).filter(Boolean)
     const yearFilteredStudents = yearLevelFilter === 'all'
         ? results
@@ -337,7 +326,6 @@ function Students() {
     const selectedGroup = selectedProgramKey
         ? groupedResults.find((g) => g.key === selectedProgramKey)
         : null
-
 
     const renderStudentCard = (student) => (
         <div className="employee-list-card" key={student.student_id}>

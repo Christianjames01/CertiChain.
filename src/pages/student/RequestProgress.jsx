@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom'
 import { PROGRESS_STEPS, describeRequest } from '../../lib/studentProgress'
 
-// The student's request journey: six steps with the current one highlighted,
-// then plain answers to "What's happening now?", "What should I do?" (with
-// the button when they must act) and "What happens next?".
 function RequestProgress({ request, requirements, schedule, credential, compact = false }) {
     const info = describeRequest(request, { requirements, schedule, credential })
 

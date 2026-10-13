@@ -30,8 +30,6 @@ function EmployeeQueue() {
         loadQueue()
     }, [])
 
-    // Update in place when a ticket is issued, called, served, or completed
-    // anywhere -- no manual refresh needed.
     useLiveRefresh(['walk_in_queue'], (options) => loadQueue(options))
 
     const loadQueue = async ({ silent = false } = {}) => {

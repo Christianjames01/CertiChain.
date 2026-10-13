@@ -10,34 +10,20 @@ import './QueueDisplay.css'
 
 const POLL_MS = 4000
 
-// Between calls the TV plays the student walkthrough (how to request
-// documents online) with the queue shrunk into a side panel; a new call
-// brings the full queue back at once. ?nodemo on the URL turns this off.
 const QUEUE_BEFORE_DEMO_MS = 300000
 const DEMO_ENABLED = typeof window === 'undefined' || !new URLSearchParams(window.location.search).has('nodemo')
-// ?demoaudio also reads the walkthrough aloud on the TV.
 const DEMO_AUDIO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('demoaudio')
 const TV_CTA = {
     title: <>Request online at <em>onlineregistrar.vercel.app</em></>,
     caption: 'Create a free CertiChain account on your phone and request your documents without queuing.',
 }
 
-// Rotated through instead of repeating one line back-to-back, so the
-// footer ticker reads as a handful of distinct announcements rather than
-// the same sentence spammed edge to edge.
 const MARQUEE_MESSAGES = [
     'Please keep your ticket ready and listen for your number to be announced.',
     'Log in to CertiChain to track your document request online.',
     'Numbers reset daily — walk-in tickets are only valid for today.',
 ]
 
-// A short two-tone chime via the Web Audio API -- no audio file asset
-// needed. `ctx` must be a context created/resumed from a real user gesture
-// (see handleStart below): browsers create a fresh AudioContext in a
-// "suspended" state and silently drop anything played through it until a
-// tap/click resumes it, so a kiosk page that's opened once and never
-// touched again would otherwise play nothing at all, with no error to
-// explain why.
 function playChime(ctx) {
     try {
         const now = ctx.currentTime
@@ -64,7 +50,6 @@ function announce(queueNumber, ctx) {
 
     if (!window.speechSynthesis) return
 
-    // Cut off the walkthrough's voice-over, if any, before announcing.
     window.speechSynthesis.cancel()
 
     const utterance = new SpeechSynthesisUtterance(
@@ -72,7 +57,6 @@ function announce(queueNumber, ctx) {
     )
     utterance.rate = 0.95
 
-    // Chime first, then speak once it's had a moment to finish.
     setTimeout(() => window.speechSynthesis.speak(utterance), 900)
 }
 
@@ -82,9 +66,9 @@ function QueueDisplay() {
     const [clock, setClock] = useState(new Date())
     const [justCalled, setJustCalled] = useState(false)
     const [soundReady, setSoundReady] = useState(false)
-    const [demo, setDemo] = useState(false) // walkthrough on, queue in the side panel
+    const [demo, setDemo] = useState(false)
     const [demoRun, setDemoRun] = useState(0)
-    const [back, setBack] = useState(false) // the queue growing back to full size
+    const [back, setBack] = useState(false)
     const lastAnnouncedKey = useRef(null)
     const audioCtxRef = useRef(null)
     const wakeLockRef = useRef(null)
@@ -99,13 +83,6 @@ function QueueDisplay() {
         }
     }, [])
 
-    // Left running unattended on a lobby TV, this is exactly the kind of
-    // page the OS/browser will try to dim or sleep after a period of no
-    // touch input, and a hidden/suspended tab has its timers throttled --
-    // both would silently stop the "now serving" number from updating.
-    // Wake Lock keeps the screen on; re-requesting it (it auto-releases
-    // whenever the tab goes hidden) and refreshing immediately on
-    // visibilitychange covers a background tab that gets refocused too.
     useEffect(() => {
         const requestWakeLock = async () => {
             try {
@@ -134,10 +111,6 @@ function QueueDisplay() {
         }
     }, [])
 
-    // One tap is all it takes, and it only needs to happen once per time the
-    // display is opened -- this is what actually lets audio/speech play at
-    // all afterward, since the browser requires a real user gesture before
-    // either will produce sound, silently otherwise.
     const enableSound = () => {
         try {
             const Ctx = window.AudioContext || window.webkitAudioContext
@@ -157,8 +130,6 @@ function QueueDisplay() {
         }
     }
 
-    // After 5 quiet minutes on the queue, play the walkthrough (restarts
-    // whenever the number being served changes).
     useEffect(() => {
         if (!DEMO_ENABLED || !soundReady || demo || justCalled) return undefined
         const t = setTimeout(() => {
@@ -189,10 +160,6 @@ function QueueDisplay() {
 
         if (current) {
             const key = `${current.queue_id}-${current.called_at}`
-            // Skip announcing on the very first poll after the page opens --
-            // only announce actual new calls/recalls that happen while the
-            // display is already up, not whatever was already "now serving"
-            // when the TV was turned on.
             const isFirstCheck = lastAnnouncedKey.current === null
             if (key !== lastAnnouncedKey.current) {
                 lastAnnouncedKey.current = key
@@ -338,12 +305,6 @@ function QueueDisplay() {
                 <span className="qd-footer-label">Reminders</span>
                 <div className="qd-marquee-viewport">
                     <div className="qd-marquee">
-                        {/* Cycled through the message list and repeated enough
-                            times that even half this row (the distance the
-                            -50% loop travels) is wider than any realistic
-                            screen, so the ticker fills the full width edge to
-                            edge without ever showing the same line twice in a
-                            row. */}
                         {Array.from({ length: 16 }).map((_, i) => (
                             <span key={i}>
                                 {MARQUEE_MESSAGES[i % MARQUEE_MESSAGES.length]}

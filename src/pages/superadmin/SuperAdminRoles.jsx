@@ -11,9 +11,6 @@ function SuperAdminRoles() {
         acc[role] = accounts.filter((a) => a.role === role).length
         return acc
     }, {})
-    // Superadmin's own account is excluded from superadmin_list_accounts(),
-    // so that count would always read 0 -- show it as "1" instead of a
-    // misleading zero (there is always exactly one, enforced server-side).
     counts.superadmin = 1
 
     return (

@@ -29,7 +29,6 @@ const OVERDUE_ELIGIBLE_STATUSES = [
 ]
 const OVERDUE_DAYS = 2
 
-// What a request with no required uploads is waiting on, for the overdue reminder.
 const NO_REQUIREMENT_NEXT_STEP = {
     pending: 'It needs no requirements, so it is only waiting for the student to pay.',
     payment_pending: 'It needs no requirements, so it is only waiting for the student to pay.',
@@ -83,7 +82,6 @@ function EmployeeRequestDetails() {
     const [rating, setRating] = useState(null)
 
     useLiveRefresh(['document_requests', 'request_requirements', 'official_receipts', 'claim_schedules', 'credentials', 'request_ratings'], (options) => loadRequest(options))
-    // Deadline before the request is rejected automatically (if it applies).
     const autoReject = useAutoReject(request)
 
     useEffect(() => {
@@ -144,9 +142,6 @@ function EmployeeRequestDetails() {
                 .eq('request_id', requestId)
 
             if (isReleasingOnly) {
-                // Releasing is a front-desk job: they can look up any
-                // request that has reached the claiming stage, regardless
-                // of which employee it's assigned to.
                 requestQuery = requestQuery.in('status', ['ready_for_claiming', 'scheduled', 'claimed', 'completed'])
             } else {
                 requestQuery = requestQuery.eq('assigned_employee_id', employee.employee_id)
@@ -168,7 +163,6 @@ function EmployeeRequestDetails() {
             setRequest(requestData)
             if (!silent) setManualStatus(requestData.status)
 
-            // Everything below only needs the request, so load it all at once (each round trip is ~0.3 s from Davao).
             await Promise.all([
                 (async () => {
                     if (requestData.document_type_id) {
@@ -207,7 +201,6 @@ function EmployeeRequestDetails() {
                         )
                     }
 
-                    // Add the student's name (profiles) alongside the number.
                     const studentInfo = studentData ? (await loadStudentsById([studentData.student_id]))[studentData.student_id] : null
                     setStudent(studentData ? { ...studentData, name: studentInfo?.name || '' } : null)
                 })(),
@@ -1282,7 +1275,6 @@ function EmployeeRequestDetails() {
             return
         }
 
-        // Manual changes skip the normal workflow: confirm who is making it.
         const verified = await confirmWithPassword({
             text: `Enter your password to change ${request.request_number} to "${manualStatus.replace(/_/g, ' ')}".`,
         })
@@ -1356,7 +1348,6 @@ function EmployeeRequestDetails() {
         : 0
 
     const isOverdue = daysSinceRequested >= OVERDUE_DAYS && OVERDUE_ELIGIBLE_STATUSES.includes(request.status)
-    // No required uploads: nothing can be "lacking", so don't offer that flag.
     const needsRequirements = requirements.some((requirement) => requirement.document_requirements?.is_required === true)
 
     return (

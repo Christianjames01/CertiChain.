@@ -8,9 +8,6 @@ import { IconCalendarCheck, IconBarChart } from '../admin/icons'
 import './EmployeePages.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 
-// The employee's own actions, in the same layout as the head's Activity
-// Logs (search, date filter, table) -- without the actor column, since
-// every row is theirs.
 function ActivityLogs() {
     const [logs, setLogs] = useState([])
     const [loading, setLoading] = useState(true)
@@ -49,8 +46,6 @@ function ActivityLogs() {
                 throw new Error('Employee record could not be found.')
             }
 
-            // No date picked: the 200 most recent. A date: every entry
-            // from that day (older days aren't reachable through the 200).
             let query = supabase
                 .from('activity_logs')
                 .select('activity_log_id, action, table_name, record_id, description, created_at')

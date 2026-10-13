@@ -35,8 +35,6 @@ function ClaimSchedule() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
-    // Version of the schedule the form was last filled from, so a live
-    // refresh doesn't wipe what's being typed unless the schedule changed.
     const formVersionRef = useRef(null)
 
     useEffect(() => {
@@ -85,9 +83,6 @@ function ClaimSchedule() {
                 )
             }
 
-            // Claiming is shared front-desk work -- any employee can open
-            // and schedule a request that has reached the claiming stage,
-            // not just the one it's assigned to.
             const { data: requestData, error: requestError } = await supabase
                 .from('document_requests')
                 .select(`
@@ -151,7 +146,6 @@ function ClaimSchedule() {
                 )
             }
 
-            // Add the student's name (profiles) alongside the number.
             const studentInfo = studentData ? (await loadStudentsById([studentData.student_id]))[studentData.student_id] : null
             setStudent(studentData ? { ...studentData, name: studentInfo?.name || '' } : null)
 
@@ -224,8 +218,6 @@ function ClaimSchedule() {
         }
     }
 
-    // Live: the student asking to reschedule, another staff member saving a
-    // date, or the request's status changing.
     useLiveRefresh(['claim_schedules', 'document_requests', 'claim_reschedule_requests'], (opts) => {
         if (requestId) loadData(opts)
     })
@@ -368,8 +360,6 @@ function ClaimSchedule() {
                         status:
                             'scheduled',
 
-                        // Clears the "pending" flag only; the student's message
-                        // (reschedule_reason) stays so it's still shown as handled.
                         reschedule_requested_at:
                             null,
 
@@ -432,7 +422,6 @@ function ClaimSchedule() {
                     description: `Updated claiming schedule for request "${request?.request_number || requestId}".${scheduleChanges ? ' ' + scheduleChanges + '.' : ''}`,
                 })
 
-                // Tell the student the remarks too (new or changed).
                 const newRemarks = remarks.trim()
                 const remarksChanged = newRemarks !== (existingSchedule.remarks || '').trim()
                 const slotChanged = existingSchedule.scheduled_date !== scheduledDate
@@ -468,7 +457,6 @@ function ClaimSchedule() {
                         scheduled_time:
                             scheduledTime,
 
-                        // Legacy column, no longer shown; kept at its old default.
                         estimated_duration_minutes: 60,
 
                         claiming_counter:
@@ -876,8 +864,6 @@ function ClaimSchedule() {
                         Choose the exact date and time when the student should arrive at the Registrar's Office.
                     </p>
 
-                    {/* Every reschedule request the student sent -- kept (marked
-                        handled) when a new date is saved, not wiped. */}
                     <RescheduleHistory
                         scheduleId={existingSchedule?.claim_schedule_id}
                         pending={existingSchedule?.reschedule_requested_at

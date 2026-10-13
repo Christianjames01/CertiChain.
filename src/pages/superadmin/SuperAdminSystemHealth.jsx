@@ -2,10 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { IconPulse } from './icons'
 
-// Four on-demand spot checks -- real pass/fail/unavailable, never a
-// fabricated uptime percentage or a polling "monitoring" promise. Each is
-// re-run only when asked (the button, or once on page load), since these
-// are checks, not a live dashboard.
 const CHECKS = [
     {
         key: 'database',

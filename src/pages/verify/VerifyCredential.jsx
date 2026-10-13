@@ -11,7 +11,6 @@ const formatDate = (value) =>
         ? new Date(value).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
         : 'N/A'
 
-// Which banner to show for a lookup result.
 function outcomeFor(result) {
     if (!result) {
         return {

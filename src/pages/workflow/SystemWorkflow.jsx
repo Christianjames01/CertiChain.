@@ -7,11 +7,6 @@ import { availableVoices, createNarrator, isNaturalVoice, recordingsAvailable, w
 import certichainLogo from '../../assets/certichain-logo.png'
 import './SystemWorkflow.css'
 
-// A narrated 3D presentation of the CertiChain request workflow, for the
-// capstone defense / system demo. Public page: /system-workflow
-//
-// Keys: Space pause/resume · ← → previous/next · F full screen · M sound.
-
 const NO_3D_MESSAGE = '3D graphics are not available in this browser. Try the latest Chrome or Edge with hardware acceleration turned on.'
 
 function webglAvailable() {
@@ -23,7 +18,7 @@ function webglAvailable() {
     }
 }
 
-const NARRATION_DELAY_MS = 1300 // let the camera arrive first
+const NARRATION_DELAY_MS = 1300
 const TICK_MS = 50
 
 function SystemWorkflow() {
@@ -46,14 +41,12 @@ function SystemWorkflow() {
     const [sceneError, setSceneError] = useState(() => (webglAvailable() ? '' : NO_3D_MESSAGE))
     const [chromeHidden, setChromeHidden] = useState(false)
 
-    // Sequencer state (refs: read inside the ticking loop).
     const seq = useRef({ elapsed: 0, cuesFired: 0, narrationStarted: false, narrationDone: false, shot: 0 })
     const playingRef = useRef(false)
     const voiceOnRef = useRef(true)
     useEffect(() => { playingRef.current = playing }, [playing])
     useEffect(() => { voiceOnRef.current = voiceOn }, [voiceOn])
 
-    // ---- Set up the 3D scene, audio and narrator ------------------------------
     useEffect(() => {
         let scene = null
         if (webglAvailable()) {
@@ -92,7 +85,6 @@ function SystemWorkflow() {
 
     const shot = SHOTS[shotIndex]
 
-    // ---- Moving to a shot -------------------------------------------------------
     const goToShot = useCallback((index) => {
         const i = Math.max(0, Math.min(SHOTS.length - 1, index))
         narratorRef.current?.stop()
@@ -103,7 +95,6 @@ function SystemWorkflow() {
         sceneRef.current?.setShot(SHOTS[i].id)
     }, [])
 
-    // ---- The sequencer: cues, narration, advancing ------------------------------
     useEffect(() => {
         if (!started) return undefined
         const timer = setInterval(() => {
@@ -112,13 +103,11 @@ function SystemWorkflow() {
             const current = SHOTS[s.shot]
             s.elapsed += TICK_MS
 
-            // Sound cues.
             while (s.cuesFired < current.cues.length && s.elapsed >= current.cues[s.cuesFired][0] * 1000) {
                 audioRef.current?.play(current.cues[s.cuesFired][1])
                 s.cuesFired += 1
             }
 
-            // Narration once the camera has arrived.
             if (!s.narrationStarted && s.elapsed >= NARRATION_DELAY_MS) {
                 s.narrationStarted = true
                 if (current.narration && voiceOnRef.current) {
@@ -130,7 +119,6 @@ function SystemWorkflow() {
                         audioRef.current?.setDucked(false)
                     })
                 } else {
-                    // Voice off: give people time to read the subtitle.
                     const readMs = (current.narration || '').length * 55
                     s.narrationDone = false
                     s.readUntil = NARRATION_DELAY_MS + readMs
@@ -141,20 +129,18 @@ function SystemWorkflow() {
                 s.readUntil = 0
             }
 
-            // Next shot when the time is up and the narrator has finished.
             if (s.narrationStarted && s.narrationDone && s.elapsed >= current.minMs) {
                 if (s.shot < SHOTS.length - 1) {
                     goToShot(s.shot + 1)
                 } else {
                     setEnded(true)
-                    s.narrationDone = false // stay on the finale
+                    s.narrationDone = false
                 }
             }
         }, TICK_MS)
         return () => clearInterval(timer)
     }, [started, goToShot])
 
-    // ---- Controls ------------------------------------------------------------------
     const start = async () => {
         if (!audioRef.current) audioRef.current = createWorkflowAudio()
         audioRef.current?.setMusic(musicOn)
@@ -180,7 +166,6 @@ function SystemWorkflow() {
         sceneRef.current?.setPaused(!next)
         if (next) {
             audioRef.current?.start()
-            // Say the current line again from the start.
             const s = seq.current
             if (s.narrationStarted && !s.narrationDone) s.narrationStarted = false
         } else {
@@ -241,7 +226,6 @@ function SystemWorkflow() {
         if (v) narratorRef.current?.setVoice(v)
     }
 
-    // Keyboard.
     useEffect(() => {
         const onKey = (e) => {
             if (e.target.closest?.('select, input, textarea')) return
@@ -259,7 +243,6 @@ function SystemWorkflow() {
         document.title = 'System Workflow · CertiChain'
     }, [])
 
-    // Keep the current step visible when the timeline is wider than the screen.
     useEffect(() => {
         timelineRef.current?.querySelector('.wf-chip.active')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
     }, [shotIndex])
@@ -278,7 +261,6 @@ function SystemWorkflow() {
 
             {sceneError && <div className="wf-error">{sceneError}</div>}
 
-            {/* Top bar */}
             {started && (
                 <header className="wf-top">
                     <div className="wf-brand">
@@ -303,7 +285,6 @@ function SystemWorkflow() {
                 </header>
             )}
 
-            {/* Subtitle + stage */}
             {started && !ended && shot.id !== 'finale' && (
                 <section className="wf-caption" key={shot.id}>
                     {shot.step > 0 && <span className="wf-caption-step">Step {shot.step} of {STEPS.length}</span>}
@@ -312,7 +293,6 @@ function SystemWorkflow() {
                 </section>
             )}
 
-            {/* Timeline */}
             {started && (
                 <nav className="wf-timeline" aria-label="Workflow steps" ref={timelineRef}>
                     {STEPS.map((label, i) => {
@@ -328,7 +308,6 @@ function SystemWorkflow() {
                 </nav>
             )}
 
-            {/* Final summary */}
             {started && shot.id === 'finale' && (
                 <section className={`wf-finale${ended ? ' is-ended' : ''}`}>
                     <span className="wf-finale-check">✓</span>
@@ -349,7 +328,6 @@ function SystemWorkflow() {
                 </section>
             )}
 
-            {/* Start screen */}
             {!started && (
                 <div className="wf-start">
                     <div className="wf-start-card">

@@ -51,9 +51,6 @@
     text-decoration: none;
 }
 
-/* ===================================================
-   LEFT BRAND PANEL
-=================================================== */
 .auth-brand-panel {
     position: relative;
     display: flex;
@@ -154,9 +151,6 @@
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* ===================================================
-   RIGHT FORM PANEL
-=================================================== */
 .auth-form-panel {
     display: flex;
     justify-content: center;
@@ -174,13 +168,6 @@
     margin: auto 0;
 }
 
-/* ===================================================
-   REFINED FILL-UP AREA (Login + Register only)
-   A modifier on .auth-card, scoped with .is-refined so
-   the other auth pages (forgot/reset password, complete
-   profile, employee register, force-change-password)
-   that share this same CSS file keep their current look.
-=================================================== */
 .auth-card.is-refined {
     position: relative;
     background: var(--white);
@@ -504,9 +491,6 @@
     text-decoration: underline;
 }
 
-/* ===================================================
-   RESPONSIVE
-=================================================== */
 @media (max-width: 880px) {
     .auth-page {
         grid-template-columns: 1fr;
@@ -542,7 +526,6 @@
         overflow: visible;
     }
 }
-/* Small checkbox under a field, e.g. "I don't have a middle name". */
 .auth-inline-check {
     display: inline-flex;
     align-items: center;
@@ -560,7 +543,6 @@
     accent-color: var(--blue);
 }
 
-/* Register / complete profile: current student vs alumni */
 .auth-type-toggle {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -614,7 +596,6 @@
     }
 }
 
-/* Login: note for graduates */
 .auth-alumni-note {
     margin-top: 16px;
     padding: 12px 14px;
@@ -637,10 +618,6 @@
     color: var(--slate);
 }
 
-/* Terms modal on the Register page. The footer (checkbox + buttons) never
-   shrinks; only the policy frame does, so it stays visible on short phone
-   screens. dvh follows iOS Safari's visible area (vh includes the space
-   behind its toolbar). */
 .terms-overlay {
     position: fixed;
     inset: 0;

@@ -29,7 +29,6 @@ const formatTurnaround = (days) => {
 
 const peso = (n) => `₱${Number(n || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
-// Fees are counted only once the request is completed (document released).
 const PAID_STATUSES = ['completed']
 
 const monthKey = (iso) => {
@@ -48,7 +47,6 @@ const previousMonthKey = () => {
     return monthKey(d.toISOString())
 }
 
-// Period filter: returns [label, test(iso) => boolean].
 function periodFilter(period, customMonth) {
     const year = new Date().getFullYear()
     switch (period) {
@@ -348,7 +346,6 @@ function Reports() {
         return <div className="admin-error-box">{error}</div>
     }
 
-    // Same tile style as the dashboard and the other head pages.
     const stat = (value, label) => (
         <div className="dash-stat-tile dash-overview-tile report-tile">
             <span className="dash-stat-label">{label}</span>
@@ -358,7 +355,6 @@ function Reports() {
 
     return (
         <div className="reports-page">
-            {/* Only shown when printing / saving as PDF */}
             <div className="report-print-header">
                 <strong>Holy Cross of Davao College — Registrar&apos;s Office</strong>
                 <span>Report period: {periodLabel} · Generated {generatedAt}</span>

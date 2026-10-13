@@ -6,7 +6,6 @@ import PageStats from '../../components/PageStats'
 import { IconFileStack, IconMegaphone, IconUsers } from './icons'
 import { IconBell, IconMessage } from '../student/icons'
 
-// Icon per notification type.
 const TYPE_ICONS = { request_update: IconFileStack, message: IconMessage, announcement: IconMegaphone, system: IconUsers }
 import './AdminPages.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'

@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Walk-in queue display for the lobby TV (pages/QueueDisplay.jsx). Opened
-   on its own, so it loads its fonts here rather than relying on a portal
-   stylesheet. Sized with vw/vh so it fills any screen, landscape TV first. */
-
 .qd-root {
     --qd-navy: #0A1F44;
     --qd-blue: #123B78;
@@ -31,7 +27,6 @@
     background-position: center;
 }
 
-/* Brand stripe along the very top, like the app's cards. */
 .qd-root::before {
     content: "";
     position: absolute;
@@ -43,7 +38,6 @@
     background: linear-gradient(90deg, var(--qd-blue), var(--qd-sky) 45%, var(--qd-red));
 }
 
-/* ---- Start screen ---------------------------------------------------------- */
 .qd-unlock {
     position: fixed;
     inset: 0;
@@ -131,7 +125,6 @@
     height: 22px;
 }
 
-/* ---- Header ------------------------------------------------------------------ */
 .qd-header {
     position: relative;
     z-index: 1;
@@ -197,7 +190,6 @@
     color: rgba(255, 255, 255, 0.72);
 }
 
-/* ---- Main: now serving + up next ---------------------------------------- */
 .qd-main {
     position: relative;
     z-index: 1;
@@ -358,7 +350,6 @@
     color: var(--qd-slate);
 }
 
-/* Up next panel. */
 .qd-upnext {
     display: flex;
     flex-direction: column;
@@ -476,7 +467,6 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* ---- Footer ticker ----------------------------------------------------------- */
 .qd-footer {
     position: relative;
     z-index: 1;
@@ -532,7 +522,6 @@
     color: var(--qd-red);
 }
 
-/* ---- Animations -------------------------------------------------------------- */
 @keyframes qd-unlock-pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.05); }
@@ -574,9 +563,7 @@
     100% { transform: translateX(-50%); }
 }
 
-/* ---- Portrait screens and phones: stack ------------------------------------ */
 @media (max-width: 900px), (orientation: portrait) {
-    /* Let the page scroll instead of squeezing everything into one screen. */
     .qd-root {
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -678,7 +665,6 @@
     }
 }
 
-/* ---- Demo mode: the walkthrough plays, the queue shrinks to a side panel -- */
 .qd-main {
     grid-template-areas: "now next";
 }
@@ -696,7 +682,6 @@
 }
 
 .qd-demo {
-    /* The page tokens the walkthrough's controls and caption use. */
     --paper: #F1F4FA;
     --ink: #101827;
     --slate: #5B6678;
@@ -744,7 +729,6 @@
     text-transform: uppercase;
 }
 
-/* Fit the 16:9 stage, its controls and caption in the screen height. */
 .qd-demo .lpx-player {
     width: 100%;
     max-width: calc((100vh - 480px) * 16 / 9);
@@ -769,7 +753,6 @@
     to { opacity: 1; transform: none; }
 }
 
-/* The queue shrinks into the side panel... */
 .qd-main.is-demo .qd-now-card,
 .qd-main.is-demo .qd-upnext {
     border-radius: 24px;
@@ -839,7 +822,6 @@
     display: none;
 }
 
-/* ...and grows back when the walkthrough ends or a number is called. */
 .qd-main.is-back .qd-now-card,
 .qd-main.is-back .qd-upnext {
     animation: qd-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -850,7 +832,6 @@
     to { opacity: 1; transform: none; }
 }
 
-/* Portrait screens: walkthrough first, then the queue under it. */
 @media (max-width: 900px), (orientation: portrait) {
     .qd-main,
     .qd-main.is-demo {

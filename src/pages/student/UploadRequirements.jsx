@@ -124,7 +124,6 @@ function UploadRequirements() {
         try {
             setUploadingId(requirement.request_requirement_id)
 
-            // Photos are shrunk before upload; PDFs go up as they are.
             const uploadFile = await shrinkImage(file)
             if (uploadFile.size > maxSize) {
                 throw new Error(`File must not exceed ${requirement.document_requirements?.max_file_size_mb || 5} MB.`)

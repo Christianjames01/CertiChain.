@@ -1,6 +1,3 @@
-// Icons used only by the Super Admin portal's new nav items. Same convention
-// as admin/student/employee icons.jsx: 24x24 viewBox, stroke-only.
-
 export const IconKey = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="8" cy="15.5" r="4" />

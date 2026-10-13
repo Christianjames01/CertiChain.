@@ -40,17 +40,12 @@ const FILTERS = [
     { key: 'past', label: 'Past dates' },
 ]
 
-// Messages longer than this are clamped on the card with a "Show more" toggle.
 const LONG_MESSAGE_CHARS = 220
 
-// For places a title is shown as plain text (confirm dialogs, activity log
-// entries) -- strips any formatting tags so those read as normal sentences
-// instead of showing raw markup.
 function stripHtml(html) {
     return (html || '').replace(/<[^>]*>/g, '').trim()
 }
 
-// YYYY-MM-DD in the viewer's local time, comparable with announcement_date.
 function todayIso() {
     return new Date().toLocaleDateString('en-CA')
 }
@@ -198,14 +193,12 @@ function Announcements() {
                 updated_at: new Date().toISOString(),
             }
 
-            // Office hours only apply to an "office open" date; cleared otherwise.
             const hours = hoursSet ? { open: form.open_time, close: form.close_time } : null
             const clearHours = { open_time: null, close_time: null }
 
             if (form.announcement_id) {
                 const run = (row) => supabase.from('announcements').update(row).eq('announcement_id', form.announcement_id)
                 let { error: updateError } = await run({ ...payload, ...(hours ? { open_time: hours.open, close_time: hours.close } : clearHours) })
-                // Before the office-hours migration, save without them.
                 if (updateError && /open_time|close_time/i.test(updateError.message)) ({ error: updateError } = await run(payload))
 
                 if (updateError) throw new Error(updateError.message)

@@ -67,10 +67,6 @@
     margin-bottom: auto;
 }
 
-/* ===================================================
-   DONUT
-=================================================== */
-
 .dash-donut-row {
     display: flex;
     align-items: center;
@@ -94,8 +90,6 @@
     overflow: visible;
 }
 
-/* The 2px surface-colored stroke is the gap between slices: an even
-   pixel gap at every size, instead of an angle that varies with the slice. */
 .dash-donut-segment {
     stroke: var(--surface);
     stroke-width: 2;
@@ -221,10 +215,6 @@
     }
 }
 
-/* ===================================================
-   DAILY COLUMNS
-=================================================== */
-
 .dash-line-wrap {
     position: relative;
     margin-top: auto;
@@ -277,7 +267,6 @@
     transition: opacity 0.15s ease;
 }
 
-/* Today's column is the one to watch, so it's full strength. */
 .dash-column.is-today {
     opacity: 1;
 }
@@ -285,10 +274,6 @@
 .dash-column.is-dimmed {
     opacity: 0.25;
 }
-
-/* ===================================================
-   TOOLTIP (shared)
-=================================================== */
 
 .dash-tooltip {
     position: absolute;
@@ -315,10 +300,6 @@
     color: rgba(255, 255, 255, 0.72);
     font-size: 11px;
 }
-
-/* ===================================================
-   TABLE VIEW (accessible twin)
-=================================================== */
 
 .dash-data-table {
     width: 100%;

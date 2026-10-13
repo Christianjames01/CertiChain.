@@ -39,8 +39,6 @@ function AdminClaimSchedule() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
-    // Version of the schedule the form was last filled from, so a live
-    // refresh doesn't wipe what's being typed unless the schedule changed.
     const formVersionRef = useRef(null)
 
     useEffect(() => {
@@ -85,7 +83,6 @@ function AdminClaimSchedule() {
                 .eq('student_id', requestData.student_id)
                 .single()
 
-            // Add the student's name (profiles) alongside the number.
             const studentInfo = studentData ? (await loadStudentsById([studentData.student_id]))[studentData.student_id] : null
             setStudent(studentData ? { ...studentData, name: studentInfo?.name || '' } : null)
 
@@ -123,8 +120,6 @@ function AdminClaimSchedule() {
         }
     }
 
-    // Live: the student asking to reschedule, another staff member saving a
-    // date, or the request's status changing.
     useLiveRefresh(['claim_schedules', 'document_requests', 'claim_reschedule_requests'], (opts) => {
         if (requestId) loadData(opts)
     })
@@ -136,9 +131,6 @@ function AdminClaimSchedule() {
             throw new Error('You are not logged in.')
         }
 
-        // Best-effort -- a registrar head may or may not also have an
-        // employees row. scheduled_by has no FK/NOT NULL constraint, so
-        // this is allowed to come back null.
         const { data: employee } = await supabase
             .from('employees')
             .select('employee_id')
@@ -208,8 +200,6 @@ function AdminClaimSchedule() {
                         claim_time: scheduledTime,
                         remarks: remarks.trim() || null,
                         status: 'scheduled',
-                        // Clears the "pending" flag only; the student's message
-                        // (reschedule_reason) stays so it's still shown as handled.
                         reschedule_requested_at: null,
                         updated_at: now,
                     }, (payload) => supabase
@@ -252,7 +242,6 @@ function AdminClaimSchedule() {
                     description: `Updated claiming schedule for request "${request?.request_number || requestId}" (Registrar Head).${scheduleChanges ? ' ' + scheduleChanges + '.' : ''}`,
                 })
 
-                // Tell the student the remarks too (new or changed).
                 const newRemarks = remarks.trim()
                 const remarksChanged = newRemarks !== (existingSchedule.remarks || '').trim()
                 const slotChanged = existingSchedule.scheduled_date !== scheduledDate
@@ -274,7 +263,6 @@ function AdminClaimSchedule() {
                         student_id: request.student_id,
                         scheduled_date: scheduledDate,
                         scheduled_time: scheduledTime,
-                        // Legacy column, no longer shown; kept at its old default.
                         estimated_duration_minutes: 60,
                         claiming_counter: claimingCounter.trim() || null,
                         status: 'scheduled',
@@ -523,8 +511,6 @@ function AdminClaimSchedule() {
                     Choose the exact date and time when the student should arrive at the Registrar's Office.
                 </p>
 
-                {/* Every reschedule request the student sent -- kept (marked
-                    handled) when a new date is saved, not wiped. */}
                 <RescheduleHistory
                     scheduleId={existingSchedule?.claim_schedule_id}
                     pending={existingSchedule?.reschedule_requested_at

@@ -94,8 +94,6 @@ function Employees() {
 
             const employeeIds = data.map((e) => e.employee_id)
 
-            // Separate query so the page still loads before the
-            // can_issue_certificates column exists (migration 20261012030000).
             const { data: certFlags } = await supabase
                 .from('employees')
                 .select('employee_id, can_issue_certificates')
@@ -283,7 +281,6 @@ function Employees() {
                 }
             }
 
-            // Done: close the modal and confirm with a toast.
             const createdMessage = `Employee account created for ${form.email.trim()}.${assignmentNote}`
             setShowAddForm(false)
             setForm(BLANK_FORM)
@@ -325,7 +322,6 @@ function Employees() {
         )
         if (!proceed) return
 
-        // Deleting an employee is permanent: confirm who is making it.
         const verified = await confirmWithPassword({
             title: 'Confirm with your password',
             text: `Enter your password to remove ${employee.name}'s employee record.`,
@@ -427,10 +423,6 @@ function Employees() {
         }
     }
 
-    // Claiming-section ("releasing") staff only handle release: requests at
-    // the claiming stage, pickup schedules and the queue. They can't edit
-    // student records or reset passwords. Requests are passed to them at
-    // the claiming stage (Request Details > Pass this request).
     const toggleClaimingSection = async (employee) => {
         if (blockedForReadOnlyViewer(role)) return
         const next = !employee.isClaimingSection
@@ -554,8 +546,6 @@ function Employees() {
         )
         if (!confirmed) return
 
-        // Both directions change who can create new logins -- confirm it's
-        // really you either way.
         const verified = await confirmWithPassword({
             title: 'Confirm with your password',
             text: next

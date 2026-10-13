@@ -10,8 +10,6 @@ import '../auth/Auth.css'
 import './StudentPages.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 
-// SHA-256 of the file, so staff are warned when the same photo is uploaded
-// for another request.
 async function sha256Hex(file) {
     try {
         const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer())
@@ -21,9 +19,6 @@ async function sha256Hex(file) {
     }
 }
 
-// Saves with the receipt number, file fingerprint and group; before the
-// receipt-safeguards migration adds file_hash / receipt_group_id, retries
-// with just the receipt number.
 async function saveWithSafeguards(run, safeguards) {
     const result = await run(safeguards)
     if (result.error && /file_hash|receipt_group_id/i.test(result.error.message || '')) {
@@ -32,7 +27,6 @@ async function saveWithSafeguards(run, safeguards) {
     return result
 }
 
-// Request statuses after the payment was verified.
 const PAID_STATUSES = ['receipt_verified', 'processing', 'lacking_requirements', 'ready_for_claiming', 'completed']
 
 function UploadReceipt() {
@@ -49,12 +43,8 @@ function UploadReceipt() {
     const [uploading, setUploading] = useState(false)
     const [message, setMessage] = useState('')
     const [error, setError] = useState('')
-    // Other requests submitted together with this one that still need
-    // payment -- one Finance Office receipt can cover them too.
     const [siblings, setSiblings] = useState([])
     const [includeIds, setIncludeIds] = useState(() => new Set())
-    // The number printed on the Finance Office receipt. Required: the same
-    // receipt can't be used for another request (checked by the database).
     const [receiptNumber, setReceiptNumber] = useState('')
 
     useLiveRefresh(['official_receipts', 'document_requests'], (options) => loadRequest(options))
@@ -177,14 +167,10 @@ function UploadReceipt() {
 
             setCurrentReceipt(existingReceipt || null)
 
-            // Rejected: keep the same receipt number -- only a clearer photo
-            // is needed.
             if (!silent && existingReceipt?.status === 'rejected' && existingReceipt.receipt_number) {
                 setReceiptNumber(existingReceipt.receipt_number)
             }
 
-            // Requests submitted together (batch_id; the column may not
-            // exist before its migration -- then there are no siblings).
             const { data: batchRow } = await supabase
                 .from('document_requests')
                 .select('batch_id')
@@ -230,9 +216,6 @@ function UploadReceipt() {
         }
     }
 
-    // One receipt at a time: once uploaded it waits for the Registrar. A new
-    // one can be uploaded only if that one is rejected (and never after it's
-    // verified or the request is cancelled).
     const receiptStatus = currentReceipt?.status || null
     const verified = receiptStatus === 'verified' || PAID_STATUSES.includes(request?.status)
     const awaitingReview = !!currentReceipt && receiptStatus !== 'rejected' && !verified
@@ -309,8 +292,6 @@ function UploadReceipt() {
         try {
             setUploading(true)
 
-            // Check the latest state first (another tab or device may have
-            // uploaded one in the meantime).
             const { data: latest } = await supabase
                 .from('official_receipts')
                 .select('status')
@@ -325,16 +306,11 @@ function UploadReceipt() {
                     : 'A receipt was already uploaded and is waiting for the Registrar. You can upload a new one only if it is rejected.')
             }
 
-            // Photos are shrunk before upload (a few hundred KB instead of
-            // several MB); PDFs go up as they are.
             const uploadFile = await shrinkImage(receiptFile)
             if (uploadFile.size > maxSize) {
                 throw new Error('File size must not exceed 5 MB.')
             }
 
-            // One upload = one receipt: link every request it pays for
-            // (staff check them together), and fingerprint the file so a
-            // reused photo can be spotted.
             const coverSiblings = siblings.filter((sib) => includeIds.has(sib.request_id))
             const groupId = coverSiblings.length > 0 ? crypto.randomUUID() : null
             const fileHash = await sha256Hex(receiptFile)
@@ -561,7 +537,6 @@ function UploadReceipt() {
                 setSiblings((prev) => prev.filter((sib) => !includeIds.has(sib.request_id) || failed.includes(sib.request_number)))
             }
 
-            // Lock the form: this receipt now waits for the Registrar.
             setCurrentReceipt({
                 ...(currentReceipt || {}),
                 status: 'uploaded',

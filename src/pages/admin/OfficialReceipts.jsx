@@ -104,7 +104,6 @@ function OfficialReceipts() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['official_receipts'], loadReceipts)
 
     const verifyReceipt = async (receipt) => {

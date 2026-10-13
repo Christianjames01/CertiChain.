@@ -89,8 +89,6 @@ function EmployeeRequestList({ title, subtitle, statusFilter, showFilterChips, e
                 .order('requested_at', { ascending: false })
 
             if (isReleasingOnly) {
-                // Releasing is a front-desk job: they need to look up any
-                // request's claiming status, not just ones assigned to them.
                 query = query.in('status', RELEASING_STATUSES)
             } else {
                 query = query.eq('assigned_employee_id', employee.employee_id)
@@ -142,7 +140,6 @@ function EmployeeRequestList({ title, subtitle, statusFilter, showFilterChips, e
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests'], loadRequests)
 
     const visibleRequests = (requests

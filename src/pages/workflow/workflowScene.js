@@ -2,11 +2,6 @@ import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 
-// The 3D stage for the System Workflow presentation: one softly lit
-// isometric platform with a station per step, joined by a glowing data path.
-// The camera glides between stations; each station animates its step
-// (setShot(id) -> local time t drives that station's animation).
-
 const COLORS = {
     bg: 0x0a1424,
     floor: 0x13233b,
@@ -26,7 +21,6 @@ const COLORS = {
 
 const FONT = '"Inter", "Segoe UI", system-ui, sans-serif'
 
-// Station positions on the platform (x, z).
 const STATIONS = {
     request: [-31, 6],
     upload: [-23, -2],
@@ -39,8 +33,6 @@ const STATIONS = {
     complete: [36, 0],
 }
 
-// Camera framing per shot: the station it looks at (y = look height, dz =
-// nudge), and the camera's offset from that point.
 const SHOT_FRAMING = {
     request: { at: 'request', y: 2.4, offset: [-7, 6.5, 12] },
     upload: { at: 'upload', y: 2.6, offset: [-6, 6, 12] },
@@ -64,7 +56,6 @@ const CAMERA = {
 const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
 const easeOut = (x) => 1 - Math.pow(1 - x, 3)
 const clamp01 = (x) => Math.min(1, Math.max(0, x))
-// 0..1 progress of t between a and b.
 const span = (t, a, b) => clamp01((t - a) / (b - a))
 const popIn = (x) => {
     if (x <= 0) return 0
@@ -73,8 +64,6 @@ const popIn = (x) => {
     const c3 = c1 + 1
     return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2)
 }
-
-// ---- Canvas-drawn panels (floating UI, screens, documents) ---------------
 
 function roundRect(g, x, y, w, h, r) {
     g.beginPath()
@@ -104,7 +93,6 @@ function checkMark(g, cx, cy, s, color = '#22c55e') {
     g.restore()
 }
 
-// A plane with a canvas texture; draw(g, w, h, state) paints it.
 function canvasPanel(width, height, draw, { pxPerUnit = 220, transparent = true, emissive = true, side = THREE.FrontSide } = {}) {
     const canvas = document.createElement('canvas')
     canvas.width = Math.round(width * pxPerUnit)
@@ -130,7 +118,6 @@ function canvasPanel(width, height, draw, { pxPerUnit = 220, transparent = true,
     return { mesh, redraw, material }
 }
 
-// Floating UI card look.
 function cardBackground(g, w, h, { accent = '#3b82f6' } = {}) {
     const r = Math.min(w, h) * 0.06
     g.save()
@@ -164,8 +151,6 @@ function text(g, str, x, y, size, { color = '#0f1f38', weight = 500, align = 'le
     g.fillText(str, x, y)
     g.textAlign = 'left'
 }
-
-// ---- Models -----------------------------------------------------------------
 
 const std = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.05, ...extra })
 
@@ -331,7 +316,6 @@ function makeDocument(panel, w, h) {
     return shadowed(doc)
 }
 
-// Station number badge that floats above each station.
 function makeBadge(number, label) {
     const panel = canvasPanel(3.2, 0.8, (g, w, h, s) => {
         g.save()
@@ -351,8 +335,6 @@ function makeBadge(number, label) {
     })
     return panel
 }
-
-// ---- The scene ----------------------------------------------------------------
 
 export function createWorkflowScene(container) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' })
@@ -375,7 +357,6 @@ export function createWorkflowScene(container) {
 
     const camera = new THREE.PerspectiveCamera(34, 16 / 9, 0.1, 400)
 
-    // Lights: soft sky, a warm key light with shadows, a cool rim.
     scene.add(new THREE.HemisphereLight(0xbcd7ff, 0x0b1220, 0.55))
     const key = new THREE.DirectionalLight(0xfff1dc, 2.1)
     key.position.set(-20, 40, 26)
@@ -393,13 +374,11 @@ export function createWorkflowScene(container) {
     rim.position.set(30, 18, -30)
     scene.add(rim)
 
-    // A spotlight that follows the active station.
     const focus = new THREE.SpotLight(0xffffff, 0, 30, Math.PI / 7, 0.6, 1.4)
     focus.position.set(0, 16, 6)
     scene.add(focus)
     scene.add(focus.target)
 
-    // Platform.
     const world = new THREE.Group()
     scene.add(world)
     const platform = new THREE.Mesh(new RoundedBoxGeometry(92, 1.2, 40, 4, 0.5), std(COLORS.floor, { roughness: 0.62, metalness: 0.15 }))
@@ -416,14 +395,12 @@ export function createWorkflowScene(container) {
     edge.position.set(8, -1.18, 0)
     world.add(edge)
 
-    // ---- Data path joining the stations -----------------------------------
     const order = ['request', 'upload', 'payment', 'record', 'process', 'generate', 'digital', 'physical', 'complete']
     const pathPoints = order.map((k) => new THREE.Vector3(STATIONS[k][0], 0.06, STATIONS[k][1]))
     const curve = new THREE.CatmullRomCurve3(pathPoints, false, 'centripetal')
     const pathMat = new THREE.MeshBasicMaterial({ color: 0x2b5a99, transparent: true, opacity: 0.75, toneMapped: false })
     const pathTube = new THREE.Mesh(new THREE.TubeGeometry(curve, 400, 0.05, 8, false), pathMat)
     world.add(pathTube)
-    // Brighter overlay that "fills" the path up to the current station.
     const fillGeo = new THREE.TubeGeometry(curve, 400, 0.075, 8, false)
     const fillMat = new THREE.MeshBasicMaterial({ color: COLORS.sky, transparent: true, opacity: 0.95, toneMapped: false })
     const pathFill = new THREE.Mesh(fillGeo, fillMat)
@@ -432,7 +409,6 @@ export function createWorkflowScene(container) {
     const fillIndexCount = fillGeo.index.count
     const stationU = order.map((_, i) => i / (order.length - 1))
 
-    // Pulses travelling along the path.
     const pulseGeo = new THREE.SphereGeometry(0.11, 12, 10)
     const pulses = []
     for (let i = 0; i < 26; i++) {
@@ -442,7 +418,6 @@ export function createWorkflowScene(container) {
         pulses.push(m)
     }
 
-    // Floating ambient particles.
     const particleCount = 520
     const particleGeo = new THREE.BufferGeometry()
     const pos = new Float32Array(particleCount * 3)
@@ -469,7 +444,6 @@ export function createWorkflowScene(container) {
     }))
     scene.add(particles)
 
-    // Short-lived sparkle bursts (confirmations).
     const burstGeo = new THREE.BufferGeometry()
     const burstCount = 160
     const burstPos = new Float32Array(burstCount * 3)
@@ -500,7 +474,6 @@ export function createWorkflowScene(container) {
     const station = {}
     const badges = {}
 
-    // ---- 1. Student request: desk, laptop, student --------------------------
     {
         const g = new THREE.Group()
         g.position.copy(at('request'))
@@ -538,10 +511,8 @@ export function createWorkflowScene(container) {
         })
         const laptop = makeLaptop(screen)
         laptop.position.set(0, 1.08, 0.05)
-        // The screen faces the student (who sits on +z) and the camera behind them.
         g.add(laptop)
 
-        // Floating request card that rises from the laptop.
         const card = canvasPanel(2.6, 1.7, (c, w, h, s) => {
             cardBackground(c, w, h)
             cardTitle(c, w, h, 'Document Request')
@@ -560,7 +531,6 @@ export function createWorkflowScene(container) {
         card.mesh.scale.setScalar(0.001)
         g.add(card.mesh)
 
-        // A small glowing "request" token that leaves along the path.
         const token = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.55, 0.06, 2, 0.03), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: COLORS.sky, emissiveIntensity: 1.3 }))
         token.visible = false
         world.add(token)
@@ -568,7 +538,6 @@ export function createWorkflowScene(container) {
         station.request = { group: g, student, screen, card, token, laptop }
     }
 
-    // ---- 2. Upload requirements: hologram pedestal with documents ------------
     {
         const g = new THREE.Group()
         g.position.copy(at('upload'))
@@ -629,17 +598,12 @@ export function createWorkflowScene(container) {
         station.upload = { group: g, pedestal, beamMat, docs, progress, student }
     }
 
-    // ---- 3. Payment: Finance Office window, Official Receipt upload ------------
-    // There is no online payment: the student pays at the Finance Office and
-    // uploads the receipt, which stays "awaiting verification" until the
-    // Registrar checks it at the next station.
     {
         const g = new THREE.Group()
         g.position.copy(at('payment'))
         world.add(g)
 
         const booth = new THREE.Group()
-        // Wall built around an open window (1.7 x 1.0) so the cashier shows through.
         const wallMat = std(0xe9edf4, { roughness: 0.5 })
         for (const [w, h, x, y] of [[3.4, 1.25, 0, 0.625], [3.4, 0.75, 0, 2.625], [0.85, 1.0, -1.275, 1.75], [0.85, 1.0, 1.275, 1.75]]) {
             const part = new THREE.Mesh(new RoundedBoxGeometry(w, h, 0.4, 2, 0.04), wallMat)
@@ -668,7 +632,6 @@ export function createWorkflowScene(container) {
         booth.rotation.y = -0.3
         g.add(shadowed(booth))
 
-        // The Official Receipt the cashier hands over.
         const receiptPanel = canvasPanel(0.8, 1.05, (c, w, h) => {
             c.fillStyle = '#fffdf6'
             c.fillRect(0, 0, w, h)
@@ -689,7 +652,6 @@ export function createWorkflowScene(container) {
         receipt.scale.setScalar(0.001)
         g.add(receipt)
 
-        // The student's upload, on the request page.
         const card = canvasPanel(3.0, 1.15, (c, w, h, s) => {
             cardBackground(c, w, h, { accent: s.done ? '#b8892b' : '#123b78' })
             text(c, 'Upload Official Receipt · REQ-000124', w * 0.06, h * 0.24, h * 0.1, { color: '#5b6b82', weight: 700 })
@@ -710,14 +672,12 @@ export function createWorkflowScene(container) {
         student.userData.start = new THREE.Vector3(-2.6, 0, 2.6)
         student.userData.end = new THREE.Vector3(-1.2, 0, 1.3)
         student.position.copy(student.userData.start)
-        // Faces the cashier window.
         student.rotation.y = 2.3
         g.add(student)
 
         station.payment = { group: g, receipt, card, student, cashier }
     }
 
-    // ---- 4. Registrar review: employee checks the request ----------------------
     {
         const g = new THREE.Group()
         g.position.copy(at('record'))
@@ -774,7 +734,6 @@ export function createWorkflowScene(container) {
         station.record = { group: g, screen, record, employee }
     }
 
-    // ---- 4. Processing: employee desk, checklist, document ---------------------
     {
         const g = new THREE.Group()
         g.position.copy(at('process'))
@@ -853,7 +812,6 @@ export function createWorkflowScene(container) {
         station.process = { group: g, screen, doc, checklist, employee }
     }
 
-    // ---- 6. Document ready: the finished document ------------------------------
     {
         const g = new THREE.Group()
         g.position.copy(at('generate'))
@@ -904,7 +862,6 @@ export function createWorkflowScene(container) {
         glow.position.set(0, 2.25, -0.08)
         g.add(glow)
 
-        // Converging particles while it is generated.
         const genCount = 140
         const genGeo = new THREE.BufferGeometry()
         const genStart = new Float32Array(genCount * 3)
@@ -934,7 +891,6 @@ export function createWorkflowScene(container) {
         station.generate = { group: g, pedestal, cert, certPanel, glowMat, genGeo, genStart, genPos, genMat, genCard, genCount }
     }
 
-    // ---- 7a. Ready: the student is notified on their phone -------------------------------
     {
         const g = new THREE.Group()
         g.position.copy(at('digital'))
@@ -962,7 +918,6 @@ export function createWorkflowScene(container) {
                 text(c, 'Tap to see your pickup schedule', w * 0.12, y + h * 0.09, h * 0.024, { color: '#5b6b82', weight: 600 })
             }
             if (s.card) {
-                // The request on the student's phone: ready, with the pickup details.
                 c.fillStyle = '#fffdf6'
                 roundRect(c, w * 0.12, h * 0.46, w * 0.76, h * 0.32, 10)
                 c.fill()
@@ -992,7 +947,6 @@ export function createWorkflowScene(container) {
         station.digital = { group: g, phone, phoneScreen, pedestal, student }
     }
 
-    // ---- 7b. Pickup: calendar board + registrar window ---------------
     {
         const g = new THREE.Group()
         g.position.copy(at('physical'))
@@ -1010,7 +964,6 @@ export function createWorkflowScene(container) {
             const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
             const cw = (w * 0.9) / 7
             days.forEach((d, i) => text(c, d, w * 0.05 + cw * (i + 0.5), h * 0.21, h * 0.045, { color: '#5b6b82', weight: 700, align: 'center' }))
-            // Oct 1, 2026 is a Thursday.
             const offset = 4
             for (let day = 1; day <= 31; day++) {
                 const idx = day + offset - 1
@@ -1038,7 +991,6 @@ export function createWorkflowScene(container) {
         g.add(shadowed(stand))
         g.add(shadowed(board))
 
-        // Registrar window.
         const booth = new THREE.Group()
         const wall = new THREE.Mesh(new RoundedBoxGeometry(3.2, 3.0, 0.4, 3, 0.08), std(0xe9edf4, { roughness: 0.5 }))
         wall.position.y = 1.5
@@ -1077,7 +1029,6 @@ export function createWorkflowScene(container) {
         station.physical = { group: g, cal, slot, student }
     }
 
-    // ---- 8. Completion: completed panel + request history -----------------------
     {
         const g = new THREE.Group()
         g.position.copy(at('complete'))
@@ -1118,7 +1069,6 @@ export function createWorkflowScene(container) {
         station.complete = { group: g, done, logCard }
     }
 
-    // Badges.
     const badgeInfo = [
         ['request', 1, 'Student Request'],
         ['upload', 2, 'Requirements'],
@@ -1137,7 +1087,6 @@ export function createWorkflowScene(container) {
         badges[k] = b
     }
 
-    // ---- Shot state + animation ------------------------------------------------
     const tmp = new THREE.Vector3()
     const camPos = new THREE.Vector3()
     const camTarget = new THREE.Vector3()
@@ -1210,7 +1159,6 @@ export function createWorkflowScene(container) {
         c.logCard.mesh.scale.setScalar(0.001)
     }
 
-    // The certificate stays generated for every shot after 'generate'.
     function settleBefore(id) {
         const idx = SHOT_ORDER.indexOf(id)
         const gIdx = SHOT_ORDER.indexOf('generate')
@@ -1270,7 +1218,6 @@ export function createWorkflowScene(container) {
                 r.token.position.set(tmp.x, 1.2 + Math.sin(k * Math.PI) * 1.4, tmp.z)
                 r.token.rotation.y = t * 3
             }
-            // student leans in to type
             r.student.userData.arms.forEach((a, i) => { a.rotation.x = -0.9 + Math.sin(t * 9 + i * 2) * (t < 4.6 ? 0.06 : 0) })
         } else if (shotId === 'upload') {
             const u = station.upload
@@ -1287,18 +1234,15 @@ export function createWorkflowScene(container) {
             u.student.userData.arms[1].rotation.x = -1.1 * span(t, 0.8, 1.6) * (1 - span(t, 4.6, 5.4))
         } else if (shotId === 'payment') {
             const pay = station.payment
-            // Walk up to the cashier window.
             const walk = easeInOut(span(t, 0.3, 1.5))
             pay.student.position.lerpVectors(pay.student.userData.start, pay.student.userData.end, walk)
             pay.student.userData.body.position.y = 1.05 + (walk > 0 && walk < 1 ? Math.abs(Math.sin(t * 7)) * 0.04 : 0)
-            // The cashier hands over the Official Receipt...
             scaleTo(pay.receipt, span(t, 1.6, 2.1))
             const hand = easeInOut(span(t, 1.9, 3.0))
             pay.receipt.position.lerpVectors(pay.receipt.userData.start, pay.receipt.userData.hand, hand)
             pay.receipt.position.y += Math.sin(hand * Math.PI) * 0.4
             pay.receipt.rotation.y = 0.6 * (1 - hand)
             pay.student.userData.arms[1].rotation.x = -1.1 * span(t, 2.4, 3.0) * (1 - span(t, 4.6, 5.2))
-            // ...and the student uploads a photo of it.
             scaleTo(pay.card.mesh, span(t, 3.2, 4.0))
             pay.card.mesh.position.y = 4.3 + Math.sin(t * 1.6) * 0.05
             const up = easeInOut(span(t, 4.6, 6.0))
@@ -1366,7 +1310,6 @@ export function createWorkflowScene(container) {
             ph.slot.mesh.position.y = 4.55 + Math.sin(t * 1.6) * 0.05
             ph.slot.redraw({ confirmed: t > 5.2 })
             if (t > 5.2 && t < 5.3) sparkle(at('physical').x - 1.0, 4.2, at('physical').z + 0.5, 0x93c5fd)
-            // student walks towards the window
             const w = easeInOut(span(t, 3.6, 7.2))
             ph.student.position.set(1.6 + w * 0.9, 0, 1.6 - w * 1.3)
             ph.student.userData.body.position.y = 1.05 + (w > 0 && w < 1 ? Math.abs(Math.sin(t * 7)) * 0.04 : 0)
@@ -1383,14 +1326,12 @@ export function createWorkflowScene(container) {
     }
 
     function idle(time) {
-        // Breathing + gentle head motion for everyone.
         const people = [station.request.student, station.upload.student, station.payment.student, station.payment.cashier, station.record.employee, station.process.employee, station.digital.student, station.physical.student]
         people.forEach((p, i) => {
             const b = p.userData.body
             b.scale.y = 1 + Math.sin(time * 1.6 + i) * 0.012
             if (!(shotId === 'record' && p === station.record.employee)) p.userData.head.rotation.y = Math.sin(time * 0.4 + i * 1.3) * 0.12
         })
-        // Path pulses.
         pulses.forEach((m) => {
             m.userData.u = (m.userData.u + 0.0016) % 1
             curve.getPointAt(m.userData.u, tmp)
@@ -1399,14 +1340,12 @@ export function createWorkflowScene(container) {
             m.material.opacity = lit ? 0.95 : 0.35
             m.scale.setScalar(lit ? 1.2 : 0.8)
         })
-        // Ambient particles drift upward.
         const arr = particleGeo.attributes.position.array
         for (let i = 0; i < particleCount; i++) {
             arr[i * 3 + 1] += speeds[i] * 0.012
             if (arr[i * 3 + 1] > 16) arr[i * 3 + 1] = 0
         }
         particleGeo.attributes.position.needsUpdate = true
-        // Badges face the camera; only on the wide overview shots (a map).
         const showBadges = shotId === 'intro' || shotId === 'finale'
         Object.values(badges).forEach((b) => {
             b.mesh.visible = showBadges
@@ -1414,26 +1353,22 @@ export function createWorkflowScene(container) {
         })
     }
 
-    // ---- Loop -------------------------------------------------------------------
     const clock = new THREE.Clock()
     let elapsed = 0
     let frame = 0
     const loop = () => {
         frame = requestAnimationFrame(loop)
-        // Real time (capped) so slow computers stay in step with the narrator.
         const dt = Math.min(0.25, clock.getDelta())
         if (!paused) {
             shotTime += dt
             elapsed += dt
         }
 
-        // Camera glide with a slow drift once it arrives.
         if (camT < 1 && !paused) camT = Math.min(1, camT + dt / 2.6)
         const e = easeInOut(camT)
         const drift = paused ? 0 : Math.sin(elapsed * 0.25) * 0.6
         camPos.lerpVectors(fromPos, toPos, e)
         camTarget.lerpVectors(fromTarget, toTarget, e)
-        // Arc the camera up a little while travelling.
         camPos.y += Math.sin(e * Math.PI) * 2.5
         camera.position.set(camPos.x + drift, camPos.y + drift * 0.3, camPos.z)
         camera.lookAt(camTarget)
@@ -1447,18 +1382,15 @@ export function createWorkflowScene(container) {
             camera.lookAt(f.target)
         }
 
-        // Fill the path up to the active station.
         pathFillNow += (pathFillTarget - pathFillNow) * Math.min(1, dt * 1.6)
         fillGeo.setDrawRange(0, Math.floor((fillIndexCount * pathFillNow) / 6) * 6)
 
-        // Spotlight on the active station.
         const wantFocus = BADGE_FOR_SHOT[shotId] ? 60 : 0
         focus.intensity += (wantFocus - focus.intensity) * Math.min(1, dt * 2)
 
         if (!paused) animateShot(shotTime)
         idle(elapsed)
 
-        // Sparkles.
         if (burstAge < 2) {
             burstAge += dt
             for (let i = 0; i < burstCount; i++) {
@@ -1481,10 +1413,7 @@ export function createWorkflowScene(container) {
         renderer.domElement.style.width = '100%'
         renderer.domElement.style.height = '100%'
         camera.aspect = w / h
-        // Keep the framing on tall (phone) screens.
         camera.fov = w / h < 1 ? 52 : 34
-        // Frame the action in the upper part of the screen, clear of the
-        // subtitles at the bottom.
         camera.setViewOffset(w, h, 0, Math.round(h * 0.14), w, h)
         camera.updateProjectionMatrix()
     }

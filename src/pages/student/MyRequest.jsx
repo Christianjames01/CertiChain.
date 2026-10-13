@@ -156,7 +156,6 @@ function MyRequest() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests'], loadRequests)
 
     const visibleRequests = requests

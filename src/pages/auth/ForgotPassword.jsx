@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase'
 import AuthLayout from './AuthLayout'
 import { captchaEnabled, getCaptchaToken, preloadCaptcha } from '../../lib/captcha'
 
-// Get the security check ready while the form is being filled in.
 preloadCaptcha()
 
 function ForgotPassword() {
@@ -20,7 +19,6 @@ function ForgotPassword() {
         setMessage('')
         setStatus('idle')
 
-        // The security check (slide puzzle + Cloudflare) pops up now.
         const captchaToken = await getCaptchaToken()
         if (captchaEnabled && !captchaToken) {
             setStatus('error')

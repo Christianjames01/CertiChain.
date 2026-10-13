@@ -91,7 +91,6 @@ function formatTime(time) {
     return date.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })
 }
 
-// e.g. "Sep 23, 2026, 10:38 PM"
 function formatDateTime(value) {
     if (!value) return ''
     return new Date(value).toLocaleString('en-PH', {
@@ -103,7 +102,6 @@ function formatDateTime(value) {
     })
 }
 
-// A plain 'YYYY-MM-DD' date (no time), e.g. "Tue, Sep 29, 2026".
 function formatDay(dateStr) {
     if (!dateStr) return ''
     return new Date(`${dateStr}T00:00:00`).toLocaleDateString('en-PH', {
@@ -136,7 +134,6 @@ function RequestDetails() {
     const [submittingRating, setSubmittingRating] = useState(false)
 
     useLiveRefresh(['document_requests', 'request_requirements', 'official_receipts', 'claim_schedules', 'credentials'], (options) => loadRequest(options))
-    // Deadline before the request is rejected automatically (if it applies).
     const autoReject = useAutoReject(request)
 
     useEffect(() => {
@@ -153,7 +150,6 @@ function RequestDetails() {
         loadRequest()
     }, [requestId])
 
-    // "View Digital Credential" links here with #credential: scroll to it.
     useEffect(() => {
         if (!loading && location.hash === '#credential') {
             document.getElementById('credential')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -257,7 +253,6 @@ function RequestDetails() {
 
             setRequest(requestData)
 
-            // Everything below only needs the request, so load it all at once (each round trip is ~0.3 s from Davao).
             await Promise.all([
                 (async () => {
                     if (requestData.document_type_id) {
@@ -283,8 +278,6 @@ function RequestDetails() {
                         if (employeeRow) {
                             const [employeeProfile] = await loadDirectoryProfiles([employeeRow.user_id])
 
-                            // Prefer the employee's nickname (set by an admin), same as
-                            // the student Messages page.
                             const realName = employeeProfile
                                 ? `${employeeProfile.first_name} ${employeeProfile.last_name}`.trim()
                                 : ''
@@ -747,7 +740,6 @@ function RequestDetails() {
                     </div>
                 )}
 
-
                 {request.status === 'completed' && (
                     <div className="student-card" style={{ background: 'var(--paper)', marginTop: 16, marginBottom: 0 }}>
                         <h3 style={{ fontSize: 15, marginBottom: 10 }}>Rate Your Experience</h3>
@@ -921,10 +913,6 @@ function RequestDetails() {
                     </div>
                 )}
 
-                {/* Every status where the request isn't paid yet: payment_pending
-                    is exactly when the banner says "upload your official receipt
-                    below", and a request sent back for requirements
-                    (lacking_requirements) can still be unpaid. */}
                 {['pending', 'payment_pending', 'processing', 'lacking_requirements'].includes(request.status) && (
                     <div className="student-card" style={{ background: 'var(--paper)', marginTop: 16, marginBottom: 0 }}>
                         <h3 style={{ fontSize: 15, marginBottom: 10 }}>Payment</h3>

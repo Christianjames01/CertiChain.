@@ -1,5 +1,3 @@
-/* Reports page, plus its printable / "Save as PDF" layout. */
-
 .report-actions {
     display: flex;
     gap: 10px;
@@ -130,7 +128,6 @@
     }
 }
 
-/* Stat tiles use the dashboard tile style; they are not links. */
 .report-tile {
     cursor: default;
 }

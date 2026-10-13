@@ -18,25 +18,17 @@ import { useTyping } from '../../lib/useTyping'
 import { pendingInquiry, statusReplyFor, inquiryRequestNumber, inquiryLabel } from '../../lib/requestStatusMessages'
 import { friendlyError } from '../../lib/friendlyError'
 
-// Same contact block already shown to students on the Help & Support page
-// -- reused here so the head doesn't have to retype the office's number,
-// email, and address every time they open a new conversation.
 const TEMPLATE_MESSAGE = `Hi! This is the HCDC Registrar's Office (ORRM). You can reach us at (082) 221-9071 to 79 loc. 116 or 167, or email registrar@hcdc.edu.ph. Our office is at Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City. How can we help you today?`
 
 function Messages() {
     const [currentUserId, setCurrentUserId] = useState(null)
     const [senderNames, setSenderNames] = useState({})
     const [threads, setThreads] = useState([])
-    // Every row loaded, including the hidden [[ref=]] routing copies, so a
-    // delete can also hide those siblings (see hideRows).
     const [rawMessages, setRawMessages] = useState([])
     const [reactionRows, setReactionRows] = useState([])
     const [deletingKey, setDeletingKey] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-    // The open conversation is read from `threads` on every render (so live
-    // messages show up in it); a brand-new conversation that has no
-    // messages yet lives in draftThread until the first one is sent.
     const [activeKey, setActiveKey] = useState(null)
     const [draftThread, setDraftThread] = useState(null)
 
@@ -45,7 +37,6 @@ function Messages() {
     const [threadFilter, setThreadFilter] = useState('all')
     const [sending, setSending] = useState(false)
     const [fillingStatus, setFillingStatus] = useState(false)
-    // The message being answered (Messenger-style reply), or null.
     const [replyTo, setReplyTo] = useState(null)
 
     const [showNewMessage, setShowNewMessage] = useState(false)
@@ -76,14 +67,11 @@ function Messages() {
 
             setCurrentUserId(user.id)
 
-            // Round 1: every message and what the head hid, together (each
-            // round trip is ~0.3 s from Davao).
             const [{ data, error: messagesError }, hiddenIds] = await Promise.all([
                 supabase
                     .from('messages')
                     .select('*')
                     .order('created_at', { ascending: true }),
-                // Messages this user deleted "for me".
                 loadHiddenMessageIds(user.id),
             ])
 
@@ -99,7 +87,6 @@ function Messages() {
                 ...new Set(visible.flatMap((m) => [m.sender_user_id, m.receiver_user_id]))
             ]
 
-            // Round 2: everyone's profile and display name, together.
             const [{ data: profiles }, labels] = await Promise.all([
                 userIds.length
                     ? supabase.from('profiles').select('user_id, first_name, last_name, role, profile_photo_url').in('user_id', userIds)
@@ -113,17 +100,10 @@ function Messages() {
 
             const roleFor = (userId) => profileByUserId[userId]?.role || ''
 
-            // A reply into a student-employee conversation is saved as one
-            // row per recipient, each tagged [[ref=]] (see sendReply). Show
-            // the student's copy (tag removed) and drop the employee's, so
-            // the message appears once. Older replies only tagged the
-            // employee's copy.
             const rows = visible
                 .filter((m) => !refOf(m.message) || roleFor(m.receiver_user_id) === 'student')
                 .map(readMessage)
 
-            // Rows saved in the same send (same sender and moment) but to
-            // someone else -- how a fanned-out reply is recognised.
             const otherReceiversOf = (m) => visible
                 .filter((x) => x.sender_user_id === m.sender_user_id && x.created_at === m.created_at && x.receiver_user_id !== m.receiver_user_id)
                 .map((x) => x.receiver_user_id)
@@ -145,14 +125,6 @@ function Messages() {
                 grouped[pairKey].messages.push(m)
             }
 
-            // A reply sent while viewing someone else's conversation is
-            // delivered as one row per recipient (messages is strictly
-            // 1:1), so a fresh reload regroups it into its own
-            // "head <-> student" / "head <-> employee" pairs. Fold only those
-            // fanned-out copies back into the conversation they were sent
-            // in. A direct message between the head and a student (or a
-            // student's reply to it) has no sibling and stays in its own
-            // head <-> student conversation.
             {
                 for (const [key, group] of Object.entries(grouped)) {
                     const isHeadGroup = group.participantA === user.id || group.participantB === user.id
@@ -160,8 +132,6 @@ function Messages() {
 
                     const otherId = group.participantA === user.id ? group.participantB : group.participantA
 
-                    // Every non-head conversation this person is part of (an
-                    // employee can be talking with several students).
                     const candidates = Object.values(grouped).filter((g) =>
                         g.pairKey !== key &&
                         g.participantA !== user.id && g.participantB !== user.id &&
@@ -177,22 +147,16 @@ function Messages() {
                     for (const m of group.messages) {
                         const signature = signatureOf(m)
 
-                        // A fanned-out copy belongs in whichever conversation
-                        // already holds its sibling (same sender, text, time).
                         const sibling = candidates
                             .map((g) => ({ g, index: g.messages.findIndex((x) => signatureOf(x) === signature) }))
                             .find((c) => c.index !== -1)
 
                         if (sibling) {
-                            // Show it once, but keep the head's own copy so its
-                            // unread status counts and "Mark as read" can clear it.
                             if (m.receiver_user_id === user.id) sibling.g.messages[sibling.index] = m
                             moved.add(m.message_id)
                             continue
                         }
 
-                        // The head's own fanned-out reply: its other copy went
-                        // to the other person of the conversation it belongs in.
                         const others = m.sender_user_id === user.id ? otherReceiversOf(m) : []
                         const target = others
                             .map((id) => grouped[[otherId, id].sort().join('|')])
@@ -207,7 +171,6 @@ function Messages() {
 
                     for (const g of touched) g.messages.sort((a, b) => a.created_at.localeCompare(b.created_at))
 
-                    // Whatever is left is a direct conversation with the head.
                     group.messages = group.messages.filter((m) => !moved.has(m.message_id))
                     if (group.messages.length === 0) delete grouped[key]
                 }
@@ -240,25 +203,12 @@ function Messages() {
         }
     }
 
-    // Messages sent to the head -- used for "Mark all as read" and for
-    // deciding what actually gets marked read when the head opens a
-    // thread. An oversight thread's messages were never addressed to the
-    // head, so opening one to look must never mark them read on behalf of
-    // the student or employee who actually received them.
     const unreadCountFor = (thread) => unreadReceived(thread.messages, currentUserId).length
 
-    // Any unread message at all, head's or not -- what the thread list
-    // badge and the Unread tab go by, same as the "All" view already shows
-    // which threads have something unseen. An oversight thread the head
-    // is just watching still shows as unread here if the actual
-    // participant hasn't read it yet -- same as Messenger shows unread on
-    // any conversation, not only ones addressed to you specifically.
     const threadUnreadCount = (thread) => thread.messages.filter((m) => !m.is_read).length
 
     const totalUnread = threads.reduce((sum, t) => sum + unreadCountFor(t), 0)
 
-    // Marks every unread message the head received in the given threads
-    // as read, in the database and in page state, and refreshes the badge.
     const markThreadsRead = async (targetThreads) => {
         const ids = targetThreads.flatMap((t) => unreadReceived(t.messages, currentUserId).map((m) => m.message_id))
         if (ids.length === 0) return
@@ -288,8 +238,6 @@ function Messages() {
         setReply('')
     }
 
-    // Opening a conversation, or a message arriving while it's open, marks
-    // what was sent to the head as read -- like Messenger.
     const activeUnread = activeThread ? unreadCountFor(activeThread) : 0
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -300,11 +248,6 @@ function Messages() {
     const isMyThread = (thread) =>
         !!currentUserId && (thread.participantA === currentUserId || thread.participantB === currentUserId)
 
-    // Normally just the one other person. Viewing a student<->employee
-    // thread the head isn't part of, neither A nor B is the head, so both
-    // come back -- a reply there fans out to each of them individually
-    // (the schema is strictly 1:1 rows), but still reads as one message
-    // sent into this same conversation rather than a separate DM.
     const otherParticipants = (thread) => {
         const both = [
             { id: thread.participantA, name: thread.nameA, role: thread.roleA },
@@ -320,9 +263,6 @@ function Messages() {
         setShowNewMessage(true)
     }
 
-    // Number and name are on different tables (students / profiles), so
-    // "matches either" needs two lookups run in parallel and merged/
-    // de-duped, rather than one query across the join.
     const searchStudents = async (query) => {
         setStudentQuery(query)
 
@@ -379,10 +319,6 @@ function Messages() {
         }
     }
 
-    // Shared by both the "+ New Message" student picker and the "Message
-    // <person>" buttons shown while viewing someone else's conversation --
-    // either way it's the head opening/continuing their own thread with
-    // that specific person.
     const startThreadWithUser = ({ userId, name, role }) => {
         const pairKey = [currentUserId, userId].sort().join('|')
         const existing = threads.find((t) => t.pairKey === pairKey)
@@ -411,21 +347,11 @@ function Messages() {
         const recipients = otherParticipants(activeThread)
         if (recipients.length === 0) return
 
-        // The employee's own Messages page can't query the student's copy
-        // of a fanned-out message (RLS only allows sender=self or
-        // receiver=self), so there's no way for it to know these two rows
-        // are siblings other than reading it off the message itself. This
-        // tag is invisible to the student's copy and stripped back out
-        // before display on the employee's side.
         const studentRecipient = recipients.find((r) => r.role === 'student')
 
         try {
             setSending(true)
 
-            // Replying into a student-employee conversation: tag each copy
-            // with the other person, so both of their pages file it in this
-            // conversation (the student's page would otherwise treat a head
-            // message as a direct one).
             const staffRecipient = recipients.find((r) => r.role !== 'student')
             const rows = recipients.map((r) => {
                 const fannedOut = recipients.length > 1 && studentRecipient
@@ -454,9 +380,6 @@ function Messages() {
 
             setRawMessages((prev) => [...prev, ...data])
 
-            // Delivered as one row per recipient under the hood, but shown
-            // as a single bubble here -- it's one message from the head's
-            // point of view, not several. Show the untagged copy.
             const shown = data.find((d) => d.receiver_user_id === studentRecipient?.id) || data[0]
             const displayRow = readMessage(shown)
             const updatedThread = { ...activeThread, messages: [...activeThread.messages, displayRow] }
@@ -480,8 +403,6 @@ function Messages() {
         }
     }
 
-    // "Delete for me": hides every stored copy of the message(s) for this
-    // user only; the other people in the conversation keep theirs.
     const hideRows = async (msgs) => {
         const ids = siblingMessageIds(msgs, rawMessages)
         await hideMessagesForMe(currentUserId, ids)
@@ -490,7 +411,6 @@ function Messages() {
         return hidden
     }
 
-    // Unsend for everyone: all participants see "... deleted a message".
     const deleteMessage = async (m) => {
         const confirmed = await confirmModal(
             'Delete this message for everyone? Everyone in the conversation will see "HCDC-Registrar deleted a message" instead.',
@@ -513,8 +433,6 @@ function Messages() {
         }
     }
 
-    // Only offered on the head's own messages (see MessageBubble). Returns
-    // false on failure so the bubble stays in edit mode.
     const editMessage = async (m, newText) => {
         try {
             await editOwnMessage(m.message_id, newText, m.replyTo)
@@ -546,8 +464,6 @@ function Messages() {
         }
     }
 
-    // Used from both the conversation list and the open conversation.
-    // New messages sent into the conversation later will bring it back.
     const deleteConversation = async (thread) => {
         const count = thread.messages.length
         const confirmed = await confirmModal(
@@ -572,19 +488,9 @@ function Messages() {
         }
     }
 
-    // A merged thread can include messages from someone who isn't either
-    // of the original two participants (e.g. the head folded into a
-    // student<->employee conversation), so this has to resolve any
-    // sender's real name rather than just matching against A/B.
-    // senderNames only knows about senders from messages that already
-    // existed at page load -- the head's own very first message ever
-    // (e.g. right after starting a brand-new "+ New Message" thread)
-    // wouldn't be in it yet, so resolve "self" directly instead of
-    // depending on that lookup for the one sender we always know for sure.
     const nameForSender = (senderId) =>
         senderId === currentUserId ? 'HCDC-Registrar' : (senderNames[senderId] || 'Unknown')
 
-    // "You deleted a message" / "Yul deleted a message", or null.
     const deletedLabel = (m) => {
         if (!m?.deleted_at) return null
         const by = m.deleted_by || m.sender_user_id
@@ -600,8 +506,6 @@ function Messages() {
     const visibleThreads = (threadFilter === 'unread' ? unreadThreads : threadFilter === 'mine' ? myThreads : threads)
         .filter((t) => !threadQuery || `${t.nameA} ${t.nameB}`.toLowerCase().includes(threadQuery))
 
-    // In the head's own conversations, show the other person; in oversight
-    // conversations, show both people.
     const peopleOf = (thread) => {
         const a = { id: thread.participantA, name: thread.nameA, photo: thread.photoA }
         const b = { id: thread.participantB, name: thread.nameB, photo: thread.photoB }
@@ -619,8 +523,6 @@ function Messages() {
         return `${roleLabel(thread.roleA)} & ${roleLabel(thread.roleB)} · replying reaches both`
     }
 
-    // Presence only makes sense for a real 1:1 -- not an oversight thread
-    // where "replying reaches both" of two other people.
     const directPartnerId = activeThread && isMyThread(activeThread) && otherParticipants(activeThread).length === 1
         ? otherParticipants(activeThread)[0].id
         : null
@@ -636,7 +538,6 @@ function Messages() {
         [thread.participantA, thread.participantB].filter((id) => id !== currentUserId && typingUserIds.includes(id))
     const activeTypers = activeThread ? typersIn(activeThread) : []
 
-    // A student asked "what's the status of REQ-…?": fill in the answer.
     const inquiry = activeThread ? pendingInquiry(activeThread.messages, currentUserId) : null
     const inquiryNumber = inquiryRequestNumber(inquiry?.message)
     const fillStatusReply = async () => {

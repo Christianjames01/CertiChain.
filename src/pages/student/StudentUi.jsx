@@ -1,7 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 export { EmptyState } from '../../components/EmptyState'
 
-// "image/jpeg,image/png,application/pdf" -> "JPG, PNG, PDF"
 const friendlyTypes = (accept) => {
     if (!accept) return 'JPG, PNG, PDF'
     const names = accept.split(',').map((t) => t.trim().toLowerCase()).map((t) => {
@@ -17,14 +16,10 @@ const friendlyTypes = (accept) => {
 
 const sizeText = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`)
 
-// A friendly file picker: tap to choose or drag a file in; once chosen shows
-// the name and size with Preview / Replace / Remove. file: the chosen File
-// (controlled by the parent); onChange(file | null).
 export function FilePicker({ file, onChange, accept, maxMb = 5, disabled = false, label = 'Upload your document' }) {
     const inputId = useId()
     const inputRef = useRef(null)
     const [dragging, setDragging] = useState(false)
-    // A temporary link to the chosen file for Preview (freed when it changes).
     const previewUrl = useMemo(() => (file ? URL.createObjectURL(file) : null), [file])
     useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
 
@@ -74,11 +69,6 @@ export function FilePicker({ file, onChange, accept, maxMb = 5, disabled = false
     )
 }
 
-// Small shared pieces for the student pages, so every page answers
-// "where am I / what do I do" the same way.
-
-// "How this page works": the few steps of this page's task, current one
-// highlighted. steps: ['Pay at the Finance Office', ...]; current: index.
 export function TaskSteps({ steps, current = 0, label = 'How this works' }) {
     return (
         <nav className="ss-steps" aria-label={label}>
@@ -102,7 +92,6 @@ export function TaskSteps({ steps, current = 0, label = 'How this works' }) {
     )
 }
 
-// A short "tip / what to remember" box.
 export function InfoBox({ title, children, tone = 'info' }) {
     return (
         <div className={`ss-info tone-${tone}`} role="note">

@@ -36,16 +36,11 @@ function Assignments() {
     const [bulkEmployeeId, setBulkEmployeeId] = useState('')
     const [applyingBulk, setApplyingBulk] = useState(false)
 
-    // College/program combos that have waiting requests but no employee
-    // covering them, and the employee picked for each.
     const [uncoveredPrograms, setUncoveredPrograms] = useState([])
     const [coverPick, setCoverPick] = useState({})
     const [covering, setCovering] = useState(null)
 
-    // Rebalancing: open requests that already have an employee, the
-    // employee whose requests are expanded, and what's picked to move.
     const [assignedOpen, setAssignedOpen] = useState([])
-    // employee_id -> Set of "college:program" they are assigned to (active, primary).
     const [coverageByEmployee, setCoverageByEmployee] = useState({})
     const [expandedEmployeeId, setExpandedEmployeeId] = useState(null)
     const [moveSelected, setMoveSelected] = useState(new Set())
@@ -87,8 +82,6 @@ function Assignments() {
 
             setEmployees(employeeList)
 
-            // Who covers which college/program -- the same rule the system
-            // uses to auto-assign a new request (lib/assignEmployee).
             const { data: coverageRows } = await supabase
                 .from('employee_assignments')
                 .select('employee_id, college_id, program_id')
@@ -184,7 +177,6 @@ function Assignments() {
                     .sort((a, b) => new Date(a.requested_at) - new Date(b.requested_at))
             )
 
-            // Group waiting requests whose college/program has no employee yet.
             const groups = {}
             for (const r of unassignedList) {
                 if (r.programCovered || !r.collegeId || !r.programId) continue
@@ -211,12 +203,8 @@ function Assignments() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests'], loadData)
 
-    // Makes the picked employee the primary for this college/program (so
-    // future requests route to them automatically) and assigns every request
-    // that was waiting for it.
     const coverProgram = async (group) => {
         if (blockedForReadOnlyViewer(role)) return
         const employeeId = coverPick[group.key]
@@ -447,11 +435,7 @@ function Assignments() {
         }
     }
 
-    // ---- Rebalancing -------------------------------------------------------
-
     const average = averageLoad(workload.map((e) => e.openCount))
-    // Only suggest moving a request to someone assigned to that student's
-    // college and program.
     const suggestedMoves = useMemo(
         () => suggestRebalance(employees, assignedOpen, (employeeId, request) =>
             Boolean(request.collegeId && request.programId && coverageByEmployee[employeeId]?.has(`${request.collegeId}:${request.programId}`))),
@@ -474,9 +458,6 @@ function Assignments() {
         })
     }
 
-    // Moves requests to other employees. `moves` is [{ request, toId }].
-    // Each update only matches rows still assigned to the employee we saw,
-    // so a request someone else reassigned meanwhile is left alone.
     const moveRequests = async (moves) => {
         if (blockedForReadOnlyViewer(role)) return
         const { data: { user } } = await supabase.auth.getUser()
@@ -602,7 +583,6 @@ function Assignments() {
     const maxLoad = Math.max(1, ...workload.map((e) => e.openCount))
     const overloadedCount = workload.filter((e) => isOverloaded(e.openCount, average, workload.length)).length
 
-    // Not started (movable) vs already in progress, per employee.
     const breakdownByEmployee = {}
     for (const r of assignedOpen) {
         const b = breakdownByEmployee[r.assigned_employee_id] || (breakdownByEmployee[r.assigned_employee_id] = { notStarted: 0, inProgress: 0 })
@@ -610,7 +590,6 @@ function Assignments() {
         else b.inProgress += 1
     }
 
-    // Each employee's open count after the suggested moves.
     const afterLoad = Object.fromEntries(workload.map((e) => [e.employee_id, e.openCount]))
     for (const m of suggestedMoves) {
         afterLoad[m.fromId] -= 1

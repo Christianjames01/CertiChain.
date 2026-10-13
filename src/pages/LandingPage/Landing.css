@@ -1,8 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-/* ===================================================
-   TOKENS
-=================================================== */
 .landing-page {
     --blue: #123B78;
     --blue-dark: #0A2450;
@@ -105,9 +102,6 @@ h2 span {
     font-size: 16px;
 }
 
-/* ===================================================
-   NAVBAR
-=================================================== */
 .landing-navbar {
     position: sticky;
     top: 0;
@@ -220,9 +214,6 @@ h2 span {
     background: var(--red-dark);
 }
 
-/* ===================================================
-   HERO
-=================================================== */
 .hero-section {
     position: relative;
     padding: 84px 0 60px;
@@ -354,7 +345,6 @@ h2 span {
     background: var(--line);
 }
 
-/* HERO CARD */
 .hero-visual {
     display: flex;
     justify-content: center;
@@ -528,9 +518,6 @@ h2 span {
     color: var(--blue-accent, var(--blue));
 }
 
-/* ===================================================
-   STATS
-=================================================== */
 .stats-section {
     background: var(--blue);
     padding: 46px 0;
@@ -559,9 +546,6 @@ h2 span {
     color: rgba(255, 255, 255, 0.75);
 }
 
-/* ===================================================
-   SERVICES
-=================================================== */
 .services-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -580,7 +564,6 @@ h2 span {
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-/* Accent line that slides in on hover */
 .service-card::before {
     content: "";
     position: absolute;
@@ -688,7 +671,6 @@ h2 span {
     transform: translateX(3px);
 }
 
-/* Highlights strip under the cards */
 .services-highlights {
     display: grid;
     grid-template-columns: repeat(3, 1fr) auto;
@@ -769,9 +751,6 @@ h2 span {
     }
 }
 
-/* ===================================================
-   DOCUMENTS
-=================================================== */
 .documents-section {
     padding: 110px 0;
     background: var(--paper);
@@ -840,9 +819,6 @@ h2 span {
     height: 14px;
 }
 
-/* ===================================================
-   PROCESS
-=================================================== */
 .process-grid {
     position: relative;
     display: grid;
@@ -871,7 +847,6 @@ h2 span {
     box-shadow: 0 20px 40px -32px rgba(10, 36, 80, 0.45);
 }
 
-/* The in-person payment step stands out */
 .process-step.is-highlight {
     border-color: color-mix(in srgb, var(--red) 45%, var(--line));
     background: linear-gradient(180deg, var(--red-tint), var(--white) 70%);
@@ -985,9 +960,6 @@ h2 span {
     line-height: 1.6;
 }
 
-/* ===================================================
-   ABOUT
-=================================================== */
 .about-card {
     background: var(--white);
     border: 1px solid var(--line);
@@ -1084,9 +1056,6 @@ h2 span {
     color: var(--slate);
 }
 
-/* ===================================================
-   VERIFY
-=================================================== */
 .verify-section {
     background: var(--paper);
 }
@@ -1367,9 +1336,6 @@ h2 span {
     }
 }
 
-/* ===================================================
-   FAQ
-=================================================== */
 .faq-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 320px;
@@ -1537,9 +1503,6 @@ h2 span {
     }
 }
 
-/* ===================================================
-   CTA
-=================================================== */
 .cta-section {
     background: var(--white);
     padding: 100px 0;
@@ -1656,9 +1619,6 @@ h2 span {
     color: var(--red);
 }
 
-/* ===================================================
-   FOOTER
-=================================================== */
 .landing-footer {
     position: relative;
     background:
@@ -1793,9 +1753,6 @@ h2 span {
     color: rgba(255, 255, 255, 0.4);
 }
 
-/* ===================================================
-   RESPONSIVE
-=================================================== */
 @media (max-width: 960px) {
 
     .hero-container,
@@ -1901,10 +1858,6 @@ h2 span {
     }
 }
 
-/* ===================================================
-   DOCUMENT PREVIEW (hover = large floating card,
-   click / tap = full-size modal)
-=================================================== */
 .document-item.has-preview {
     cursor: zoom-in;
 }
@@ -1980,7 +1933,6 @@ h2 span {
     to { opacity: 1; transform: translateY(-50%); }
 }
 
-/* Full-size preview */
 .document-zoom-overlay {
     position: fixed;
     inset: 0;
@@ -2057,9 +2009,6 @@ h2 span {
     }
 }
 
-/* ===================================================
-   HELP CENTER / CONTACT POP-UPS (SweetAlert, rendered at body level)
-=================================================== */
 .swal2-popup.lp-modal {
     text-align: left;
 }
@@ -2214,8 +2163,6 @@ h2 span {
     }
 }
 
-/* Help Center / Contact pop-ups always stay white with dark text, even when
-   the site is in dark mode (index.css darkens every .swal2-popup). */
 .swal2-popup.lp-modal,
 html[data-theme="dark"] .swal2-popup.lp-modal {
     background: #FFFFFF !important;

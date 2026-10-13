@@ -186,9 +186,6 @@
     }
 }
 
-/* Scroll stat cards as a single row on mobile instead of wrapping into a
-   tall stack -- appended last so it wins the cascade over the unconditional
-   .student-stat-grid rule above. */
 @media (max-width: 640px) {
     .student-stat-grid {
         display: flex;
@@ -216,7 +213,6 @@
     margin-bottom: 24px;
 }
 
-/* ---- Student dashboard (redesign) ---------------------------------------- */
 .visually-hidden {
     position: absolute;
     width: 1px;
@@ -483,7 +479,6 @@
     .sd-summary-card { min-height: 80px; padding: 12px; gap: 10px; }
     .sd-summary-value { font-size: 22px; }
 
-    /* Table rows become stacked cards. */
     .sd-row-head { display: none; }
     .sd-row { grid-template-columns: 1fr auto; grid-template-areas: "doc status" "date date" "next next" "view view"; gap: 8px; }
     .sd-cell-doc { grid-area: doc; }

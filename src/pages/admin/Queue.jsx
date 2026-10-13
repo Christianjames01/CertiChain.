@@ -33,8 +33,6 @@ function AdminQueue() {
         loadQueue()
     }, [])
 
-    // Update in place when a ticket is issued, called, served, or completed
-    // anywhere -- no manual refresh needed.
     useLiveRefresh(['walk_in_queue'], (options) => loadQueue(options))
 
     const loadQueue = async ({ silent = false } = {}) => {
@@ -167,12 +165,6 @@ function AdminQueue() {
         await updateTicket(ticket, { status: 'cancelled' }, `Cancelled ${formatQueueNumber(ticket.queue_number)}.`)
     }
 
-    // A plain numbered ticket, nothing more: click, get the next number, done.
-    // No student lookup step -- the number itself is what's called and what
-    // the student waits for, matching a real walk-up ticket dispenser.
-    // batchCount > 1 issues a whole contiguous block in one action (e.g.
-    // pre-printing 1-50 at the start of the day) instead of clicking once
-    // per ticket.
     const issueTicket = async () => {
         if (blockedForReadOnlyViewer(role)) return
         const count = Math.max(1, Math.min(100, Number(batchCount) || 1))

@@ -14,11 +14,6 @@ import { IconKey, IconShieldLock, IconPulse, IconDownloadCloud, IconChevronLeft 
 import './SuperAdminTheme.css'
 import './SuperAdminLayout.css'
 
-// Groups and items match the Super Admin redesign brief's sidebar sections.
-// Deep-linked items route into the existing, unmodified /head/* pages
-// (registrar-head portal) -- they already work, are already read-only for
-// superadmin (RLS + blockedForReadOnlyViewer), and are explicitly out of
-// scope to duplicate or reskin here.
 const NAV_GROUPS = [
     {
         label: 'Overview',
@@ -102,8 +97,6 @@ function SuperAdminLayout() {
         load()
     }, [load])
 
-    // New sign-ins and account changes show up without a manual refresh --
-    // see src/lib/useLiveRefresh.js.
     useLiveRefresh(['login_events', 'profiles', 'user_presence'], load)
 
     useEffect(() => {
@@ -135,9 +128,8 @@ function SuperAdminLayout() {
             const next = !prev
             try {
                 localStorage.setItem(COLLAPSE_KEY, next ? '1' : '0')
-            } catch {
-                // localStorage unavailable (private window, etc.) -- collapse
-                // just won't persist across reloads, nothing else breaks.
+            } catch (err) {
+                void err
             }
             return next
         })

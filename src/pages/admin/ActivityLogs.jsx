@@ -30,11 +30,6 @@ function ActivityLogs() {
             if (!silent) setLoading(true)
             setError('')
 
-            // With no date picked, show the 200 most recent entries -- a
-            // quick glance at recent activity. Once activity passes that
-            // count, older days become unreachable by that query alone, so
-            // picking a specific date instead fetches every entry from
-            // that day (up to a generous cap), bypassing the 200 cutoff.
             let query = supabase
                 .from('activity_logs')
                 .select('activity_log_id, user_id, employee_id, action, table_name, record_id, description, created_at')

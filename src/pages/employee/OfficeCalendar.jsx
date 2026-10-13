@@ -53,11 +53,6 @@ function OfficeCalendar() {
             if (!silent) setLoading(true)
             setError('')
 
-            // Fetch all open days/events, not just today-and-future, so
-            // staff can also mark past weekends open or add past
-            // events/notes (e.g. backfilling something that was missed),
-            // and so those past entries render correctly on the calendar
-            // grid and are recognized as "already set" when toggling.
             const {
                 data: { user },
             } = await supabase.auth.getUser()
@@ -89,9 +84,6 @@ function OfficeCalendar() {
             if (claimSchedulesRes.error) throw new Error(claimSchedulesRes.error.message)
             if (employeeRes.error || !employeeRes.data) throw new Error('Employee record could not be found.')
 
-            // Same scoping as the Claim Schedule page: releasing staff work
-            // the front desk and see every claim office-wide; everyone else
-            // sees claims for requests assigned to them or that they scheduled.
             const me = employeeRes.data
             const visibleClaims = (claimSchedulesRes.data || []).filter(
                 (cs) =>
@@ -126,8 +118,6 @@ function OfficeCalendar() {
         return map
     }, [events])
 
-    // Grouped by claim_date when the appointment's been rescheduled,
-    // otherwise the original scheduled_date -- same as the admin calendar.
     const claimSchedulesByDate = useMemo(() => {
         const map = {}
         for (const cs of claimSchedules) {
@@ -142,9 +132,6 @@ function OfficeCalendar() {
         return map
     }, [claimSchedules])
 
-    // The sidebar is meant as an at-a-glance look-ahead, so it stays
-    // upcoming-only even though `events`/`openDays` now also hold past
-    // entries (needed for the calendar grid and for past-day editing).
     const upcomingEvents = useMemo(() => events.filter((ev) => ev.event_date >= getToday()), [events])
     const upcomingOpenDays = useMemo(() => openDays.filter((d) => d.open_date >= getToday()), [openDays])
 
@@ -227,7 +214,6 @@ function OfficeCalendar() {
         }
     }
 
-    // Change the hours of a day already marked open. Returns true on success.
     const saveOpenDayHours = async (hours) => {
         const existing = openDaysByDate[dayModalDate]
         if (!existing) return false
@@ -239,7 +225,6 @@ function OfficeCalendar() {
             const update = (values) => supabase.from('office_open_days').update(values).eq('open_day_id', existing.open_day_id)
             let { error: updateError } = await update({ open_time: hours.open, close_time: hours.close })
 
-            // Before the office-hours migration: keep the hours in the note.
             if (updateError && isMissingHoursColumn(updateError)) {
                 ({ error: updateError } = await update({ note: noteWithHours(existing.note, hours) }))
             }

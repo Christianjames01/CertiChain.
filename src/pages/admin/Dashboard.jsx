@@ -23,10 +23,8 @@ const QUICK_LINKS = [
     { to: '/reports', label: 'Reports', Icon: IconBarChart },
 ]
 
-// Statuses that still need someone to act on them.
 const ACTIVE_STATUSES = ['pending', 'payment_pending', 'receipt_uploaded', 'receipt_verified', 'processing', 'lacking_requirements', 'ready_for_claiming']
 
-// "2m ago", "3h ago", "Yesterday", "Sep 18" -- compact times for the activity feed.
 const relativeTime = (value, now) => {
     const then = new Date(value)
     const minutes = Math.floor((now - then) / 60000)
@@ -38,7 +36,6 @@ const relativeTime = (value, now) => {
     return then.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })
 }
 
-// "45 min", "5 hrs", "3 days" -- how long a request has been waiting.
 const formatAge = (ms) => {
     const minutes = Math.floor(ms / 60000)
     if (minutes < 60) return `${Math.max(1, minutes)} min`
@@ -162,10 +159,6 @@ function AdminDashboard() {
                 ? await supabase.from('employees').select('employee_id, user_id, employee_number').in('employee_id', employeeIds)
                 : { data: [] }
 
-            // Employees are logged by employee_id; the registrar head and
-            // admins are logged by user_id directly -- resolve both, the same
-            // way the Activity Logs page does. Only rows with neither (e.g.
-            // scheduled jobs) are really "System".
             const userIds = [...new Set([
                 ...(employees || []).map((e) => e.user_id),
                 ...(logs || []).map((l) => l.user_id).filter(Boolean),
@@ -254,7 +247,6 @@ function AdminDashboard() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests', 'claim_schedules'], loadDashboard)
 
     const loadStorageUsage = async () => {
@@ -325,11 +317,8 @@ function AdminDashboard() {
     const activeRequests = requests.filter((r) => ACTIVE_STATUSES.includes(r.status))
     const unassignedCount = activeRequests.filter((r) => !r.assigned_employee_id).length
 
-    // Active requests per employee, busiest first. Active employees with no
-    // requests are included (as 0) so the average reflects the whole team.
     const workload = useMemo(() => {
         const counts = Object.fromEntries(activeEmployeeIds.map((id) => [id, 0]))
-        // How long each employee's active requests have been waiting (ms since requested).
         const ages = {}
         const now = loadedAt.getTime()
         for (const r of requests) {

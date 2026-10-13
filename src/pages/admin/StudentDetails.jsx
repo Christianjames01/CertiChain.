@@ -50,7 +50,6 @@ function StudentDetails() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    // 'personal' | 'student' | null -- which card is being edited in place.
     const [editingSection, setEditingSection] = useState(null)
     const [form, setForm] = useState(null)
     const [saving, setSaving] = useState(false)
@@ -169,8 +168,6 @@ function StudentDetails() {
                     .order('created_at', { ascending: false })
                 : { data: [] }
 
-            // Most recent non-cancelled schedule per request -- a
-            // rescheduled request can have more than one row.
             const claimScheduleByRequestId = {}
             for (const s of scheduleRows || []) {
                 if (!claimScheduleByRequestId[s.request_id]) {

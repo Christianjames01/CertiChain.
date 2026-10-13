@@ -3,12 +3,6 @@ import certichainLogo from "../../assets/certichain-logo.png";
 import { QrMark } from "../../components/explainer/parts";
 import { prefersReducedMotion, useInView, useTicker } from "./motion";
 
-// The hero's product visualization: a small copy of the real student portal
-// (navy sidebar with the menu, "Welcome back", announcement, stat cards and
-// a request card with the Submitted -> Completed stepper). One request moves
-// through its real statuses, with the notification the student gets at each
-// step and the QR-verified credential it ends in.
-
 const STAGES = [
     { status: "Receipt uploaded", tone: "blue", step: 0, note: "Your receipt was uploaded and is waiting for verification." },
     { status: "Payment verified", tone: "blue", step: 0, note: "Your official receipt was verified." },
@@ -58,7 +52,6 @@ const RECENT = [
     { name: "Good Moral Certificate", no: "REQ-000112 · 1 copy", status: "Completed", tone: "green" },
 ];
 
-// The 3D certificate needs WebGL; without it the portal mock is shown.
 function webglAvailable() {
     try {
         const canvas = document.createElement("canvas");
@@ -80,10 +73,8 @@ function HeroVisual() {
     const current = STAGES[stage];
     const done = stage === STAGES.length - 1;
     const ready = current.step === 2;
-    // One new notification per status change.
     const unread = stage + 1;
 
-    // Load the 3D certificate separately (three.js is big) and mount it.
     useEffect(() => {
         if (mode !== "3d") return undefined;
         let cancelled = false;
@@ -104,15 +95,11 @@ function HeroVisual() {
         };
     }, [mode]);
 
-    // Follow the status cycle; pause when the hero is off screen.
     useEffect(() => { sceneRef.current?.setStage(stage); }, [stage, sceneReady]);
     useEffect(() => { sceneRef.current?.setActive(inView); }, [inView, sceneReady]);
 
     return (
         <div className="lpm-hero-visual" ref={ref} aria-hidden="true">
-            {/* Soft, fully static glow sampled from the certificate's own
-                palette (navy + gold on warm paper) -- depth and warmth
-                behind the card instead of a separate decorative motif. */}
             <div className="lpm-glow lpm-glow-navy" />
             <div className="lpm-glow lpm-glow-gold" />
 
@@ -193,7 +180,6 @@ function HeroVisual() {
                             </div>
                         </div>
 
-                        {/* Like the real dashboard's Recent Requests list. */}
                         <div className="lpv-card lpv-recent">
                             <strong className="lpv-recent-title">Recent Requests</strong>
                             {RECENT.map((r) => (

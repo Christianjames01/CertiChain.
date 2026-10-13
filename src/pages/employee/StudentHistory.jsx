@@ -35,7 +35,6 @@ function formatTime(time) {
     return date.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })
 }
 
-// Same layout as the registrar head's Student Details page.
 function StudentHistory() {
     const { studentId } = useParams()
     const navigate = useNavigate()
@@ -48,7 +47,6 @@ function StudentHistory() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    // 'personal' | 'student' | null -- which section is being edited.
     const [editingSection, setEditingSection] = useState(null)
     const [form, setForm] = useState(null)
     const [saving, setSaving] = useState(false)
@@ -151,8 +149,6 @@ function StudentHistory() {
                     .order('created_at', { ascending: false })
                 : { data: [] }
 
-            // Most recent non-cancelled schedule per request -- a
-            // rescheduled request can have more than one row.
             const claimScheduleByRequestId = {}
             for (const sch of scheduleRows || []) {
                 if (!claimScheduleByRequestId[sch.request_id]) {
@@ -392,7 +388,6 @@ function StudentHistory() {
         }
     }
 
-    // Same flow as the registrar head's Student Details page.
     const handleChangeLoginEmail = async () => {
         const { value: newEmail } = await Swal.fire({
             icon: 'warning',

@@ -19,10 +19,6 @@ import tuvnordImg from '../../assets/coe/tuvnord.png'
 import './EmployeePages.css'
 import './CertificateOfEnrollment.css'
 
-// The letterhead and footer images are the Registrar's own (cut from the
-// ORRM stationery template with Word's crops applied), each placed where
-// the Registrar's PDF puts it: [left, top, width, height] in points from
-// the page's top-left corner. Sizes are stretched to the box like Word does.
 const PLACED_IMAGES = [
     { src: sealImg, alt: 'Holy Cross of Davao College seal', box: [45.0, 37.0, 78.0, 84.1] },
     { src: hcdc75Img, alt: 'HCDC 75 Years of Grace and Growth', box: [480.2, 32.2, 96.1, 96.1] },
@@ -44,22 +40,16 @@ const placedStyle = ([left, top, width, height]) => ({
     height: `${height}pt`,
 })
 
-// Word's small caps: capitals at full size, lowercase as smaller capitals.
 const smallCaps = (text) =>
     text.split(/([a-z]+)/).map((part, i) => (i % 2 ? <span key={i} className="coe-sc">{part.toUpperCase()}</span> : part))
 
-// The preview is laid out at real US Letter size (8.5in = 816 CSS px) so
-// the printout matches it exactly; on screen it's zoomed to fit its column.
 const PAGE_WIDTH_PX = 816
 
-// The sheet carries its own margins, so the printer page must have none.
 const PRINT_PAGE_RULE = '@page { size: letter; margin: 0; }'
 
 const YEAR_LEVELS = ['First Year', 'Second Year', 'Third Year', 'Fourth Year', 'Fifth Year']
 const SEMESTERS = ['First Semester', 'Second Semester', 'Summer']
 
-// School year "starts" in June -- before that, we're still in the previous
-// one (e.g. February 2027 is still S.Y. 2026-2027).
 const defaultSchoolYear = () => {
     const now = new Date()
     const y = now.getMonth() >= 5 ? now.getFullYear() : now.getFullYear() - 1
@@ -72,19 +62,13 @@ const ordinal = (n) => {
     return `${n}${{ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th'}`
 }
 
-// The Registrar's signature is always Mrs. Yee -- not a choice of
-// whichever registrar_head account happens to be active (that list
-// includes non-signatory admin/dev accounts too).
 const REGISTRAR_NAME = 'MRS. JENNIFER C. YEE'
 
-// "purposes only." is fixed text on the form, so drop it if typed in.
 const stripPurposeSuffix = (text) => text.trim().replace(/\s*purposes?\s+only\.?$/i, '')
 
-// Wraps hyphenated words so the line never breaks at the hyphen.
 const keepHyphens = (text) =>
     text.split(/(\S*-\S*)/).map((part, i) => (i % 2 ? <span key={i} className="coe-nowrap">{part}</span> : part))
 
-// A form fill-in value, bolded where the template bolds it.
 const Fill = ({ children, bold }) => (
     <span className="coe-fill">{bold ? <strong>{children}</strong> : children}</span>
 )
@@ -134,9 +118,6 @@ function CertificateOfEnrollment() {
         setPrograms((programRows || []).map((p) => p.program_name))
     }
 
-    // How many certificates this staff member has saved & printed, overall
-    // and today (local date). The registrar head sees everyone's tally on
-    // the head portal's Issued Certificates page.
     const loadMyCounts = async () => {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
@@ -163,11 +144,6 @@ function CertificateOfEnrollment() {
             return
         }
 
-        // Print first, before any SweetAlert modal is open: while one is open
-        // it aria-hides the rest of <body>, and its print CSS then hides
-        // those elements -- the certificate included. Browsers don't say
-        // whether the print dialog was cancelled, so ask, and only log the
-        // certificate once the employee confirms it printed.
         window.print()
 
         const printed = await confirmModal('Only certificates that actually printed are saved to the log.', {
@@ -198,8 +174,6 @@ function CertificateOfEnrollment() {
 
             let { error } = await supabase.from('enrollment_certificates').insert(certificate)
 
-            // Until the encoder_initials migration reaches the database, log
-            // the certificate without the initials rather than not at all.
             if (error && /encoder_initials/.test(error.message || '')) {
                 ;({ error } = await supabase.from('enrollment_certificates').insert({ ...certificate, encoder_initials: undefined }))
             }
@@ -221,14 +195,8 @@ function CertificateOfEnrollment() {
     const issuedMonthYear = `${issuedDateObj.toLocaleDateString('en-PH', { month: 'long' })}, ${issuedDateObj.getFullYear()}`
     const yearAdjective = form.yearLevel.toLowerCase().replace(' ', '-')
 
-    // The sheet is rendered twice: zoomed in the on-screen preview, and at
-    // full size in a print-only copy portalled straight under <body>. The
-    // dashboard's sticky / overflow-hidden containers clip anything printed
-    // from inside them, which left the printout blank.
     const sheet = (
         <>
-                {/* Letterhead, footer and their images are pinned to the
-                    Registrar's PDF coordinates; only the body flows. */}
                 <div className="coe-fixed">
                     {PLACED_IMAGES.map((img) => (
                         <img key={img.alt} src={img.src} alt={img.alt} className="coe-placed" style={placedStyle(img.box)} />

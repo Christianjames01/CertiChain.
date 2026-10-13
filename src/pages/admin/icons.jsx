@@ -69,7 +69,6 @@ export const IconClipboardCheck = () => (
     </svg>
 )
 
-// Dashboard stat card icons (same 24px line style as the rest of this set).
 export const IconUsers = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="9" cy="8" r="3.5" />

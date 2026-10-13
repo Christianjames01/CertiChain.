@@ -12,12 +12,8 @@ import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
 import { adminPath } from '../../lib/portalPaths'
 
-// Hidden from the superadmin's view of the head portal -- not relevant for
-// account oversight (walk-in queue, announcements) or not meaningful for an
-// account that isn't the one signed in as head (its own profile, the guide).
 const HIDDEN_FOR_SUPERADMIN = ['/announcements', '/queue', '/guide', '/profile']
 
-// Grouped into work stages like an Agile board (see NAV_STAGES).
 const NAV_ITEMS = [
     { to: '/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
     { to: '/requests', label: 'All Requests', icon: <IconClipboardList />, stage: 'todo' },
@@ -145,9 +141,6 @@ function AdminLayout() {
 
         setPendingStudents(pendingCount || 0)
 
-        // Same "unclaimed" definition as ClaimSchedules.jsx's own count:
-        // ready-for-claiming requests that don't already have a non-
-        // cancelled claim schedule.
         const { data: readyRequests } = await supabase
             .from('document_requests')
             .select('request_id')
@@ -168,8 +161,6 @@ function AdminLayout() {
             setUnclaimed(0)
         }
 
-        // Same default filter as OfficialReceipts.jsx: receipts waiting to
-        // be verified.
         const { count: uploadedCount } = await supabase
             .from('official_receipts')
             .select('receipt_id', { count: 'exact', head: true })

@@ -111,7 +111,6 @@ function UploadReceiptList() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests', 'official_receipts'], loadRequests)
 
     return (

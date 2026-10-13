@@ -6,7 +6,6 @@ import { SUFFIX_NONE, SUFFIX_OPTIONS, validateRegistrationDetails } from '../../
 import { isStudentNumberTaken, studentNumberTakenMessage, isDuplicateStudentNumberError, isPhoneNumberTaken, phoneNumberTakenMessage } from '../../lib/studentNumberCheck'
 import AuthLayout from './AuthLayout'
 
-// Graduation years offered to alumni, newest first.
 const GRADUATION_YEARS = Array.from({ length: new Date().getFullYear() - 1959 }, (_, i) => new Date().getFullYear() - i)
 
 function CompleteProfile() {
@@ -20,16 +19,13 @@ function CompleteProfile() {
     const [noMiddleName, setNoMiddleName] = useState(false)
     const [suffix, setSuffix] = useState('')
     const [phoneNumber, setPhoneNumber] = useState('')
-    // Set when the typed phone number is already registered to another account.
     const [phoneTaken, setPhoneTaken] = useState(false)
 
     const [studentNumber, setStudentNumber] = useState('')
-    // Set when the typed student ID is already registered (checked on blur and on submit).
     const [studentNumberTaken, setStudentNumberTaken] = useState(false)
     const [collegeId, setCollegeId] = useState('')
     const [programId, setProgramId] = useState('')
     const [yearLevel, setYearLevel] = useState('')
-    // 'current' student or 'alumni' (graduate: graduation year instead of year level)
     const [studentType, setStudentType] = useState('current')
     const [graduationYear, setGraduationYear] = useState('')
 
@@ -154,7 +150,6 @@ function CompleteProfile() {
             return
         }
 
-        // Before saving anything: is this student ID already registered?
         if (await isPhoneNumberTaken(phoneNumber)) {
             setPhoneTaken(true)
             setStatus('error')

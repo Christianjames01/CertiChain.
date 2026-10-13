@@ -52,9 +52,6 @@ function ForceChangePassword() {
                 throw new Error(profileError.message)
             }
 
-            // Full page load straight into the dashboard (not a client-side
-            // navigate), so every route guard re-reads the profile and sees
-            // must_change_password = false instead of any state from before.
             setDone(true)
             window.location.replace(dashboardPathForRole(profile.role) || '/')
 

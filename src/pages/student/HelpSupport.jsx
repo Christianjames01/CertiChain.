@@ -26,8 +26,6 @@ const IconTiktok = () => (
     </svg>
 )
 
-
-// Step-by-step answers in plain words.
 const FAQS = [
     {
         question: 'How do I request a document?',

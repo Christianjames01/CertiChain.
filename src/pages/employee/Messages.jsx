@@ -22,8 +22,6 @@ function Messages() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
-    // The open conversation is looked up in `threads` on every render, so
-    // messages arriving live show up in it straight away.
     const [activeId, setActiveId] = useState(null)
     const [search, setSearch] = useState('')
     const [filter, setFilter] = useState('all')
@@ -33,7 +31,6 @@ function Messages() {
     const [reactionRows, setReactionRows] = useState([])
     const [busy, setBusy] = useState(false)
     const [fillingStatus, setFillingStatus] = useState(false)
-    // The message being answered (Messenger-style reply), or null.
     const [replyTo, setReplyTo] = useState(null)
 
     useLiveRefresh(['messages', 'message_reactions'], (options) => loadMessages(options))
@@ -59,15 +56,12 @@ function Messages() {
 
             setUserId(user.id)
 
-            // Round 1: the messages and what this user hid, together (each
-            // round trip is ~0.3 s from Davao).
             const [{ data, error: messagesError }, hiddenIds] = await Promise.all([
                 supabase
                     .from('messages')
                     .select('*')
                     .or(`sender_user_id.eq.${user.id},receiver_user_id.eq.${user.id}`)
                     .order('created_at', { ascending: true }),
-                // Messages this user deleted "for me" stay out of every thread.
                 loadHiddenMessageIds(user.id),
             ])
 
@@ -83,11 +77,9 @@ function Messages() {
                     rows.map((m) => (m.sender_user_id === user.id ? m.receiver_user_id : m.sender_user_id))
                 )
             ]
-            // Students a head reply was filed under (see REF_TAG below).
             const refStudentIds = [...new Set(rows.map((m) => m.message.match(/^\[\[ref=([0-9a-f-]+)\]\]/)?.[1]).filter(Boolean))]
             const everyoneIds = [...new Set([...otherUserIds, ...refStudentIds])]
 
-            // Round 2: everyone's profile and display name, together.
             const [{ data: profiles }, prefetchedLabels] = await Promise.all([
                 everyoneIds.length
                     ? supabase.from('profiles').select('user_id, first_name, last_name, role, profile_photo_url').in('user_id', everyoneIds)
@@ -99,15 +91,6 @@ function Messages() {
                 (profiles || []).map((p) => [p.user_id, p])
             )
 
-            // A message from the registrar head has no field linking it to
-            // "this was about student X" -- messages is strictly 1:1, and
-            // RLS only lets an employee query rows where they're the
-            // sender or receiver, so there's no query that could look up
-            // the fan-out sibling sent to the student either. The admin
-            // side tags the employee-facing copy's text with a hidden
-            // [[ref=<studentUserId>]] prefix when it fans a head reply out
-            // (see admin/Messages.jsx sendReply) specifically so this page
-            // can file it under that student instead of under the head.
             const REF_TAG = /^\[\[ref=([0-9a-f-]+)\]\]/
 
             const redirectToStudent = {}
@@ -122,11 +105,6 @@ function Messages() {
 
             const labels = prefetchedLabels
 
-            // A reply this employee sent into a shared conversation fans out
-            // as one row per recipient (student + head), all with the same
-            // text and timestamp. File every copy under the student so the
-            // reply stays in that conversation instead of also opening a
-            // separate thread with the head, and show it as one bubble.
             const fanOutKey = (m) => `${m.message}|${m.created_at}`
             const studentForFanOut = {}
 
@@ -160,11 +138,6 @@ function Messages() {
                         role: profileByUserId[otherId]?.role || '',
                         messages: [],
                         unreadCount: 0,
-                        // Anyone besides "the" other person (e.g. the head)
-                        // who has sent into this thread -- a reply here
-                        // fans out to them too, so this stays a shared
-                        // conversation rather than only ever routing back
-                        // to the one counterpart.
                         extraParticipantIds: new Set(),
                     }
                 }
@@ -202,8 +175,6 @@ function Messages() {
         }
     }
 
-    // Marks every unread message in the given threads as read, in the
-    // database and in page state, and refreshes the sidebar badge.
     const markThreadsRead = async (targetThreads) => {
         const ids = targetThreads.flatMap((t) => unreadReceived(t.messages, userId).map((m) => m.message_id))
         if (ids.length === 0) return
@@ -229,8 +200,6 @@ function Messages() {
         setReplyTo(null)
     }
 
-    // Opening a conversation, or a message arriving while it's open, marks
-    // it read -- like Messenger.
     const activeUnread = activeThread ? unreadReceived(activeThread.messages, userId).length : 0
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -245,9 +214,6 @@ function Messages() {
     const sendReply = async () => {
         if (!reply.trim() || !activeThread) return
 
-        // messages is strictly 1:1, so reaching everyone in this thread
-        // (the student plus anyone else who's messaged in, e.g. the head)
-        // means one row per recipient, same fan-out the admin side does.
         const recipientIds = [activeThread.otherUserId, ...(activeThread.extraParticipantIds || [])]
 
         try {
@@ -276,7 +242,6 @@ function Messages() {
                 notificationType: 'message',
             })))
 
-            // One bubble here even though it went out as multiple rows.
             const displayRow = readMessage(data.find((d) => d.receiver_user_id === activeThread.otherUserId) || data[0])
 
             const updatedThread = {
@@ -308,8 +273,6 @@ function Messages() {
         )
     }
 
-    // Unsend for everyone: the student (and anyone else in the thread)
-    // sees "... deleted a message" instead of the text.
     const deleteMessage = async (m) => {
         const confirmed = await confirmModal(
             'Delete this message for everyone? Everyone in the conversation will see that you deleted a message instead.',
@@ -329,14 +292,12 @@ function Messages() {
         }
     }
 
-    // "You deleted a message" / "Yul deleted a message", or null.
     const deletedLabel = (m) => {
         if (!m?.deleted_at) return null
         const by = m.deleted_by || m.sender_user_id
         return by === userId ? 'You deleted a message' : `${senderNames[by] || 'Someone'} deleted a message`
     }
 
-    // Returns false on failure so the bubble stays in edit mode.
     const editMessage = async (m, newText) => {
         try {
             await editOwnMessage(m.message_id, newText, m.replyTo)
@@ -367,7 +328,6 @@ function Messages() {
         }
     }
 
-    // A student asked "what's the status of REQ-…?": fill in the answer.
     const inquiry = activeThread ? pendingInquiry(activeThread.messages, userId) : null
     const inquiryNumber = inquiryRequestNumber(inquiry?.message)
     const fillStatusReply = async () => {
@@ -397,8 +357,6 @@ function Messages() {
     const nameOf = (id) => (id === userId ? 'You' : id === activeThread?.otherUserId ? activeThread.name : senderNames[id] || 'Someone')
     const threadById = activeThread ? Object.fromEntries(activeThread.messages.map((m) => [m.message_id, m])) : {}
 
-    // Who in a conversation is typing right now (the student, or anyone
-    // else who has written in it, e.g. the head).
     const typersIn = (thread) =>
         [thread.otherUserId, ...(thread.extraParticipantIds || [])].filter((id) => typingUserIds.includes(id))
     const activeTypers = activeThread ? typersIn(activeThread) : []

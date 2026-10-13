@@ -20,7 +20,6 @@ import { blockedForReadOnlyViewer } from '../../lib/viewOnlyGuard'
 import { friendlyError } from '../../lib/friendlyError'
 import { digitsOnly, isValidPhMobile } from '../../lib/phoneInput'
 
-// Same "still open" definition Assignments.jsx uses for workload/coverage.
 const OPEN_STATUSES = ['pending', 'payment_pending', 'receipt_uploaded', 'receipt_verified', 'processing', 'lacking_requirements', 'ready_for_claiming']
 
 function EmployeeDetails() {
@@ -158,9 +157,6 @@ function EmployeeDetails() {
         }
     }
 
-    // Registrar head sets a temporary password; the employee is signed out
-    // and must create their own password on next login (ProtectedRoute ->
-    // /force-change-password).
     const handleSetTempPassword = async () => {
         if (blockedForReadOnlyViewer(role)) return
         const name = `${employee.first_name || ''} ${employee.last_name || ''}`.trim() || employee.employee_number
@@ -436,10 +432,6 @@ function EmployeeDetails() {
                 description: `Removed employee ${employee.first_name} ${employee.last_name}'s assignment to "${collegeName(assignment.college_id)}" · "${programName(assignment.program_id)}".`,
             })
 
-            // If someone else still actively covers this exact college/program,
-            // hand this employee's open requests for it straight to them --
-            // otherwise those requests would sit with someone who no longer
-            // owns the program.
             const { data: otherAssignments } = await supabase
                 .from('employee_assignments')
                 .select('employee_id, is_primary')

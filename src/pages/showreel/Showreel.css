@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Fraunces:ital,opsz,wght@1,9..144,700&display=swap');
 
-/* CertiChain showreel. Always dark: a full-screen film frame. */
 .rl-root {
     position: fixed;
     inset: 0;
@@ -27,7 +26,6 @@
     background: #071530;
 }
 
-/* ---- Background ---------------------------------------------------------- */
 .rl-bg { position: absolute; inset: 0; overflow: hidden; }
 
 .rl-blob {
@@ -80,7 +78,6 @@
 .rl-word { display: inline-flex; overflow: hidden; padding: 0.06em 0 0.12em; }
 .rl-word > span { display: inline-block; }
 
-/* ---- 1. Kinetic type ------------------------------------------------------- */
 .rl-k-line { display: flex; gap: 40px; }
 
 .rl-k-slam {
@@ -119,7 +116,6 @@
     border-radius: 50%;
 }
 
-/* ---- 2. Logo --------------------------------------------------------------- */
 .rl-logo-mark { position: relative; }
 
 .rl-logo-glow {
@@ -151,7 +147,6 @@
     white-space: nowrap;
 }
 
-/* ---- 3. Journey ------------------------------------------------------------ */
 .rl-journey { justify-content: flex-start; align-items: stretch; padding-top: 175px; }
 
 .rl-j-title {
@@ -236,7 +231,6 @@
 .rl-j-card.is-done .rl-j-dot,
 .rl-j-card.is-active .rl-j-dot { border-color: #F2C75C; background: #F2C75C; box-shadow: 0 0 24px #F2C75C; }
 
-/* ---- 4. Proof --------------------------------------------------------------- */
 .rl-proof { flex-direction: row; gap: 120px; }
 
 .rl-qr {
@@ -297,7 +291,6 @@
     letter-spacing: 0.08em;
 }
 
-/* ---- 5. Word storm ------------------------------------------------------------ */
 .rl-storm-panel {
     position: absolute;
     inset: 0;
@@ -324,7 +317,6 @@
     letter-spacing: -0.04em;
 }
 
-/* ---- 6. End card ---------------------------------------------------------------- */
 .rl-end-lockup { display: flex; align-items: center; gap: 40px; }
 
 .rl-end-word {
@@ -353,7 +345,6 @@
     letter-spacing: 0.04em;
 }
 
-/* ---- Transitions ------------------------------------------------------------- */
 .rl-wipe { position: absolute; inset: -10%; z-index: 20; pointer-events: none; }
 
 .rl-wipe span {
@@ -374,7 +365,6 @@
     background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
 }
 
-/* ---- Controls ------------------------------------------------------------------ */
 .rl-controls {
     position: fixed;
     left: 50%;
@@ -427,7 +417,6 @@
     .rl-progress, .rl-time { display: none; }
 }
 
-/* ---- Logo bug, captions, end-card badge ------------------------------------ */
 .rl-bug {
     position: absolute;
     top: 48px;

@@ -8,9 +8,7 @@ import { IconBell, IconMessage } from '../student/icons'
 import { EmptyState } from './StudentUi'
 import { friendlyError } from '../../lib/friendlyError'
 
-// Icon per notification type.
 const TYPE_ICONS = { request_update: IconFileStack, message: IconMessage, announcement: IconMegaphone, system: IconUsers, schedule: IconCalendarCheck }
-// Plain names for the notification kinds.
 const TYPE_LABELS = { request_update: 'Request update', message: 'Message', announcement: 'Announcement', system: 'Account', schedule: 'Pickup', claim_schedule: 'Pickup', requirement: 'Requirements', receipt: 'Payment' }
 import './StudentPages.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'

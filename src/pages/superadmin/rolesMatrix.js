@@ -1,9 +1,3 @@
-// Plain-language summary of CertiChain's actual access rules, grouped by
-// module. There is no editable "permissions" table behind this -- access is
-// enforced by Postgres RLS policies and role-check functions (is_employee(),
-// is_registrar_head(), is_superadmin(), etc.). This file only describes what
-// those rules already do; changing what a role can do means changing a
-// policy, not a setting on a page.
 export const ROLES_MATRIX = [
     {
         module: 'User management',

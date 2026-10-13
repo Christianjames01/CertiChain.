@@ -1,12 +1,7 @@
-/* Request Assignments: small additions on top of the shared dashboard
-   components (DashboardStats.css), which this page reuses. */
-
-/* Summary tiles here are informational, not links. */
 .admin-layout div.dash-stat-tile {
     cursor: default;
 }
 
-/* The employee whose requests are open for moving. */
 .dash-workload button.is-selected {
     background: var(--blue-tint);
 }
@@ -19,7 +14,6 @@
     background: transparent;
 }
 
-/* Suggested-move rows aren't clickable. */
 .dash-row.asg-static-row {
     cursor: default;
 }
@@ -39,7 +33,6 @@
     color: var(--blue-accent, var(--blue));
 }
 
-/* Request rows with a checkbox (moving an employee's requests). */
 .dash-row input[type="checkbox"] {
     flex-shrink: 0;
     width: 16px;

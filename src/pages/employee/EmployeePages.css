@@ -139,8 +139,6 @@
     gap: 18px;
 }
 
-/* Dashboard stat cards -- same look as employee-info-grid on desktop, but
-   scrolls as a single row on mobile instead of wrapping into a tall stack. */
 .employee-stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -157,10 +155,6 @@
 .employee-info-field strong {
     font-size: 14.5px;
     font-weight: 600;
-    /* A long unbroken value (e.g. an uploaded file name with no spaces)
-       has no natural place to wrap, so on a narrow screen it overflows
-       its grid column and visually spills into the field next to it
-       instead of wrapping onto a new line. */
     overflow-wrap: anywhere;
 }
 
@@ -242,10 +236,6 @@
     border-color: var(--blue-accent, var(--blue));
     box-shadow: 0 0 0 3px var(--blue-tint);
 }
-
-/* ===================================================
-   REQUEST DETAILS PAGE
-=================================================== */
 
 .employee-primary-button,
 .employee-danger-button,
@@ -450,9 +440,6 @@ select.employee-textarea {
     margin-left: 14px;
 }
 
-/* Scroll stat cards and filter chips as a single row on mobile instead of
-   wrapping into a tall stack -- appended last so it wins the cascade over
-   the unconditional .employee-filter-row/.employee-stat-grid rules above. */
 @media (max-width: 640px) {
     .employee-stat-grid,
     .employee-filter-row {
@@ -478,8 +465,6 @@ select.employee-textarea {
     }
 }
 
-/* Student name shown above the document on request / claim cards. Scoped
-   so it outranks `.employee-layout p { color: var(--slate) }`. */
 .employee-layout .request-student-name {
     margin: 0 0 2px;
     font-size: 12.5px;
@@ -489,7 +474,6 @@ select.employee-textarea {
     color: var(--blue-accent, var(--blue));
 }
 
-/* ---- Student details (same layout as the head's Student Details page) ---- */
 .employee-edit-grid {
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     align-items: end;
@@ -573,7 +557,6 @@ select.employee-textarea {
     }
 }
 
-/* Two-column fact tables (label | value), as on the head's Request Details. */
 .employee-fact-table {
     table-layout: fixed;
 }

@@ -50,7 +50,6 @@ function ClaimSchedules() {
 
     const [schedules, setSchedules] = useState([])
     const [unclaimed, setUnclaimed] = useState([])
-    // request_id -> authorized representative, for the release window.
     const [representatives, setRepresentatives] = useState({})
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
@@ -205,7 +204,6 @@ function ClaimSchedules() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['claim_schedules', 'document_requests'], loadData)
 
     const dismissSchedule = async (schedule) => {
@@ -345,7 +343,6 @@ function ClaimSchedules() {
     const countFor = (key) => schedules.filter((s) => matchesChip(s, key)).length
     const visibleSchedules = schedules.filter((s) => matchesChip(s, activeChip))
 
-    // "SEP" / "29" badge for a schedule's date.
     const dateBadge = (dateStr) => {
         if (!dateStr) return { month: '—', day: '' }
         const d = new Date(`${dateStr}T00:00:00`)

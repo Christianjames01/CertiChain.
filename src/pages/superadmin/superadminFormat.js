@@ -27,7 +27,6 @@ export function formatDay(value) {
     })
 }
 
-// "5 minutes ago", "3 hours ago", "12 days ago". Falls back to the date after a month.
 export function timeAgo(value) {
     if (!value) return 'Never'
     const seconds = Math.round((Date.now() - new Date(value).getTime()) / 1000)
@@ -50,7 +49,6 @@ export function displayName(row) {
     return row.full_name?.trim() || row.email || 'Unnamed account'
 }
 
-// Downloads rows as a CSV file. Values are quoted so commas and quotes survive.
 export function downloadCsv(filename, headers, rows) {
     const escape = (value) => `"${String(value ?? '').replace(/"/g, '""')}"`
     const body = [headers, ...rows].map((row) => row.map(escape).join(',')).join('\r\n')

@@ -12,10 +12,8 @@ import { SUFFIX_NONE, SUFFIX_OPTIONS, validateRegistrationDetails } from '../../
 import { isStudentNumberTaken, studentNumberTakenMessage, isDuplicateStudentNumberError, isPhoneNumberTaken, phoneNumberTakenMessage } from '../../lib/studentNumberCheck'
 import { captchaEnabled, getCaptchaToken, preloadCaptcha } from '../../lib/captcha'
 
-// Get the security check ready while the form is being filled in.
 preloadCaptcha()
 
-// Graduation years offered to alumni, newest first.
 const GRADUATION_YEARS = Array.from({ length: new Date().getFullYear() - 1959 }, (_, i) => new Date().getFullYear() - i)
 
 const LEGAL_TABS = {
@@ -38,17 +36,14 @@ function Register() {
     const [lastName, setLastName] = useDraftState('register', 'lastName', '')
     const [suffix, setSuffix] = useDraftState('register', 'suffix', '')
     const [phoneNumber, setPhoneNumber] = useDraftState('register', 'phoneNumber', '')
-    // Set when the typed phone number is already registered to another account.
     const [phoneTaken, setPhoneTaken] = useState(false)
     const [birthDate, setBirthDate] = useDraftState('register', 'birthDate', '')
 
     const [studentNumber, setStudentNumber] = useDraftState('register', 'studentNumber', '')
-    // Set when the typed student ID is already registered (checked on blur and on submit).
     const [studentNumberTaken, setStudentNumberTaken] = useState(false)
     const [collegeId, setCollegeId] = useDraftState('register', 'collegeId', '')
     const [programId, setProgramId] = useDraftState('register', 'programId', '')
     const [yearLevel, setYearLevel] = useDraftState('register', 'yearLevel', '')
-    // 'current' student or 'alumni' (graduate: graduation year instead of year level)
     const [studentType, setStudentType] = useDraftState('register', 'studentType', 'current')
     const [graduationYear, setGraduationYear] = useDraftState('register', 'graduationYear', '')
 
@@ -144,8 +139,6 @@ function Register() {
         setGoogleLoading(true)
         setMessage('')
 
-        // Same security check as email sign-in before handing off to Google
-        // (Google also runs its own bot checks).
         const captchaToken = await getCaptchaToken()
         if (captchaEnabled && !captchaToken) {
             setStatus('error')
@@ -183,8 +176,6 @@ function Register() {
 
         const isAlumni = studentType === 'alumni'
 
-        // HCDC accounts are deactivated after graduation, so alumni must
-        // sign up with a personal email they can still open.
         if (isAlumni && email.trim().toLowerCase().endsWith('@hcdc.edu.ph')) {
             setStatus('error')
             setMessage('Alumni must use a personal email (e.g. Gmail). HCDC email accounts are deactivated after graduation, so you would not receive our emails there.')
@@ -203,7 +194,6 @@ function Register() {
             return
         }
 
-        // Before anything is created: is this student ID already registered?
         if (await isPhoneNumberTaken(phoneNumber)) {
             setPhoneTaken(true)
             setStatus('error')
@@ -234,7 +224,6 @@ function Register() {
     }
 
     const submitRegistration = async () => {
-        // The security check (slide puzzle + Cloudflare) pops up now.
         const captchaToken = await getCaptchaToken()
         if (captchaEnabled && !captchaToken) {
             setStatus('error')

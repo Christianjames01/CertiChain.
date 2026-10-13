@@ -40,8 +40,6 @@ function Profile() {
         loadProfile()
     }, [])
 
-    // Picks up a change the Registrar Head makes (a new assignment, a
-    // different college) without needing a reload.
     useLiveRefresh(['profiles', 'employees', 'employee_assignments'], (options) => loadProfile(options))
 
     const loadProfile = async ({ silent = false } = {}) => {

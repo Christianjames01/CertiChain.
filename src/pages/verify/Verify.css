@@ -1,7 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
 
-/* Public credential verification page. Always light: it is shown to
-   employers and schools, often printed. */
 .verify-page {
     --blue: #123B78;
     --blue-dark: #0A2450;
@@ -41,7 +39,6 @@
     white-space: nowrap;
 }
 
-/* Header */
 .verify-header {
     background: var(--blue-dark);
     padding: 16px 24px;
@@ -95,7 +92,6 @@
     text-decoration: underline;
 }
 
-/* Content */
 .verify-content {
     max-width: 760px;
     margin: 0 auto;
@@ -197,7 +193,6 @@
     cursor: not-allowed;
 }
 
-/* Cards */
 .verify-card {
     margin-top: 18px;
     border: 1px solid var(--line);
@@ -249,7 +244,6 @@
     color: var(--slate);
 }
 
-/* Result */
 .verify-result {
     overflow: hidden;
 }
@@ -457,7 +451,6 @@
     background: var(--blue-tint);
 }
 
-/* Trust notes + contact */
 .verify-trust {
     display: grid;
     grid-template-columns: repeat(3, 1fr);

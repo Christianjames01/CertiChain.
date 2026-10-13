@@ -15,9 +15,6 @@ import './StudentPages.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import { digitsOnly } from '../../lib/typedNumber'
 
-// Alphabetical order puts "Fourth Year" right after "First Year" (both
-// start with "F"), so year_level needs an explicit chronological order
-// rather than relying on a plain SQL `.order('year_level')`.
 const YEAR_LEVEL_ORDER = ['First Year', 'Second Year', 'Third Year', 'Fourth Year']
 function NewRequest() {
     const navigate = useNavigate()
@@ -29,7 +26,6 @@ function NewRequest() {
     const [quantity, setQuantity] = useState(1)
     const [purpose, setPurpose] = useState('')
     const [loading, setLoading] = useState(false)
-    // Documents picked so far, submitted together (kept across a refresh).
     const [cart, setCart] = useDraftState('newRequest', 'cart', [])
     const [cartNotice, setCartNotice] = useState('')
     const [loadingDocuments, setLoadingDocuments] = useState(true)
@@ -107,10 +103,6 @@ function NewRequest() {
                     : Promise.resolve({ data: null }),
             ])
 
-            // A TOR covers the student's whole academic history, not just their
-            // current year -- fetch every year of their curriculum so the sample
-            // preview can show a course from each year instead of only the
-            // current one.
             let curriculumCourses = []
 
             if (student.program_id) {
@@ -214,7 +206,6 @@ function NewRequest() {
     const cartTotal = cart.reduce((sum, item) => sum + item.fee * item.quantity, 0)
     const peso = (n) => `₱${Number(n || 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
-    // Adds the selected document (with its copies and purpose) to the list.
     const addToCart = (e) => {
         e.preventDefault()
         setError('')
@@ -264,8 +255,6 @@ function NewRequest() {
         setCartNotice('')
     }
 
-    // Submits every document in the list: one request each, linked by a
-    // shared batch_id when there are several so one receipt can cover them.
     const submitCart = async () => {
         setError('')
         setCartNotice('')
@@ -275,7 +264,6 @@ function NewRequest() {
             return
         }
 
-        // Confirm before submitting: what, how much, what happens next.
         const confirmed = await confirmModal(
             `You are requesting: ${cart.map((item) => `${item.document_name} (${item.quantity} ${item.quantity === 1 ? 'copy' : 'copies'})`).join(', ')}. ` +
             `Total per your assessment slip: ${peso(cartTotal)}. Make sure the Registrar has already verified your Official Receipt in person — you'll upload a photo of it next.`,
@@ -316,9 +304,6 @@ function NewRequest() {
                 }
             }
 
-            // May be null when no employee covers this college/program yet --
-            // the requests still save and wait on the head's Request
-            // Assignments page (the database notifies the registrar head).
             const assignedEmployeeId = await findAssignedEmployee(student.college_id, student.program_id)
             const batchId = cart.length > 1 ? crypto.randomUUID() : null
 
@@ -338,7 +323,6 @@ function NewRequest() {
                 let { data: request, error: requestError } = await supabase
                     .from('document_requests').insert(payload).select().single()
 
-                // Before the batch migration is applied: submit unlinked.
                 if (requestError && /batch_id/.test(requestError.message || '')) {
                     delete payload.batch_id
                     ;({ data: request, error: requestError } = await supabase
@@ -398,7 +382,6 @@ function NewRequest() {
         } catch (err) {
             console.error(err)
             if (created.length > 0) {
-                // Keep only what still needs submitting.
                 const done = new Set(created.map((r) => r.document_type_id))
                 setCart(cart.filter((item) => !done.has(item.document_type_id)))
                 setError(`${created.map((r) => r.request_number).join(', ')} submitted, but the rest could not be. ${friendlyError(err, '')}`.trim())

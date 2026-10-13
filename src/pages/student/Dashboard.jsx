@@ -14,7 +14,6 @@ import { SkeletonStatGrid, SkeletonPage } from '../../components/Skeleton'
 import './StudentPages.css'
 import './Dashboard.css'
 
-// Statuses where the student has to do something.
 const ACTION_STATUSES = ['pending', 'payment_pending', 'lacking_requirements']
 
 const greeting = () => {
@@ -25,7 +24,6 @@ const greeting = () => {
 function Dashboard() {
     const [name, setName] = useState('')
     const [requests, setRequests] = useState([])
-    // Unread notifications show on the bell in the header.
     const [, setUnreadCount] = useState(0)
     const [upcomingClaim, setUpcomingClaim] = useState(null)
     const [missedClaimCount, setMissedClaimCount] = useState(0)
@@ -43,11 +41,8 @@ function Dashboard() {
         return () => window.removeEventListener('notifications-updated', loadDashboard)
     }, [])
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['document_requests', 'claim_schedules', 'announcements', 'office_open_days', 'messages'], loadDashboard)
 
-    // Everything is fetched in two rounds of parallel requests (instead of
-    // one after another): each database round trip is ~0.3 s from Davao.
     async function loadDashboard() {
         try {
             const {
@@ -59,7 +54,6 @@ function Dashboard() {
                 return
             }
 
-            // Round 1: everything that only needs the signed-in user.
             const [
                 posted,
                 officeNotices,
@@ -96,13 +90,9 @@ function Dashboard() {
                 (documentTypes || []).map((d) => [d.document_type_id, d.document_name])
             )
 
-            // Most recent message in any of the student's conversations (the
-            // staff handling their requests, or the Registrar Head), shown the
-            // way Messages shows it: tags removed, deleted ones as such.
             const latest = (messageRows || []).find((m) => !hiddenIds.has(m.message_id))
             const otherId = latest && (latest.sender_user_id === user.id ? latest.receiver_user_id : latest.sender_user_id)
 
-            // Round 2: things that need the student record or the latest message.
             const [
                 { data: requestRows },
                 { data: scheduleRows },
@@ -176,11 +166,9 @@ function Dashboard() {
         setLoading(false)
     }
 
-    // A rejected request (not an automatic one) means the receipt must be re-uploaded.
     const isActive = (r) => ACTIVE_STATUSES.includes(r.status) || (r.status === 'rejected' && !r.auto_rejected_at)
     const activeRequests = requests
         .filter(isActive)
-        // The upcoming pickup (when it's this request) gives its "Ready" row the date.
         .map((r) => ({ ...r, info: describeRequest(r, { schedule: upcomingClaim?.request_id === r.request_id ? upcomingClaim : null }) }))
         .sort((a, b) => (a.info.tone === 'action' ? 0 : 1) - (b.info.tone === 'action' ? 0 : 1))
     const actionCount = activeRequests.filter((r) => r.info.tone === 'action').length

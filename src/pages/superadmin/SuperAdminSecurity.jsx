@@ -26,9 +26,6 @@ function SuperAdminSecurity() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // Lockouts are set by the login-guard edge function, which writes
-    // profiles.locked_until -- show a new one without waiting for a manual
-    // refresh.
     useLiveRefresh(['profiles'], load)
 
     const locked = snapshot?.currently_locked || []

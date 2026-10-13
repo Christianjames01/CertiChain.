@@ -7,8 +7,6 @@ const formatDayLabel = (isoDate) =>
 const formatDayLong = (isoDate) =>
     new Date(`${isoDate}T00:00:00`).toLocaleDateString('en-PH', { weekday: 'short', month: 'short', day: 'numeric' })
 
-// Whole-number axis ticks for request counts: never "1, 1, 2, 2" from
-// rounding fractional steps. Aims for about 4 intervals.
 const integerTicks = (max) => {
     const top = Math.max(max, 1)
     const rawStep = top / 4
@@ -26,7 +24,6 @@ const polarToCartesian = (cx, cy, r, angleDeg) => {
 }
 
 const donutSegmentPath = (cx, cy, rOuter, rInner, startAngle, endAngle) => {
-    // A full circle can't be drawn as one arc; nudge it just short of 360.
     const end = endAngle - startAngle >= 360 ? startAngle + 359.99 : endAngle
     const startOuter = polarToCartesian(cx, cy, rOuter, end)
     const endOuter = polarToCartesian(cx, cy, rOuter, startAngle)
@@ -134,7 +131,6 @@ export function StatusDonutChart({ data }) {
                             ))}
                         </svg>
 
-                        {/* Center readout follows the hovered status, otherwise the total. */}
                         <div className="dash-donut-center" aria-hidden="true">
                             <span className="dash-donut-center-value">{hovered ? hovered.value : total}</span>
                             <span className="dash-donut-center-label">
@@ -195,7 +191,6 @@ export function RequestsTrendChart({ data }) {
 
     const hovered = hoverIndex !== null ? data[hoverIndex] : null
 
-    // Rounded top corners only, so each column sits flat on the baseline.
     const columnPath = (x, y, w, h) => {
         const r = Math.min(4, w / 2, h)
         return `M ${x} ${y + h} V ${y + r} Q ${x} ${y} ${x + r} ${y} H ${x + w - r} Q ${x + w} ${y} ${x + w} ${y + r} V ${y + h} Z`
@@ -266,7 +261,6 @@ export function RequestsTrendChart({ data }) {
                             const h = padTop + plotHeight - y
                             return (
                                 <g key={d.date}>
-                                    {/* Full-height hit area so thin or empty days are easy to hover. */}
                                     <rect
                                         x={padLeft + slot * i}
                                         y={padTop}

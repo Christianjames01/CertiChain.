@@ -1,13 +1,6 @@
-/* ===================================================
-   ANNOUNCEMENTS (admin) -- list cards, toolbar, editor.
-   Colors come from AdminLayout's theme variables.
-=================================================== */
-
 .ann-header {
     margin-bottom: 20px;
 }
-
-/* ---------- Toolbar ---------- */
 
 .ann-toolbar {
     display: flex;
@@ -41,8 +34,6 @@
     background: rgba(255, 255, 255, 0.22);
     color: inherit;
 }
-
-/* ---------- Cards ---------- */
 
 .ann-list {
     display: flex;
@@ -78,7 +69,6 @@
     --ann-tint: var(--success-bg);
 }
 
-/* Inactive announcements stay readable but visibly recede. */
 .ann-card.is-inactive {
     --ann-accent: var(--line);
     background: var(--paper);
@@ -267,8 +257,6 @@
     cursor: not-allowed;
 }
 
-/* ---------- Empty state ---------- */
-
 .ann-empty {
     display: flex;
     flex-direction: column;
@@ -309,8 +297,6 @@
     font-size: 13.5px;
     color: var(--slate);
 }
-
-/* ---------- Editor (modal) ---------- */
 
 .ann-form {
     display: flex;
@@ -399,7 +385,6 @@
     color: var(--danger-text, var(--red));
 }
 
-/* Toggle switch built on a real checkbox so it stays keyboard/AT friendly. */
 .ann-switch {
     position: relative;
     display: flex;

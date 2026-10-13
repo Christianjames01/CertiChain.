@@ -1,13 +1,8 @@
 import { useEffect, useState } from "react";
 
-// Small motion helpers for the landing page. Everything respects the
-// visitor's "reduce motion" setting: elements simply appear.
-
 export const prefersReducedMotion = () =>
     typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-// Adds "is-in" to every [data-reveal] element inside `rootRef` the first
-// time it scrolls into view. Stagger with style={{ "--d": "120ms" }}.
 export function useReveal(rootRef, deps = []) {
     useEffect(() => {
         const root = rootRef.current;
@@ -34,8 +29,6 @@ export function useReveal(rootRef, deps = []) {
     }, deps);
 }
 
-// True once the element has been on screen (used to start count-ups and
-// the explainer's autoplay).
 export function useInView(ref, { threshold = 0.35, once = true } = {}) {
     const [inView, setInView] = useState(false);
 
@@ -58,7 +51,6 @@ export function useInView(ref, { threshold = 0.35, once = true } = {}) {
     return inView || typeof IntersectionObserver === "undefined";
 }
 
-// Counts from 0 to `target` once `active` turns true.
 export function useCountUp(target, active, duration = 1400) {
     const [value, setValue] = useState(0);
 
@@ -79,8 +71,6 @@ export function useCountUp(target, active, duration = 1400) {
     return active && prefersReducedMotion() ? target : value;
 }
 
-// 0..1: how far the element has travelled through the viewport (0 when its
-// top reaches 75% of the screen height, 1 when its bottom reaches 55%).
 export function useScrollProgress(ref) {
     const [progress, setProgress] = useState(0);
 
@@ -112,7 +102,6 @@ export function useScrollProgress(ref) {
     return prefersReducedMotion() ? 1 : progress;
 }
 
-// Buttons that lean toward the cursor a little (final call to action).
 export function useMagnetic(ref, strength = 0.25) {
     useEffect(() => {
         const el = ref.current;
@@ -133,7 +122,6 @@ export function useMagnetic(ref, strength = 0.25) {
     }, [ref, strength]);
 }
 
-// Re-renders every `ms` while `running` -- a simple clock for looping scenes.
 export function useTicker(running, ms) {
     const [tick, setTick] = useState(0);
 

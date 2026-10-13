@@ -40,10 +40,6 @@
     gap: 12px;
 }
 
-/* ---- Certificate preview ----
-   A true US Letter sheet (8.5 x 11 in) measured off the Registrar's own
-   template, so the printout is a duplicate of it. On screen the component
-   zooms the whole sheet down to fit this column. */
 .coe-preview-wrap {
     display: flex;
     justify-content: center;
@@ -73,10 +69,6 @@
     print-color-adjust: exact;
 }
 
-/* The certificate is paper: it never follows the app's dark mode. Dark mode
-   swaps the layout's colour tokens, and rules like `.employee-layout p
-   { color: var(--slate) }` would turn the letterhead text light grey on the
-   white sheet. The doubled class outranks those (0,2,0 > 0,1,1). */
 .coe-preview.coe-preview {
     color-scheme: light;
     background: #fff;
@@ -90,16 +82,10 @@
     color: #0563c1;
 }
 
-/* Keeps hyphenated fill-ins like "CHED-TDP" from splitting across lines. */
 .coe-nowrap {
     white-space: nowrap;
 }
 
-/* ---- Letterhead & footer ----
-   Pinned to the Registrar's PDF: every position below is in points (pt)
-   from the page's top-left corner, read straight off the PDF, so the
-   sheet prints as a duplicate of it. Text lines are placed by their top
-   edge (baseline minus the font's ascent). */
 .coe-fixed {
     position: absolute;
     inset: 0;
@@ -123,7 +109,6 @@
     color: #000;
 }
 
-/* Centred on the PDF's text column (36pt to 578pt). */
 .coe-preview .coe-lh {
     left: 36pt;
     width: 542pt;
@@ -137,7 +122,6 @@
     font-weight: 700;
 }
 
-/* Small capitals at Word's size (19pt under 24pt capitals). */
 .coe-preview .coe-lh-name .coe-sc {
     font-size: 19pt;
 }
@@ -164,7 +148,6 @@
     text-decoration: underline;
 }
 
-/* The two 0.72pt black rules, edge to edge of the text column. */
 .coe-rule {
     position: absolute;
     left: 36pt;
@@ -176,10 +159,6 @@
 .coe-rule-top { top: 138.04pt; }
 .coe-rule-bottom { top: 701.64pt; }
 
-/* ---- Body ----
-   Scoped under .coe-preview so the employee layout's own heading and
-   paragraph rules (.employee-layout h2 / p -- display font, slate colour,
-   zero margins, 1.6 line height) can't override the certificate's. */
 .coe-preview .coe-title,
 .coe-preview .coe-salutation,
 .coe-preview .coe-body,
@@ -230,8 +209,6 @@
     line-height: 0;
 }
 
-/* "Not Valid w/out" block, small, under the last paragraph and out at
-   the page's 36pt margin like the PDF. */
 .coe-preview .coe-note {
     margin-top: 25.1pt;
     margin-left: 3.6pt;
@@ -245,7 +222,6 @@
     line-height: 9.7pt;
 }
 
-/* Registrar sign-off, on the right. */
 .coe-preview .coe-signature {
     display: flex;
     flex-direction: column;
@@ -253,15 +229,10 @@
     align-self: flex-end;
     margin: 42.3pt 72.4pt 0 0;
     font-size: 12pt;
-    /* Name and "Registrar" on consecutive lines, spaced as in the PDF. */
     line-height: 15.7pt;
     text-align: center;
 }
 
-/* ---- Printing: only the print copy of the sheet (portalled under <body>,
-   outside the dashboard), one full Letter page. The zero-margin @page rule
-   lives in the component (PRINT_PAGE_RULE) so it only applies while this
-   page is mounted -- other pages print normally. ---- */
 .coe-print-root {
     display: none;
 }
@@ -271,8 +242,6 @@
         display: none !important;
     }
 
-    /* !important: an open SweetAlert modal aria-hides the rest of <body>
-       and its print CSS hides [aria-hidden] siblings -- not this one. */
     .coe-print-root {
         display: block !important;
     }

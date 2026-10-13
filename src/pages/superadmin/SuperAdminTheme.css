@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
 
-/* Self-contained design tokens for the Super Admin portal only. Deliberately
-   does not reuse --blue/--ink/etc. from admin/AdminLayout.css (shared with
-   admin & registrar_head) -- nothing here can leak into or be overridden by
-   another portal's styling, and nothing of theirs leaks into this one. */
 .sa-portal {
     --sa-navy: #123b78;
     --sa-navy-dark: #0d2c5c;
@@ -97,7 +93,6 @@ html[data-theme='dark'] .sa-portal {
     font-size: inherit;
 }
 
-/* ===== Page header ===== */
 .sa-page-header {
     margin-bottom: var(--sa-space-5);
 }
@@ -116,7 +111,6 @@ html[data-theme='dark'] .sa-portal {
     margin-bottom: var(--sa-space-5);
 }
 
-/* ===== Buttons ===== */
 .sa-btn {
     display: inline-flex;
     align-items: center;
@@ -169,7 +163,6 @@ html[data-theme='dark'] .sa-portal {
     color: var(--sa-success);
 }
 
-/* ===== Cards ===== */
 .sa-card {
     background: var(--sa-surface);
     border: 1px solid var(--sa-border);
@@ -190,7 +183,6 @@ html[data-theme='dark'] .sa-portal {
     font-size: 16px;
 }
 
-/* ===== Tables ===== */
 .sa-table-wrapper {
     overflow-x: auto;
 }
@@ -226,7 +218,6 @@ html[data-theme='dark'] .sa-portal {
     border-bottom: none;
 }
 
-/* ===== Badges / pills ===== */
 .sa-badge {
     display: inline-flex;
     align-items: center;
@@ -259,7 +250,6 @@ html[data-theme='dark'] .sa-portal {
     color: var(--sa-danger);
 }
 
-/* ===== Chips (filters) ===== */
 .sa-chips {
     display: flex;
     gap: 8px;
@@ -290,7 +280,6 @@ html[data-theme='dark'] .sa-portal {
     opacity: 0.8;
 }
 
-/* ===== Toolbar / search / select ===== */
 .sa-toolbar {
     display: flex;
     align-items: center;
@@ -325,7 +314,6 @@ html[data-theme='dark'] .sa-portal {
     outline-offset: 2px;
 }
 
-/* ===== Empty / error states ===== */
 .sa-empty {
     text-align: center;
     padding: 48px 24px;
@@ -365,7 +353,6 @@ html[data-theme='dark'] .sa-portal {
     font-size: 13px;
 }
 
-/* ===== Stat tiles ===== */
 .sa-tiles {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -445,7 +432,6 @@ html[data-theme='dark'] .sa-portal {
     box-shadow: 0 0 0 3px var(--sa-success-bg);
 }
 
-/* ===== Grids / panels (dashboard) ===== */
 .sa-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -466,7 +452,6 @@ html[data-theme='dark'] .sa-portal {
     }
 }
 
-/* ===== Login chart ===== */
 .sa-chart {
     display: flex;
     align-items: flex-end;
@@ -502,7 +487,6 @@ html[data-theme='dark'] .sa-portal {
     color: var(--sa-text-muted);
 }
 
-/* ===== Role bars ===== */
 .sa-bars {
     list-style: none;
     margin: 0;
@@ -532,7 +516,6 @@ html[data-theme='dark'] .sa-portal {
     border-radius: 999px;
 }
 
-/* ===== System activity mini-stats ===== */
 .sa-mini-stats {
     display: flex;
     flex-direction: column;
@@ -588,7 +571,6 @@ html[data-theme='dark'] .sa-portal {
     opacity: 0.85;
 }
 
-/* ===== Attention / feed lists ===== */
 .sa-attention {
     list-style: none;
     margin: 0;
@@ -677,7 +659,6 @@ html[data-theme='dark'] .sa-portal {
     margin-bottom: 10px;
 }
 
-/* ===== Matrix (Roles & Permissions) ===== */
 .sa-matrix-wrapper {
     overflow-x: auto;
 }
@@ -709,7 +690,6 @@ html[data-theme='dark'] .sa-portal {
     white-space: nowrap;
 }
 
-/* ===== Health check cards ===== */
 .sa-health-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -732,7 +712,6 @@ html[data-theme='dark'] .sa-portal {
     font-size: 14px;
 }
 
-/* ===== Export cards ===== */
 .sa-export-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

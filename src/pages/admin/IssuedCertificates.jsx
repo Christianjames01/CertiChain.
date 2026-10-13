@@ -11,8 +11,6 @@ const initialsOf = (name) =>
 
 const ROLE_LABELS = { employee: 'Employee', registrar_head: 'Registrar Head', admin: 'Admin', superadmin: 'Superadmin' }
 
-// Local (PH) date as YYYY-MM-DD -- toISOString() is UTC, which would put
-// anything issued before 8 AM on the previous day.
 const localDateKey = (d) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 const todayKey = () => localDateKey(new Date())
@@ -21,8 +19,6 @@ const monthKey = () => todayKey().slice(0, 7)
 const formatDate = (value) =>
     new Date(value).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 
-// Every Certificate of Enrollment saved & printed from the employee portal,
-// with a per-staff tally so the head can see who issued how many.
 function IssuedCertificates() {
     const [certificates, setCertificates] = useState([])
     const [loading, setLoading] = useState(true)
@@ -50,8 +46,6 @@ function IssuedCertificates() {
 
             let { data, error: certError } = await fetchCertificates(`${columns}, encoder_initials`)
 
-            // Until the encoder_initials migration reaches the database,
-            // still list the certificates, just without the initials.
             if (certError && /encoder_initials/.test(certError.message || '')) {
                 ;({ data, error: certError } = await fetchCertificates(columns))
             }
@@ -89,10 +83,8 @@ function IssuedCertificates() {
 
     const today = todayKey()
     const month = monthKey()
-    // When it was actually saved & printed -- not the (editable) date on the form.
     const issuedOn = (cert) => localDateKey(new Date(cert.created_at))
 
-    // Per-staff tally, most certificates first.
     const byIssuer = {}
     for (const cert of certificates) {
         const key = cert.issued_by || 'unknown'

@@ -3,14 +3,6 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import QRCode from 'qrcode'
 import hcdcLogo from '../../assets/hcdc-logo.png'
 
-// The landing hero's 3D certificate: a softly curved academic certificate
-// that floats, follows the pointer, catches a light sweep, gets its gold seal
-// stamped when the request is ready, and a holographic "Verified" badge when
-// it's claimed. setStage(i) follows the hero's status cycle:
-//   0-2 receipt / payment / processing  -> draft
-//   3   ready for claiming              -> seal stamped
-//   4   completed                       -> verified
-
 const PAPER_W = 3.4
 const PAPER_H = 2.4
 const TEX_W = 2048
@@ -39,12 +31,10 @@ function loadImage(src) {
     })
 }
 
-// ---- The certificate face (canvas) ------------------------------------------
 function drawCertificate(g, { seal, qr, draft }) {
     const w = TEX_W
     const h = TEX_H
 
-    // Paper with a faint warm gradient and fibres.
     const paper = g.createLinearGradient(0, 0, w, h)
     paper.addColorStop(0, '#fffdf7')
     paper.addColorStop(1, '#f6f0e1')
@@ -57,7 +47,6 @@ function drawCertificate(g, { seal, qr, draft }) {
     }
     g.globalAlpha = 1
 
-    // Guilloche border band.
     const m = 46
     g.fillStyle = NAVY
     g.fillRect(m, m, w - m * 2, h - m * 2)
@@ -84,12 +73,10 @@ function drawCertificate(g, { seal, qr, draft }) {
         along(h, (t, s) => (t === 0 ? g.moveTo(w - m - band / 2 + s, t) : g.lineTo(w - m - band / 2 + s, t)))
     }
     g.restore()
-    // Thin gold inner rule.
     g.strokeStyle = GOLD
     g.lineWidth = 4
     g.strokeRect(m + band + 22, m + band + 22, w - (m + band + 22) * 2, h - (m + band + 22) * 2)
 
-    // Corner ornaments.
     const corner = (x, y, sx, sy) => {
         g.save()
         g.translate(x, y)
@@ -125,7 +112,6 @@ function drawCertificate(g, { seal, qr, draft }) {
         if ('letterSpacing' in g) g.letterSpacing = '0px'
     }
 
-    // Header with the school seal.
     if (seal.logo) g.drawImage(seal.logo, center - 85, 196, 170, 170)
     text('HOLY CROSS OF DAVAO COLLEGE', 420, 54, { spacing: 6, color: NAVY })
     text('Office of Registration & Records Management', 482, 30, { font: 'Inter, Arial, sans-serif', weight: 600, color: '#5b6b82', spacing: 2 })
@@ -142,7 +128,6 @@ function drawCertificate(g, { seal, qr, draft }) {
     text('Bachelor of Science in Information Technology', 1030, 50, { color: NAVY })
     text('Given this 2nd day of October, 2026, at Davao City, Philippines.', 1100, 28, { font: 'Inter, Arial, sans-serif', weight: 500, color: '#6b7280' })
 
-    // Signature (left).
     const sx = 520
     g.strokeStyle = '#1f3a6b'
     g.lineWidth = 4
@@ -160,7 +145,6 @@ function drawCertificate(g, { seal, qr, draft }) {
     g.textAlign = 'center'
     g.fillText('University Registrar', sx, 1290)
 
-    // QR (right) -- real, scannable verify link.
     if (qr.canvas) {
         const size = 230
         const qx = w - 520 - size / 2
@@ -174,7 +158,6 @@ function drawCertificate(g, { seal, qr, draft }) {
         g.fillText('CERT-000124', qx + size / 2, qy + size + 36)
     }
 
-    // Draft watermark while it's still being processed.
     if (draft) {
         g.save()
         g.translate(center, h / 2 + 40)
@@ -188,7 +171,6 @@ function drawCertificate(g, { seal, qr, draft }) {
     }
 }
 
-// The embossed face of the gold seal.
 function drawSealFace(g, size) {
     const c = size / 2
     const grad = g.createRadialGradient(c * 0.7, c * 0.6, size * 0.05, c, c, c)
@@ -212,7 +194,6 @@ function drawSealFace(g, size) {
     g.beginPath()
     g.arc(c, c, c * 0.6, 0, Math.PI * 2)
     g.stroke()
-    // Ring text.
     g.fillStyle = 'rgba(95, 60, 5, 0.85)'
     g.font = `800 ${Math.round(size * 0.075)}px Inter, Arial, sans-serif`
     g.textAlign = 'center'
@@ -226,7 +207,6 @@ function drawSealFace(g, size) {
         g.fillText(label[i], 0, 0)
         g.restore()
     }
-    // Check mark.
     g.strokeStyle = 'rgba(95, 60, 5, 0.9)'
     g.lineWidth = size * 0.06
     g.lineCap = 'round'
@@ -238,7 +218,6 @@ function drawSealFace(g, size) {
     g.stroke()
 }
 
-// Holographic "Verified" badge.
 function drawHolo(g, size, hue) {
     const c = size / 2
     const grad = g.createLinearGradient(0, 0, size, size)
@@ -269,7 +248,6 @@ function drawHolo(g, size, hue) {
     g.stroke()
 }
 
-// ---- Scene -------------------------------------------------------------------
 export function createHeroCertificate(container, { reducedMotion = false } = {}) {
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
@@ -301,7 +279,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
     const cert = new THREE.Group()
     root.add(cert)
 
-    // Paper: a curved plane with the canvas face, plus a card-stock back.
     const faceCanvas = document.createElement('canvas')
     faceCanvas.width = TEX_W
     faceCanvas.height = TEX_H
@@ -316,7 +293,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         for (let i = 0; i < p.count; i++) {
             const x = p.getX(i) / (PAPER_W / 2)
             const y = p.getY(i) / (PAPER_H / 2)
-            // A gentle bow plus a lifted bottom-right corner.
             const z = -0.09 * x * x + 0.05 * Math.max(0, x) * Math.max(0, -y) * Math.max(0, -y) + depth
             p.setZ(i, z)
         }
@@ -330,7 +306,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
     const back = new THREE.Mesh(backGeo, new THREE.MeshStandardMaterial({ color: 0xe9e1cc, roughness: 0.9, side: THREE.BackSide }))
     cert.add(back)
 
-    // Light sweep across the paper.
     const sweepCanvas = document.createElement('canvas')
     sweepCanvas.width = 256
     sweepCanvas.height = 16
@@ -351,7 +326,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
     const sweepMat = new THREE.MeshBasicMaterial({ map: sweepTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.6, toneMapped: false })
     cert.add(new THREE.Mesh(sweepGeo, sweepMat))
 
-    // Gold seal with ribbons (bottom centre).
     const seal = new THREE.Group()
     seal.position.set(0, -0.78, 0.06)
     cert.add(seal)
@@ -383,7 +357,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
     seal.add(sealFace)
     seal.scale.setScalar(0.001)
 
-    // Holographic "Verified" badge (top right).
     const holoCanvas = document.createElement('canvas')
     holoCanvas.width = holoCanvas.height = 256
     const holoCtx = holoCanvas.getContext('2d')
@@ -394,7 +367,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
     holo.scale.setScalar(0.001)
     cert.add(holo)
 
-    // Soft shadow under the certificate.
     const shadowCanvas = document.createElement('canvas')
     shadowCanvas.width = shadowCanvas.height = 128
     const shg = shadowCanvas.getContext('2d')
@@ -408,7 +380,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
     shadow.rotation.x = -Math.PI / 2.4
     root.add(shadow)
 
-    // Gold sparkles for the seal stamp.
     const dot = document.createElement('canvas')
     dot.width = dot.height = 64
     const dg = dot.getContext('2d')
@@ -442,7 +413,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         sparkAge = 0
     }
 
-    // ---- Face drawing (needs the fonts, school seal and QR) ------------------
     const assets = { logo: null, qr: null }
     let faceKey = ''
     let stage = 0
@@ -466,7 +436,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         redrawFace()
     })
 
-    // ---- Interaction + animation -----------------------------------------------
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 }
     const onMove = (e) => {
         const r = container.getBoundingClientRect()
@@ -492,7 +461,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         stageTime += dt
         const still = reducedMotion
 
-        // Follow the pointer, with a slow idle sway.
         pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 3)
         pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 3)
         const sway = still ? 0 : 1
@@ -502,12 +470,10 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         cert.position.y = 0.1 + Math.sin(elapsed * 0.9) * 0.06 * sway
         shadow.scale.x = 1 - Math.sin(elapsed * 0.9) * 0.04 * sway
 
-        // Light sweep every few seconds.
         const cycle = (elapsed % 5.5) / 5.5
         sweepTex.offset.x = still ? 0.5 : 1.1 - cycle * 2.2
         sweepMat.opacity = still ? 0 : 0.55
 
-        // Seal: stamped when ready, stays after.
         const sealTarget = stage >= 3 ? 1 : 0
         if (sealTarget) {
             const k = stage === 3 ? popIn(stageTime / 0.7) : 1
@@ -518,7 +484,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         }
         seal.rotation.z = Math.sin(elapsed * 0.8) * 0.04
 
-        // Verified hologram on completion.
         if (stage >= 4) {
             holo.scale.setScalar(Math.max(0.001, popIn(stageTime / 0.8)))
             holoHue = (holoHue + dt * 60) % 360
@@ -550,7 +515,6 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         renderer.domElement.style.width = '100%'
         renderer.domElement.style.height = '100%'
         camera.aspect = w / h
-        // Keep the whole certificate in frame whatever the box shape.
         const fitH = (PAPER_H * 1.2) / 2
         const fitW = (PAPER_W * 1.1) / 2 / camera.aspect
         camera.fov = (2 * Math.atan(Math.max(fitH, fitW) / camera.position.z) * 180) / Math.PI

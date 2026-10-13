@@ -17,10 +17,6 @@ import { digitsOnly, decimalOnly } from '../../lib/typedNumber'
 import { blockedForReadOnlyViewer } from '../../lib/viewOnlyGuard'
 import { friendlyError } from '../../lib/friendlyError'
 
-// programs.duration_years is always stored in years -- these just let the
-// admin type/read a short vocational course's length in whichever unit
-// makes sense (e.g. "6 months" instead of mentally converting to 0.5) and
-// keep the same number of real days when switching the unit mid-edit.
 function convertDurationValue(value, fromUnit, toUnit) {
     if (value === '' || value === null || fromUnit === toUnit) return value
 
@@ -51,19 +47,11 @@ function CollegesPrograms() {
     const [showProgramForm, setShowProgramForm] = useState(false)
     const [programDurationUnit, setProgramDurationUnit] = useState('years')
 
-    // Adding colleges/programs one at a time meant repeating the same modal
-    // up to 56 times to seed the real catalog. One shared modal lets an
-    // admin check off any number of colleges and programs from the HCDC
-    // reference catalog and add all of them in a single action.
     const [showAddModal, setShowAddModal] = useState(false)
     const [selectedCollegeCodes, setSelectedCollegeCodes] = useState([])
     const [selectedProgramCodes, setSelectedProgramCodes] = useState([])
     const [addingBulk, setAddingBulk] = useState(false)
 
-    // The catalog is a fixed reference list -- once everything in it is
-    // added, there's nothing left to check. These hold a one-off entry for
-    // something genuinely new (e.g. a program HCDC opens later) that isn't
-    // in the catalog at all, so that case isn't a dead end.
     const [showCustomCollege, setShowCustomCollege] = useState(false)
     const [customCollege, setCustomCollege] = useState({ code: '', name: '' })
     const [showCustomProgram, setShowCustomProgram] = useState(false)
@@ -92,11 +80,6 @@ function CollegesPrograms() {
         setCurrentRole(profile?.role || '')
     }
 
-    // `silent` skips the loading/skeleton state for refreshes after a save,
-    // toggle, or bulk-add. Swapping the list for a short skeleton mid-edit
-    // shrinks the page and makes the browser clamp scroll back near the top,
-    // so once the full list re-renders it looks like the page jumped up even
-    // though nothing intentionally scrolled the admin away from their spot.
     const loadData = async ({ silent = false } = {}) => {
         try {
             if (!silent) setLoading(true)
@@ -227,11 +210,6 @@ function CollegesPrograms() {
     }
 
     const openEditProgram = (p) => {
-        // A stored duration under a year (e.g. 0.5) is virtually always a
-        // short vocational course entered in months, not a fraction of a
-        // year an admin actually thinks in -- defaulting to Months here
-        // means it displays correctly right away instead of showing an
-        // awkward decimal until they manually switch the unit.
         const unit = p.duration_years != null && p.duration_years > 0 && p.duration_years < 1 ? 'months' : 'years'
         setProgramForm({
             ...p,
@@ -348,10 +326,6 @@ function CollegesPrograms() {
     const availableColleges = HCDC_COLLEGES.filter((c) => !colleges.some((existing) => existing.college_code === c.code))
     const availablePrograms = HCDC_PROGRAMS.filter((p) => !programs.some((existing) => existing.program_code === p.code))
 
-    // Choices for the custom program's college field: existing colleges,
-    // plus any catalog colleges checked in this same batch, plus the custom
-    // college being defined right now (if any) -- covers "add a brand new
-    // college and a program under it" in one action.
     const customProgramCollegeChoices = [
         ...colleges.map((c) => ({ id: c.college_id, name: c.college_name })),
         ...selectedCollegeCodes.map((code) => {
@@ -426,10 +400,6 @@ function CollegesPrograms() {
                 insertedColleges = data || []
             }
 
-            // A program's college might be one selected/entered in this same
-            // batch (not yet in `colleges` state until after loadData), so
-            // resolve college_id against both the existing list and what was
-            // just inserted above.
             const collegeIdByCode = Object.fromEntries(
                 [...colleges, ...insertedColleges].map((c) => [c.college_code, c.college_id])
             )

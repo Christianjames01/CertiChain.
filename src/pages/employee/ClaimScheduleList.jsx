@@ -23,7 +23,6 @@ function ClaimScheduleList() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [marking, setMarking] = useState(null)
-    // request_id -> authorized representative, for the release window.
     const [representatives, setRepresentatives] = useState({})
 
     const listedRequestIds = [...needsScheduling.map((r) => r.request_id), ...todayAppointments.map((a) => a.request_id)].sort().join(',')
@@ -63,9 +62,6 @@ function ClaimScheduleList() {
 
             setEmployee(employeeData)
 
-            // Claiming is a shared, front-desk job: every employee sees every
-            // request ready for claiming and every upcoming appointment
-            // office-wide, not just ones assigned to or scheduled by them.
             const needsSchedulingQuery = supabase
                 .from('document_requests')
                 .select(`
@@ -226,7 +222,6 @@ function ClaimScheduleList() {
         }
     }
 
-    // Update in place when requests change -- no manual refresh needed.
     useLiveRefresh(['claim_schedules', 'document_requests'], loadData)
 
     const markAsClaimed = async (appointment) => {
@@ -254,8 +249,6 @@ function ClaimScheduleList() {
                 throw new Error('Failed to update claim schedule: ' + scheduleError.message)
             }
 
-            // Claiming is shared front-desk work -- any employee can release a
-            // request ready for claiming, not just the one it's assigned to.
             const { error: requestError } = await supabase
                 .from('document_requests')
                 .update({

@@ -29,10 +29,6 @@ const CLOSED_STATUSES = ['completed', 'cancelled', 'rejected']
 
 const otherParty = (m, userId) => (m.sender_user_id === userId ? m.receiver_user_id : m.sender_user_id)
 
-// One conversation per registrar staff member: every employee who handles
-// (or handled) one of the student's requests, plus anyone else from the
-// Registrar who has messaged them. ?employee=<employee_id> (from a request
-// page) opens that employee's conversation.
 function Messages() {
     const [searchParams, setSearchParams] = useSearchParams()
     const requestedEmployeeId = searchParams.get('employee')
@@ -42,20 +38,13 @@ function Messages() {
     const [selectedUserId, setSelectedUserId] = useState(null)
     const [messages, setMessages] = useState([])
     const [reactionRows, setReactionRows] = useState([])
-    // message_id -> the staff member whose conversation it belongs in, and
-    // sender labels for staff other than that person (e.g. the Registrar Head).
     const [threadOf, setThreadOf] = useState({})
     const [labels, setLabels] = useState({})
     const [reply, setReply] = useState('')
-    // The student's requests, for "Ask about a request".
     const [requests, setRequests] = useState([])
     const [askOpen, setAskOpen] = useState(false)
-    // The message being answered (Messenger-style reply), or null.
     const [replyTo, setReplyTo] = useState(null)
-    // Staff member "typing" the automatic status reply (their user id).
     const [autoTyping, setAutoTyping] = useState(null)
-    // Phones show the list first; the chat opens full screen when a
-    // conversation is picked (or requested via ?employee=).
     const [chatOpen, setChatOpen] = useState(!!requestedEmployeeId)
 
     const [loading, setLoading] = useState(true)
@@ -66,10 +55,6 @@ function Messages() {
     useLiveRefresh(['messages', 'message_reactions'], (options) => loadMessages(options))
     const { typingUserIds, sendTyping } = useTyping(userId)
 
-    // Appends an incoming message the instant it arrives, instead of waiting
-    // for the next full reload (useLiveRefresh above still runs too, and
-    // corrects anything this simpler path can't handle, e.g. a Head reply
-    // routed into an employee's thread via [[ref=...]]).
     useEffect(() => {
         if (!userId) return undefined
         const channel = supabase
@@ -93,8 +78,6 @@ function Messages() {
             if (userError || !user) throw new Error('You are not logged in.')
             setUserId(user.id)
 
-            // Round 1: the student record, their messages and what they've
-            // hidden, all at once (each round trip is ~0.3 s from Davao).
             const [{ data: student, error: studentError }, { data: messageRows, error: messagesError }, hiddenIds, { data: documentTypes }] = await Promise.all([
                 supabase.from('students').select('student_id, college_id, program_id').eq('user_id', user.id).single(),
                 supabase
@@ -109,8 +92,6 @@ function Messages() {
             if (studentError || !student) throw new Error('Student record could not be found.')
             if (messagesError) throw new Error('Failed to load messages: ' + messagesError.message)
 
-            // [[ref=<employee>]] marks a Registrar Head reply sent into the
-            // conversation with that employee; the tag itself is never shown.
             const rows = (messageRows || [])
                 .filter((m) => !hiddenIds.has(m.message_id))
                 .map((m) => {
@@ -120,8 +101,6 @@ function Messages() {
                 })
             const messageParties = [...new Set(rows.map((m) => otherParty(m, user.id)))].filter(Boolean)
 
-            // Round 2: the student's requests (for who handles them and for
-            // "Ask about a request") and the names of everyone they've messaged.
             const [{ data: requestRows }, partyLabels] = await Promise.all([
                 supabase
                     .from('document_requests')
@@ -131,7 +110,6 @@ function Messages() {
                 buildSenderLabels(messageParties),
             ])
 
-            // Employees handling the student's requests, newest request first.
             const ownRequests = (requestRows || []).filter((r) => r.assigned_employee_id)
             const requestsByEmployee = {}
             for (const r of ownRequests) {
@@ -145,7 +123,6 @@ function Messages() {
                 if (fallback) employeeIds = [fallback]
             }
 
-            // Round 3: those employees.
             const { data: employeeRows } = employeeIds.length
                 ? await supabase
                     .from('employees')
@@ -157,11 +134,6 @@ function Messages() {
             const missing = employeeUserIds.filter((id) => !partyLabels[id])
             const labels = missing.length ? { ...partyLabels, ...(await buildSenderLabels(missing)) } : partyLabels
 
-            // Which conversation each message belongs in. Messages with an
-            // employee go in that employee's conversation, and so do Registrar
-            // Head replies sent into it (tagged with that employee, see
-            // admin/Messages sendReply). Any other message from the head is a
-            // direct one and gets its own conversation.
             const employeeUserSet = new Set(employeeUserIds)
             const assigned = {}
             for (const m of rows) {
@@ -191,8 +163,6 @@ function Messages() {
                 }
             })
 
-            // Other registrar staff with a direct conversation (e.g. the
-            // Registrar Head messaging the student) get their own entry.
             for (const uid of new Set(Object.values(assigned))) {
                 if (!uid || list.some((c) => c.userId === uid)) continue
                 list.push({
@@ -207,11 +177,8 @@ function Messages() {
                 })
             }
 
-            // Active handlers first, then most recent conversation.
             list.sort((a, b) => Number(b.handlesActive) - Number(a.handlesActive) || b.lastAt - a.lastAt || b.latestRequestAt - a.latestRequestAt)
 
-
-            // Requests the student can ask about (open ones first).
             const docName = Object.fromEntries((documentTypes || []).map((t) => [t.document_type_id, t.document_name]))
 
             setRequests((requestRows || []).map((r) => ({ ...r, documentName: docName[r.document_type_id] || '' })))
@@ -235,8 +202,6 @@ function Messages() {
     }
 
     const selected = contacts.find((c) => c.userId === selectedUserId) || null
-    // Messages sent from this page before a reload aren't in threadOf yet;
-    // they belong with the person they were sent to.
     const threadFor = (m) => threadOf[m.message_id] || otherParty(m, userId)
     const thread = selected ? messages.filter((m) => threadFor(m) === selected.userId) : []
     const unreadInThread = unreadReceived(thread, userId)
@@ -262,8 +227,6 @@ function Messages() {
         }
     }
 
-    // An open conversation reads its messages as they arrive, like
-    // Messenger. On phones that's only once the chat is actually open.
     const threadVisible = !!selected && (chatOpen || !window.matchMedia('(max-width: 880px)').matches)
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -300,9 +263,6 @@ function Messages() {
         return shown
     }
 
-    // "Ask about a request": asks the person in the open conversation (the
-    // student chose who to talk to), who then sends the automatic status
-    // reply. With ALL_REQUESTS, asks about every request.
     const askAboutRequest = async (request) => {
         setAskOpen(false)
         const all = request === ALL_REQUESTS
@@ -321,9 +281,6 @@ function Messages() {
             setSending(false)
         }
 
-        // Reply like a person would: a short pause, "… is typing", then the
-        // status. The reply is only written after the pause, so live updates
-        // can't show it early.
         await new Promise((resolve) => setTimeout(resolve, 700))
         setAutoTyping(contact.userId)
         try {
@@ -334,8 +291,6 @@ function Messages() {
                 p_reply_as: contact.userId,
                 p_reply_to: question?.message_id || null,
             })
-            // Before the migration the staff member still gets the question
-            // and can answer it with one click.
             if (replyError) console.warn('AUTO STATUS REPLY UNAVAILABLE:', replyError.message)
             else if (autoReply) addMessage(readMessage(autoReply))
         } catch (err) {
@@ -363,7 +318,6 @@ function Messages() {
         }
     }
 
-    // Unsend for everyone: the registrar staff see "... deleted a message".
     const deleteMessage = async (m) => {
         const confirmed = await confirmModal(
             'Delete this message for everyone? The registrar staff will see that you deleted a message instead.',
@@ -383,7 +337,6 @@ function Messages() {
         }
     }
 
-    // Returns false on failure so the bubble stays in edit mode.
     const editMessage = async (m, newText) => {
         try {
             await editOwnMessage(m.message_id, newText, m.replyTo)
@@ -413,8 +366,6 @@ function Messages() {
 
     const threadOfContact = (c) => messages.filter((m) => threadFor(m) === c.userId)
 
-    // The staff member, or other registrar staff who wrote in this
-    // conversation (e.g. the head), typing right now.
     const typersIn = (c) => {
         const senders = new Set([c.userId, ...threadOfContact(c).map((m) => m.sender_user_id)])
         const typers = typingUserIds.filter((id) => id !== userId && senders.has(id))

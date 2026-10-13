@@ -55,8 +55,6 @@ function Profile() {
         loadProfile()
     }, [])
 
-    // Picks up a change the Registrar makes to your record (e.g. approving
-    // your registration, correcting a detail) without needing a reload.
     useLiveRefresh(['profiles', 'students'], (options) => loadProfile(options))
 
     const loadProfile = async ({ silent = false } = {}) => {
@@ -92,8 +90,6 @@ function Profile() {
             }
 
             setProfile(profileData)
-            // Don't stomp on an in-progress edit if a live update arrives
-            // while the student has the form open.
             if (!editing) setPhoneNumber(profileData.phone_number || '')
 
             const { data: studentData, error: studentError } = await supabase

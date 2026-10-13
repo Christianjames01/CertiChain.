@@ -27,9 +27,6 @@
     margin-bottom: 16px;
 }
 
-/* A sensitive/destructive action sitting in its own card (e.g. status
-   override) -- a red border marks it as a zone to pause before using,
-   without the loud full-red background of an admin-notice. */
 .admin-danger-zone {
     border-color: var(--danger-text, var(--red));
 }
@@ -152,9 +149,6 @@
     gap: 18px;
 }
 
-/* Dashboard/report stat cards -- same look as admin-info-grid on desktop,
-   but scrolls as a single row on mobile instead of wrapping into a tall
-   stack, closer to the compact web layout. */
 .admin-stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -171,10 +165,6 @@
 .admin-info-field strong {
     font-size: 14.5px;
     font-weight: 600;
-    /* A long unbroken value (e.g. an uploaded file name with no spaces)
-       has no natural place to wrap, so on a narrow screen it overflows
-       its grid column and visually spills into the field next to it
-       instead of wrapping onto a new line. */
     overflow-wrap: anywhere;
 }
 
@@ -314,8 +304,6 @@
     background: var(--paper);
 }
 
-/* Variant for buttons sitting on the dark blue bulk-select bar, where the
-   default surface/ink secondary-button colors would be unreadable. */
 .admin-bulkbar-button {
     background: rgba(255, 255, 255, 0.12);
     color: var(--white);
@@ -378,9 +366,6 @@
     background: var(--paper);
 }
 
-/* Key/value "fact" table -- a row per field instead of a floating grid of
-   label/value pairs, so related facts read as one connected block. Not
-   clickable, so no row hover highlight. */
 .admin-fact-table {
     table-layout: fixed;
 }
@@ -416,9 +401,6 @@
     }
 }
 
-/* Scroll stat cards and filter chips as a single row on mobile instead of
-   wrapping into a tall stack -- appended last so it wins the cascade over
-   the unconditional .admin-filter-row/.admin-stat-grid rules above. */
 @media (max-width: 640px) {
     .admin-stat-grid,
     .admin-filter-row {
@@ -453,8 +435,6 @@
     height: 20px;
 }
 
-/* Edit forms for a single Student Details section (Personal / Student
-   Information), laid out on the same grid as the read-only fields. */
 .admin-edit-grid {
     grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     align-items: end;
@@ -491,7 +471,6 @@
     }
 }
 
-/* Messages: delete action on each conversation in the list. */
 .admin-thread-delete:hover:not(:disabled) {
     text-decoration: underline;
 }
@@ -506,10 +485,6 @@
     color: var(--danger-text, var(--red));
 }
 
-/* ===================================================
-   List pages (Employees, Students, Documents, Claim Schedules,
-   Official Receipts, Messages): summary tiles, cards, actions.
-=================================================== */
 .page-stats {
     margin-bottom: 22px;
 }
@@ -528,7 +503,6 @@
     box-shadow: 0 16px 34px -28px rgba(10, 36, 80, 0.45);
 }
 
-/* Details inside a list card read as small tiles. */
 .admin-list-card .admin-info-grid {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 10px;
@@ -547,7 +521,6 @@
     text-transform: uppercase;
 }
 
-/* Title row with an avatar or icon. */
 .admin-card-title {
     display: flex;
     align-items: center;
@@ -600,7 +573,6 @@
     vertical-align: middle;
 }
 
-/* Action buttons at the bottom of a card. */
 .admin-card-actions {
     display: flex;
     flex-wrap: wrap;
@@ -654,7 +626,6 @@
     cursor: not-allowed;
 }
 
-/* Search box with a magnifier and the filter chips beside it. */
 .admin-toolbar {
     display: flex;
     align-items: center;
@@ -713,7 +684,6 @@
     transform: none;
 }
 
-/* Date badge on claiming appointment cards ("SEP / 29"). */
 .claim-date-badge {
     display: flex;
     flex-direction: column;
@@ -754,7 +724,6 @@
     background: var(--success-text, #1e8a5f);
 }
 
-/* Admin Messages conversation cards. */
 .msg-thread-card.is-unread {
     border-left: 4px solid var(--blue-accent, var(--blue));
 }
@@ -798,7 +767,6 @@
     white-space: nowrap;
 }
 
-/* Walk-in queue number badge (e.g. Q-024). */
 .queue-number-badge {
     display: inline-flex;
     align-items: center;
@@ -832,7 +800,6 @@
     color: var(--slate);
 }
 
-/* Activity log table: actor with avatar, action as a pill. */
 .log-actor {
     display: inline-flex;
     align-items: center;
@@ -870,7 +837,6 @@
     white-space: nowrap;
 }
 
-/* Header card on detail pages (employee, student, request). */
 .admin-detail-hero {
     position: relative;
     display: flex;
@@ -978,8 +944,6 @@
     height: 28px;
 }
 
-/* Phones: document image and status pill on the first row, the title and
-   details full width below (see PortalUi.css for the other portals). */
 @media (max-width: 640px) {
     .admin-detail-hero:has(> [class*="status-pill"]) {
         flex-wrap: wrap;
@@ -1004,7 +968,6 @@
     }
 }
 
-/* Phones: list card details two per row (an odd last one spans the row). */
 @media (max-width: 640px) {
     .admin-list-card .admin-info-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1020,8 +983,6 @@
     }
 }
 
-
-/* ---- Student details: submitted requirements -------------------------- */
 .pf-page + .admin-section-title,
 .pf-page ~ .admin-section-title {
     margin-top: 28px;

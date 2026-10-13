@@ -41,7 +41,6 @@
 .employee-layout h2,
 .employee-layout h3 {
     font-family: var(--font-display);
-    /* Follow the app theme, not the OS setting the global h1/h2 rule uses. */
     color: var(--ink);
     font-weight: 600;
     margin: 0;
@@ -74,9 +73,6 @@
     font-size: inherit;
 }
 
-/* ===================================================
-   SIDEBAR
-=================================================== */
 .employee-sidebar {
     width: 264px;
     flex-shrink: 0;
@@ -272,18 +268,12 @@
     color: var(--white);
 }
 
-/* ===================================================
-   CONTENT
-=================================================== */
 .employee-content {
     flex: 1;
     min-width: 0;
     padding: 40px 44px;
 }
 
-/* ===================================================
-   RESPONSIVE
-=================================================== */
 @media (max-width: 960px) {
     .employee-mobile-topbar {
         display: flex;

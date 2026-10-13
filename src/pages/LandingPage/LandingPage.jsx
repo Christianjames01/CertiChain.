@@ -16,8 +16,6 @@ import certichainLogo from "../../assets/certichain-logo.png";
 import dpoRegisteredBadge from "../../assets/dpo-registered-badge.png";
 import dataPrivacyBadge from "../../assets/data-privacy-badge.png";
 
-// Fallback only: the catalog is loaded live from document_types (so the
-// registrar head's edits show here). Used if that load fails or is empty.
 const FALLBACK_DOCUMENTS = [
     { name: "Transcript of Records", code: "TOR" },
     { name: "Certification of Grades", code: "COG" },
@@ -113,7 +111,6 @@ const IconQr = () => (
     </svg>
 );
 
-// Landing page "Registrar Services" cards.
 const SERVICES = [
     {
         Icon: IconDocument,
@@ -234,14 +231,11 @@ const LANDING_FAQ = [
     ["How do I know a document is genuine?", "Every document CertiChain issues carries a unique credential number and QR code. Anyone — an employer, another school — can scan it or enter the number on the Verify page, no account required."],
 ];
 
-
-// The walkthrough ends with sign-up / log-in.
 const LANDING_CTA = {
     primary: { label: "Create an account →", href: "/register" },
     secondary: { label: "Log in", href: "/login" },
 };
 
-// Headline words that rise in one after another.
 const Words = ({ text, start = 0 }) =>
     text.split(" ").map((word, i) => (
         <span className="lpm-word" style={{ "--w": start + i }} key={`${word}-${i}`}>
@@ -249,8 +243,6 @@ const Words = ({ text, start = 0 }) =>
         </span>
     ));
 
-// Thin progress bar under the navbar: how far down the page you are. Its
-// own component so scrolling doesn't re-render the whole page.
 function PageProgress() {
     const [progress, setProgress] = useState(0);
 
@@ -275,13 +267,9 @@ function PageProgress() {
     return <span className="lpm-progress" style={{ transform: `scaleX(${progress})` }} aria-hidden="true" />;
 }
 
-// "How it works": a rail of numbered dots fills as the section scrolls by,
-// lighting each step card as it's reached.
 function ProcessSteps() {
     const ref = useRef(null);
     const progress = useScrollProgress(ref);
-    // The cards re-render as the rail fills, which would wipe a class added
-    // from outside React -- so their reveal ("is-in") is set here instead.
     const shown = useInView(ref, { threshold: 0.1 });
     const lit = (i) => progress >= (i + 0.35) / PROCESS_STEPS.length;
 
@@ -318,7 +306,6 @@ function ProcessSteps() {
     );
 }
 
-// Results: numbers that count up, then the old way vs CertiChain.
 function Benefits({ documentCount }) {
     const ref = useRef(null);
     const inView = useInView(ref, { threshold: 0.3 });
@@ -394,7 +381,6 @@ function Benefits({ documentCount }) {
     );
 }
 
-// Final call to action: buttons lean toward the cursor.
 function FinalCta() {
     const primary = useRef(null);
     const secondary = useRef(null);
@@ -443,14 +429,12 @@ const IconShieldCheck = () => (
     </svg>
 );
 
-// Social proof: facts about the system, not invented reviews.
 const TRUST_POINTS = [
     { quote: "The official online registrar service of Holy Cross of Davao College — requests go straight to the Registrar’s staff.", who: "Office of Registration & Records Management", role: "Holy Cross of Davao College", logo: true },
     { quote: "Your personal data is handled under the Data Privacy Act, by an institution registered with the National Privacy Commission.", who: "Data privacy", role: "NPC-registered DPO", Icon: IconShieldCheck },
     { quote: "Every released document carries a signed credential number and QR code — schools and employers can check it free, no account needed.", who: "Verifiable credentials", role: "Signed and QR-verified", Icon: IconQr },
 ];
 
-// Available document types, alphabetical, straight from the database.
 function useDocumentCatalog() {
     const [documents, setDocuments] = useState(FALLBACK_DOCUMENTS);
 
@@ -479,8 +463,6 @@ function useDocumentCatalog() {
     return documents;
 }
 
-// The head's uploaded sample image if there is one, otherwise the same
-// layout mock-up students see on New Request.
 const DocumentPreviewContent = ({ doc }) => (
     <>
         <div className="document-preview-media">
@@ -505,15 +487,10 @@ const LandingPage = () => {
     const DOCUMENTS = useDocumentCatalog();
     const pageRef = useRef(null);
     useReveal(pageRef, [DOCUMENTS.length]);
-    // Large floating preview while hovering a document (mouse only), and the
-    // full-size preview modal opened by clicking/tapping one.
     const [hoverPreview, setHoverPreview] = useState(null);
     const [zoomedDoc, setZoomedDoc] = useState(null);
     useScrollLock(Boolean(zoomedDoc));
 
-    // Place the hover preview beside the hovered item -- to its left (over
-    // the section's text column) when there's room, else to its right --
-    // vertically centered in the viewport so it can be large.
     const showHoverPreview = (doc, item) => {
         if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
 
@@ -522,13 +499,11 @@ const LandingPage = () => {
         const width = Math.min(520, window.innerWidth - 32);
         let left = rect.left - width - gap;
         if (left < 16) left = rect.right + gap;
-        if (left + width > window.innerWidth - 16) return; // no room: click opens it instead
+        if (left + width > window.innerWidth - 16) return;
 
         setHoverPreview({ doc, style: { left, width } });
     };
 
-    // The hover preview is positioned for where the item was; drop it when
-    // the page scrolls, and let Escape close the full-size preview.
     useEffect(() => {
         if (!hoverPreview) return undefined;
         const hide = () => setHoverPreview(null);
@@ -555,7 +530,6 @@ const LandingPage = () => {
         window.location.href = `/verify/${encodeURIComponent(code)}`;
     };
 
-    // Contact details as HTML for the Help Center / Contact pop-ups.
     const contactHtml = () => `
         <div class="lp-modal-contact">
             <strong>${REGISTRAR_CONTACT.office}</strong>
@@ -600,8 +574,6 @@ const LandingPage = () => {
             confirmButtonColor: "#123B78",
             width: 720,
             didOpen: (popup) => {
-                // In-page links close the pop-up, then scroll to their section
-                // (after closing, since SweetAlert restores the scroll position).
                 popup.querySelectorAll("[data-section]").forEach((link) => {
                     link.addEventListener("click", (e) => {
                         e.preventDefault();

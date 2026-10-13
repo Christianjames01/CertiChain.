@@ -1,13 +1,7 @@
-// Music and sound effects for the System Workflow presentation, made live
-// with the Web Audio API (no audio files): a soft, slow ambient pad with a
-// gentle pluck, and subtle interface sounds. The music ducks while the
-// narrator speaks so the voice always stays on top.
-
 const MUSIC_LEVEL = 0.16
 const MUSIC_DUCKED = 0.05
 const SFX_LEVEL = 0.32
 
-// Cmaj9 -> Am9 -> Fmaj9 -> G6/9, voiced low and wide.
 const CHORDS = [
     [48, 55, 59, 62, 64],
     [45, 52, 55, 59, 60],
@@ -38,7 +32,6 @@ export function createWorkflowAudio() {
     master.gain.value = 1
     master.connect(ctx.destination)
 
-    // Shared soft reverb.
     const reverb = ctx.createConvolver()
     reverb.buffer = makeImpulse(ctx)
     const reverbGain = ctx.createGain()
@@ -76,7 +69,6 @@ export function createWorkflowAudio() {
         musicBus.gain.linearRampToValueAtTime(musicTarget(), now + seconds)
     }
 
-    // One chord: detuned soft oscillators with slow swells.
     function playChord(notes, start) {
         const dur = CHORD_SECONDS + 3
         notes.forEach((note, i) => {
@@ -97,7 +89,6 @@ export function createWorkflowAudio() {
             }
         })
 
-        // A few quiet plucks from the chord, like a slow arpeggio.
         const pluckNotes = notes.slice(2).map((n) => n + 12)
         for (let k = 0; k < 4; k++) {
             const note = pluckNotes[(k * 2 + chordIndex) % pluckNotes.length]
@@ -122,7 +113,6 @@ export function createWorkflowAudio() {
         musicTimer = setTimeout(scheduleMusic, CHORD_SECONDS * 1000)
     }
 
-    // ---- Sound effects -------------------------------------------------
     const tone = (freq, { type = 'sine', at = 0, dur = 0.25, peak = 0.5, attack = 0.005, to = null } = {}) => {
         const t = ctx.currentTime + at
         const osc = ctx.createOscillator()
@@ -191,7 +181,7 @@ export function createWorkflowAudio() {
         },
         play(name) {
             if (!sfxOn || !running || !SFX[name]) return
-            try { SFX[name]() } catch { /* audio unavailable */ }
+            try { SFX[name]() } catch (err) { void err }
         },
         setDucked(value) {
             if (ducked === value) return
@@ -202,7 +192,7 @@ export function createWorkflowAudio() {
         setSfx(on) { sfxOn = on },
         dispose() {
             clearTimeout(musicTimer)
-            try { ctx.close() } catch { /* already closed */ }
+            try { ctx.close() } catch (err) { void err }
         },
     }
 }

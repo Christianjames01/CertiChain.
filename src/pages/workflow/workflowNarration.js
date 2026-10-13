@@ -1,16 +1,5 @@
-// The narrator for the System Workflow presentation.
-//
-// 1. Recorded voice (best): if every shot's file is in
-//    /public/workflow-narration/ (e.g. 01-request.mp3), those recordings
-//    are played -- a real person's voice.
-// 2. Otherwise the most natural voice the browser has: the neural
-//    "Natural"/"Online" voices (Microsoft Edge: Aria, Jenny, Ava, Andrew...)
-//    or Google's voices, never the old robotic ones if a better one exists.
-//    Each sentence is spoken separately with short breaths between them.
-
 const RECORDING_DIR = '/workflow-narration/'
 
-// Higher is better.
 function scoreVoice(voice) {
     const name = `${voice.name} ${voice.voiceURI}`.toLowerCase()
     if (!/^en/i.test(voice.lang)) return -1
@@ -20,8 +9,8 @@ function scoreVoice(voice) {
     if (/google/.test(name)) score += 45
     if (/en[-_]us/i.test(voice.lang)) score += 8
     if (/en[-_](gb|au|ph)/i.test(voice.lang)) score += 5
-    if (/samantha|daniel|karen|moira|serena/.test(name)) score += 25 // good macOS voices
-    if (/desktop|espeak|zira|david|mark/.test(name)) score -= 20 // older, flatter voices
+    if (/samantha|daniel|karen|moira|serena/.test(name)) score += 25
+    if (/desktop|espeak|zira|david|mark/.test(name)) score -= 20
     return score
 }
 
@@ -35,7 +24,6 @@ export function availableVoices() {
 
 export const isNaturalVoice = (voice) => !!voice && /natural|neural|online|google/i.test(`${voice.name} ${voice.voiceURI}`)
 
-// Voices load asynchronously in some browsers.
 export function whenVoicesReady(timeoutMs = 2500) {
     return new Promise((resolve) => {
         if (!('speechSynthesis' in window)) return resolve([])
@@ -47,7 +35,6 @@ export function whenVoicesReady(timeoutMs = 2500) {
     })
 }
 
-// Are all the recordings there? (HEAD request for each file.)
 export async function recordingsAvailable(files) {
     const list = files.filter(Boolean)
     if (!list.length) return false
@@ -65,7 +52,7 @@ export async function recordingsAvailable(files) {
 const sentencesOf = (text) => (text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text]).map((s) => s.trim()).filter(Boolean)
 
 export function createNarrator() {
-    let mode = 'voice' // 'voice' | 'recording'
+    let mode = 'voice'
     let voice = null
     let audio = null
     let session = 0
@@ -79,7 +66,6 @@ export function createNarrator() {
         }
     }
 
-    // Resolves when finished (or stopped).
     const speakWithVoice = (text, mySession) => new Promise((resolve) => {
         if (!('speechSynthesis' in window)) return resolve()
         const synth = window.speechSynthesis
@@ -95,8 +81,6 @@ export function createNarrator() {
             } else {
                 u.lang = 'en-US'
             }
-            // Natural voices sound best at their own pace; older ones a
-            // little slower and warmer.
             u.rate = isNaturalVoice(voice) ? 0.98 : 0.92
             u.pitch = 1
             u.volume = 1
@@ -104,13 +88,11 @@ export function createNarrator() {
             const after = () => {
                 if (finished) return
                 finished = true
-                // A short breath between sentences.
                 setTimeout(next, i < parts.length ? 380 : 0)
             }
             u.onend = after
             u.onerror = after
             synth.speak(u)
-            // Safety net if the browser never fires onend.
             setTimeout(after, 2000 + parts[i - 1].length * 95)
         }
         next()
@@ -136,14 +118,11 @@ export function createNarrator() {
         setVoice(v) { voice = v },
         setMode(m) { mode = m },
         get mode() { return mode },
-        // Speaks a shot's line; resolves when done.
         speak(shot) {
             stop()
             const mySession = session
             if (!shot.narration) return Promise.resolve()
             if (mode === 'recording' && shot.audio) return playRecording(shot.audio, mySession)
-            // `spoken` (optional) spells out acronyms for the browser voice;
-            // the subtitles keep showing `narration`.
             return speakWithVoice(shot.spoken || shot.narration, mySession)
         },
         stop,

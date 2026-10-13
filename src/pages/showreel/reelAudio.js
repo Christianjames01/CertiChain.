@@ -1,8 +1,3 @@
-// A synthesized soundtrack for the showreel (Web Audio, no files): 120 BPM
-// kick + hats + bass, a riser into each cut, an impact on the cut, and a
-// chime for the stamp and the end card. restart(offset) schedules the loop
-// from that point.
-
 export function createReelAudio({ duration, beat, cuts }) {
     const Ctx = window.AudioContext || window.webkitAudioContext
     if (!Ctx) return null
@@ -109,7 +104,6 @@ export function createReelAudio({ duration, beat, cuts }) {
         })
     }
 
-    // A minor-ish progression for the bass, one note per bar (4 beats).
     const BASS = [55, 55, 65.4, 49]
 
     function schedule(offset) {
@@ -144,7 +138,6 @@ export function createReelAudio({ duration, beat, cuts }) {
             bus.connect(master)
             schedule(offset)
         },
-        // Lower the music while the voice-over speaks.
         setDuck(on) {
             master.gain.setTargetAtTime(on ? 0.2 : 0.55, ctx.currentTime, on ? 0.05 : 0.25)
         },
@@ -156,7 +149,7 @@ export function createReelAudio({ duration, beat, cuts }) {
             setTimeout(() => old.disconnect(), 300)
         },
         dispose() {
-            try { ctx.close() } catch { /* closed */ }
+            try { ctx.close() } catch (err) { void err }
         },
     }
 }

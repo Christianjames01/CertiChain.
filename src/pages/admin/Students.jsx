@@ -17,9 +17,6 @@ import { adminPath } from '../../lib/portalPaths'
 import { blockedForReadOnlyViewer } from '../../lib/viewOnlyGuard'
 import { friendlyError } from '../../lib/friendlyError'
 
-// Pending registrations are reviewed in their own section and rejected ones
-// aren't real students, so only verified (or pre-verification) students are
-// listed and counted.
 function isListedStudent(s) {
     return s.verification_status !== 'pending' && s.verification_status !== 'rejected'
 }
@@ -211,11 +208,6 @@ function Students() {
                 throw new Error('Failed to load students: ' + studentsError.message)
             }
 
-            // Only verified students belong in the list, the college/course
-            // table, and the year counts -- pending ones have their own
-            // section above and rejected ones are left out. Every row still
-            // counts as "has a student row" below, so none of them reappear
-            // as incomplete setups.
             setAllStudents(await enrichStudents((rows || []).filter(isListedStudent)))
             setSearched(true)
 
@@ -393,9 +385,6 @@ function Students() {
         }
     }
 
-    // "Setup incomplete" accounts have no student record yet -- nothing to
-    // back up, so this skips straight to the password-confirmed delete that
-    // removeStudent above also ends with.
     const removeIncompleteProfile = async (profile) => {
         if (blockedForReadOnlyViewer(role)) return
         const name = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
@@ -454,7 +443,6 @@ function Students() {
     const selectedGroup = selectedProgramKey
         ? groupedResults.find((g) => g.key === selectedProgramKey)
         : null
-
 
     const renderStudentCard = (student) => (
         <div className="admin-list-card" key={student.student_id}>

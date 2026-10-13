@@ -27,9 +27,6 @@
     margin-bottom: 16px;
 }
 
-/* ===================================================
-   HELP PAGE FOOTER (compliance badges + contact)
-=================================================== */
 .student-help-footer {
     position: relative;
     background:
@@ -185,10 +182,6 @@
 }
 
 .student-info-field {
-    /* Grid items default to min-width: auto, which stops them shrinking
-       below an unbroken string's full width (e.g. an email address) --
-       that pushes the whole grid wider than the viewport on mobile
-       instead of letting the text wrap. */
     min-width: 0;
 }
 
@@ -202,9 +195,6 @@
 .student-info-field strong {
     font-size: 14.5px;
     font-weight: 600;
-    /* `anywhere` (rather than `break-word`) also affects the grid track's
-       min-content sizing, which is what actually stops a long unbroken
-       value like a file name from overflowing its column on mobile. */
     overflow-wrap: anywhere;
 }
 
@@ -416,8 +406,6 @@
     align-items: start;
 }
 
-/* Grid items default to min-width: auto, so a long document name used to
-   stretch the column past a phone's width (and the phone zoomed out). */
 .student-request-grid > * {
     min-width: 0;
 }
@@ -437,9 +425,6 @@
     }
 }
 
-/* Scroll filter chips as a single row on mobile instead of wrapping into a
-   tall stack -- appended last so it wins the cascade over the unconditional
-   .student-filter-row rule above. */
 @media (max-width: 640px) {
     .student-filter-row {
         display: flex;
@@ -459,9 +444,6 @@
     }
 }
 
-/* ===================================================
-   Request a Document: request list (several documents at once)
-=================================================== */
 .rq-add-button {
     align-self: flex-start;
     margin: 0;
@@ -630,7 +612,6 @@
     text-align: center;
 }
 
-/* Requests submitted together (My Requests) */
 .rq-batch-tag {
     display: inline-block;
     margin-top: 4px;
@@ -642,7 +623,6 @@
     color: var(--blue-accent, var(--blue));
 }
 
-/* Upload Receipt: one receipt for requests submitted together */
 .rq-cover {
     margin-top: 18px;
     padding: 14px;
@@ -718,7 +698,6 @@
     font-size: 16px;
 }
 
-/* ---- Upload receipt: locked while the Registrar checks it --------------- */
 .receipt-lock {
     display: flex;
     align-items: flex-start;
@@ -762,7 +741,6 @@
     background: var(--slate);
 }
 
-/* Waiting: a small spinner. */
 .receipt-lock-icon i {
     width: 16px;
     height: 16px;
@@ -815,7 +793,6 @@
     }
 }
 
-/* ---- Request progress: six steps + "now / do / next" (RequestProgress) ---- */
 .sp-progress {
     margin: 0 0 20px;
     padding: 22px;
@@ -844,7 +821,6 @@
     text-align: center;
 }
 
-/* Connector to the previous step. */
 .sp-step + .sp-step::before {
     content: '';
     position: absolute;
@@ -981,7 +957,6 @@
 .sp-action:hover { filter: brightness(1.08); }
 .sp-action:focus-visible { outline: 3px solid var(--blue-tint); outline-offset: 2px; }
 
-/* Compact (lists): steps only, smaller. */
 .sp-progress.is-compact { padding: 14px 10px 8px; margin: 10px 0 0; border: 0; background: transparent; box-shadow: none; }
 .sp-progress.is-compact .sp-step-dot { width: 24px; height: 24px; font-size: 11px; }
 .sp-progress.is-compact .sp-step + .sp-step::before { top: 11px; }
@@ -991,7 +966,6 @@
 @media (max-width: 760px) {
     .sp-guide { grid-template-columns: 1fr; }
 
-    /* Steps become a vertical list on phones. */
     .sp-progress:not(.is-compact) .sp-steps { grid-template-columns: 1fr; gap: 10px; }
     .sp-progress:not(.is-compact) .sp-step { flex-direction: row; text-align: left; gap: 12px; }
     .sp-progress:not(.is-compact) .sp-step + .sp-step::before { top: auto; bottom: 50%; right: auto; left: 15px; width: 3px; height: calc(100% + 10px); }
@@ -1005,7 +979,6 @@
     .sp-step.is-current .sp-step-dot { animation: none; }
 }
 
-/* ---- My Requests: next step on each card ----------------------------------- */
 .student-list-card.rq-needs-action {
     border-color: rgba(180, 83, 9, 0.45);
     box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.07);
@@ -1047,7 +1020,6 @@
     margin-top: 12px;
 }
 
-/* Shared with the dashboard (Dashboard.css isn't loaded here). */
 .rq-card-actions .sd-action-btn,
 .rq-card-actions .sd-view-btn {
     min-height: 42px;
@@ -1080,7 +1052,6 @@
     .rq-card-actions > button { flex: 1 1 100%; min-height: 44px; }
 }
 
-/* ---- Shared student UI: task steps, empty states, info boxes (StudentUi.jsx) ---- */
 .ss-steps {
     display: flex;
     align-items: center;
@@ -1171,7 +1142,6 @@
     .ss-steps li + li::before { display: none; }
 }
 
-/* Notifications: type label + what tapping does. */
 .nt-type {
     display: inline-block;
     margin-bottom: 4px;
@@ -1196,7 +1166,6 @@
     color: var(--blue-accent, var(--blue));
 }
 
-/* Help: numbered steps. */
 .hs-steps {
     margin: 0;
     padding: 4px 16px 16px 36px;
@@ -1207,7 +1176,6 @@
 
 .hs-steps li + li { margin-top: 4px; }
 
-/* ---- File picker (StudentUi FilePicker) ------------------------------------ */
 .visually-hidden {
     position: absolute;
     width: 1px;

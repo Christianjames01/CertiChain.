@@ -11,7 +11,6 @@ import GoogleIcon from './GoogleIcon'
 import PasswordToggleButton from './PasswordToggleButton'
 import { captchaEnabled, getCaptchaToken, preloadCaptcha } from '../../lib/captcha'
 
-// Get the security check ready while the form is being filled in.
 preloadCaptcha()
 
 function Login() {
@@ -95,7 +94,6 @@ function Login() {
             return
         }
 
-        // The security check (slide puzzle + Cloudflare) pops up now.
         const captchaToken = await getCaptchaToken()
         if (captchaEnabled && !captchaToken) {
             setMessageType('error')
@@ -187,8 +185,6 @@ function Login() {
         setGoogleLoading(true)
         setMessage('')
 
-        // Same security check as email sign-in before handing off to Google
-        // (Google also runs its own bot checks).
         const captchaToken = await getCaptchaToken()
         if (captchaEnabled && !captchaToken) {
             setMessageType('error')

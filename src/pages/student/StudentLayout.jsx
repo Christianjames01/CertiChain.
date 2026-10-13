@@ -28,8 +28,6 @@ import './StudentLayout.css'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import PageLoading from '../../components/PageLoading'
 
-// In the order a student uses them: see requests, request one, pay, pick up.
-// Grouped into work stages like an Agile board (see NAV_STAGES).
 const NAV_ITEMS = [
     { to: '/student/dashboard', label: 'Dashboard', icon: <IconHome />, end: true, stage: 'overview' },
     { to: '/student/new-request', label: 'Request a Document', icon: <IconDocumentPlus />, stage: 'todo' },

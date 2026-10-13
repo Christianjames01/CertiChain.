@@ -4,20 +4,8 @@ import { speakLine, stopVoice } from './reelVoice'
 import certichainLogo from '../../assets/certichain-logo.png'
 import './Showreel.css'
 
-// CertiChain showreel: an 18-second, beat-synced (120 BPM) motion graphics
-// loop, rendered live from one timeline (no video file). Designed on a
-// 1920x1080 stage scaled to fit. ?t=7.5 freezes a frame (for stills).
-//
-//  0.0  Kinetic type      YOUR RECORDS, / VERIFIED.
-//  2.5  Logo build        certificate + seal link draw, check, wordmark
-//  5.5  The journey       five steps, camera whip-pan
-//  9.5  Proof             QR assembles, scan, SIGNATURE VALID
-// 12.5  Word storm        NO LINES. NO REPEAT VISITS. REQUEST. TRACK. VERIFY.
-// 15.0  End card          lockup, tagline, URL
-
 const DURATION = 18
 
-// Female voice-over, one line per scene (at = seconds into the reel).
 const VOICE_OVER = [
     { at: 0.15, text: 'Your records. Verified.' },
     { at: 2.7, text: 'This is CertiChain.' },
@@ -41,13 +29,11 @@ const outBack = (x) => {
 const inExpo = (x) => (x <= 0 ? 0 : Math.pow(2, 10 * x - 10))
 const lerp = (a, b, k) => a + (b - a) * k
 
-// Deterministic pseudo-random.
 const rand = (i) => {
     const x = Math.sin(i * 127.1 + 311.7) * 43758.5453
     return x - Math.floor(x)
 }
 
-// QR-like 21x21 pattern with finder squares.
 const QR_N = 21
 const QR = (() => {
     const cells = []
@@ -77,7 +63,6 @@ const PARTICLES = Array.from({ length: 46 }, (_, i) => ({
     hue: rand(i + 11) < 0.25 ? 'gold' : rand(i + 13) < 0.5 ? 'red' : 'blue',
 }))
 
-// ---- The mark, drawn with progress values -------------------------------------
 function Mark({ size, cert = 1, lines = 1, link = 1, ribbons = 1, check = 1, light = false }) {
     const ink = light ? '#FFFFFF' : '#0B2A5B'
     const blue = light ? '#7DB3FF' : '#2563EB'
@@ -137,20 +122,16 @@ const STORM = [
     { text: 'VERIFY.', bg: '#C9A23A', fg: '#0B2A5B' },
 ]
 
-// ---- Frame ----------------------------------------------------------------------
 function Frame({ t }) {
-    // Beat pulse (0..1, decays after each beat).
     const beatPhase = (t % BEAT) / BEAT
     const pulse = Math.pow(1 - beatPhase, 3)
 
-    // Camera shake on hits.
     const hit = CUTS.reduce((m, c) => Math.max(m, t >= c && t < c + 0.35 ? 1 - (t - c) / 0.35 : 0), 0)
     const shake = hit * 10
     const camera = `translate(${Math.sin(t * 90) * shake}px, ${Math.cos(t * 77) * shake}px)`
 
     return (
         <div className="rl-frame" style={{ transform: camera }}>
-            {/* Background: drifting blobs + perspective grid */}
             <div className="rl-bg" style={{ '--p': pulse }}>
                 <span className="rl-blob is-red" style={{ transform: `translate(${Math.sin(t * 0.6) * 160}px, ${Math.cos(t * 0.5) * 90}px)` }} />
                 <span className="rl-blob is-blue" style={{ transform: `translate(${Math.cos(t * 0.45) * 200}px, ${Math.sin(t * 0.7) * 120}px)` }} />
@@ -172,7 +153,6 @@ function Frame({ t }) {
             <SceneStorm t={t} />
             <SceneEnd t={t} />
 
-            {/* Transition wipes at each cut */}
             {CUTS.map((c) => {
                 const k = seg(t, c - 0.32, c + 0.32)
                 if (k <= 0 || k >= 1) return null
@@ -190,14 +170,12 @@ function Frame({ t }) {
             <LogoBug t={t} />
             <VoiceCaption t={t} />
 
-            {/* Flash frames on the hits */}
             <div className="rl-flash" style={{ opacity: hit * 0.35 }} />
             <div className="rl-vignette" />
         </div>
     )
 }
 
-// The CertiChain logo, top-left, from the second scene to the end card.
 function LogoBug({ t }) {
     const k = outExpo(seg(t, 2.6, 3.1)) * (1 - seg(t, 14.7, 15.0))
     if (k <= 0) return null
@@ -212,7 +190,6 @@ function LogoBug({ t }) {
     )
 }
 
-// Subtitles for the voice-over (shown even with the sound off).
 function VoiceCaption({ t }) {
     const line = [...VOICE_OVER].reverse().find((l) => t >= l.at)
     if (!line) return null
@@ -283,7 +260,6 @@ function SceneJourney({ t }) {
     if (t < 5.25 || t > 9.85) return null
     const enter = outExpo(seg(t, 5.4, 6.0))
     const exit = inExpo(seg(t, 9.25, 9.7))
-    // Camera pans card to card, with a whip between.
     const pos = clamp((t - 5.9) / 0.62, 0, 4)
     const whole = Math.floor(pos)
     const frac = pos - whole
@@ -410,7 +386,6 @@ function SceneEnd({ t }) {
     )
 }
 
-// ---- Page -------------------------------------------------------------------------
 const FROZEN = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('t') : null
 
 function Showreel() {

@@ -7,7 +7,6 @@ import PasswordRequirements from '../../components/PasswordRequirements'
 import { passwordMeetsRequirements, passwordRequirementMessage } from '../../lib/passwordStrength'
 import { captchaEnabled, getCaptchaToken, preloadCaptcha } from '../../lib/captcha'
 
-// Get the security check ready while the form is being filled in.
 preloadCaptcha()
 
 function EmployeeRegister() {
@@ -52,7 +51,6 @@ function EmployeeRegister() {
     }
 
     const handleRegister = async () => {
-        // The security check (slide puzzle + Cloudflare) pops up now.
         const captchaToken = await getCaptchaToken()
         if (captchaEnabled && !captchaToken) {
             setMessage('Please complete the security check to register.')
