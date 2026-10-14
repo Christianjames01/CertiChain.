@@ -193,14 +193,14 @@ function Credentials() {
             notifyWarning(data.message || 'Recording is already running. Try again in a minute.')
             return
         }
-        const failure = data?.record?.error || data?.revoke?.error || data?.error
+        const failure = data?.record?.error || data?.revoke?.error || data?.documents?.error || data?.error
         if (failure) {
             notifyError('Blockchain recording failed: ' + failure)
         } else {
-            const recorded = (data?.record?.recorded || 0) + (data?.record?.alreadyOnChain || 0)
+            const recorded = (data?.record?.recorded || 0) + (data?.record?.alreadyOnChain || 0) + (data?.documents?.recorded || 0) + (data?.documents?.alreadyOnChain || 0)
             const revokedCount = data?.revoke?.revoked || 0
             notifySuccess(recorded || revokedCount
-                ? `Recorded ${recorded} credential${recorded === 1 ? '' : 's'}${revokedCount ? ` and ${revokedCount} revocation${revokedCount === 1 ? '' : 's'}` : ''} on the blockchain.`
+                ? `Recorded ${recorded} item${recorded === 1 ? '' : 's'}${revokedCount ? ` and ${revokedCount} revocation${revokedCount === 1 ? '' : 's'}` : ''} on the blockchain.`
                 : 'Everything is already recorded on the blockchain.')
         }
         load({ silent: true })

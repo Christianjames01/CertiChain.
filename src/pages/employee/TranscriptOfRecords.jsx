@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
 import { logActivity } from '../../lib/activityLog'
-import { confirmModal, notifyError, notifySuccess } from '../../lib/notify'
+import { confirmModal, notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
+import { newSealCode, sealPrintedDocument } from '../../lib/documentSeal'
+import SealQr from '../../components/SealQr'
 import sealImg from '../../assets/coe/seal.png'
 import hcdc75Img from '../../assets/coe/hcdc-75.png'
 import pacuImg from '../../assets/coe/pacu.png'
@@ -193,6 +195,7 @@ function TranscriptOfRecords() {
     const [subjects, setSubjects] = useState(null)
     const [previewScale, setPreviewScale] = useState(1)
     const [employeeId, setEmployeeId] = useState(null)
+    const [sealCode, setSealCode] = useState(() => newSealCode())
     const previewWrapRef = useRef(null)
 
     useEffect(() => {
@@ -380,7 +383,32 @@ function TranscriptOfRecords() {
             recordId: selectedStudentId || null,
             description: `Printed the Transcript of Records for ${form.name.trim()} (${form.studentNumber.trim() || 'no student ID'})${form.otrNo.trim() ? `, OTR No. ${form.otrNo.trim()}` : ''}.`,
         })
-        notifySuccess('Transcript recorded in your activity log.')
+        const sealError = await sealPrintedDocument({
+            code: sealCode,
+            docType: 'tor',
+            title: 'Official Transcript of Records',
+            studentName: form.name.trim(),
+            sourceId: selectedStudentId || null,
+            content: {
+                student_number: form.studentNumber.trim(),
+                college: form.collegeOf.trim(),
+                otr_no: form.otrNo.trim(),
+                graduated_text: form.graduatedText.trim(),
+                remarks: form.remarks.trim(),
+                prepared_by: form.preparedBy.trim(),
+                prepared_date: form.preparedDate,
+                courses: rows.map((r) => (r.kind === 'course'
+                    ? { code: r.code.trim(), title: r.title.trim(), final: String(r.final).trim(), completion: String(r.completion).trim(), units: String(r.units).trim() }
+                    : { heading: r.title.trim() })),
+            },
+        })
+        setSealCode(newSealCode())
+        if (sealError) {
+            console.error('SEAL TRANSCRIPT ERROR:', sealError)
+            notifyWarning('Transcript recorded, but its verification QR could not be registered.')
+        } else {
+            notifySuccess('Transcript recorded and sealed for verification.')
+        }
     }
 
     const renderRow = (item) => {
@@ -570,6 +598,7 @@ function TranscriptOfRecords() {
 
                             {isLast && (
                                 <div className="otr-sign">
+                                    <SealQr code={sealCode} className="otr-seal-qr" />
                                     <p className="otr-seal-note">not valid without school seal</p>
                                     <p className="otr-prepared" style={{ top: '42pt' }}><span>Prepared by:</span> {form.preparedBy}</p>
                                     <p className="otr-prepared" style={{ top: '56pt' }}><span>Date:&nbsp;&nbsp;:</span> {formatShortDate(form.preparedDate)}</p>

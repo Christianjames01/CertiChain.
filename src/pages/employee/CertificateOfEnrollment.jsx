@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
-import { confirmModal, notifyError, notifySuccess } from '../../lib/notify'
+import { confirmModal, notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
+import { newSealCode, sealPrintedDocument } from '../../lib/documentSeal'
+import SealQr from '../../components/SealQr'
 import { friendlyError } from '../../lib/friendlyError'
 import PageStats from '../../components/PageStats'
 import { IconFileStack, IconCalendarCheck } from '../admin/icons'
@@ -78,6 +80,7 @@ function CertificateOfEnrollment() {
     const [saving, setSaving] = useState(false)
     const [previewScale, setPreviewScale] = useState(1)
     const [myCounts, setMyCounts] = useState(null)
+    const [sealCode, setSealCode] = useState(() => newSealCode())
     const previewWrapRef = useRef(null)
 
     const [form, setForm] = useState({
@@ -172,16 +175,41 @@ function CertificateOfEnrollment() {
                 issued_by: user.id,
             }
 
-            let { error } = await supabase.from('enrollment_certificates').insert(certificate)
+            let { data: saved, error } = await supabase.from('enrollment_certificates').insert(certificate).select('certificate_id').single()
 
             if (error && /encoder_initials/.test(error.message || '')) {
-                ;({ error } = await supabase.from('enrollment_certificates').insert({ ...certificate, encoder_initials: undefined }))
+                ;({ data: saved, error } = await supabase.from('enrollment_certificates').insert({ ...certificate, encoder_initials: undefined }).select('certificate_id').single())
             }
 
             if (error) throw error
 
+            const sealError = await sealPrintedDocument({
+                code: sealCode,
+                docType: 'coe',
+                title: 'Certificate of Enrollment',
+                studentName: certificate.student_name,
+                sourceId: saved?.certificate_id,
+                content: {
+                    program: certificate.program,
+                    year_level: certificate.year_level,
+                    semester: certificate.semester,
+                    school_year: certificate.school_year,
+                    purpose: certificate.purpose,
+                    issued_date: certificate.issued_date,
+                    or_number: certificate.or_number,
+                    cert_number: certificate.cert_number,
+                    registrar_name: certificate.registrar_name,
+                },
+            })
+            setSealCode(newSealCode())
+
             loadMyCounts()
-            notifySuccess('Certificate logged.')
+            if (sealError) {
+                console.error('SEAL CERTIFICATE ERROR:', sealError)
+                notifyWarning('Certificate logged, but its verification QR could not be registered.')
+            } else {
+                notifySuccess('Certificate logged and sealed for verification.')
+            }
         } catch (err) {
             console.error('SAVE CERTIFICATE ERROR:', err)
             notifyError(friendlyError(err, 'Failed to save the certificate.'))
@@ -217,6 +245,7 @@ function CertificateOfEnrollment() {
                     <span className="coe-footer-label" style={{ left: '53.5pt' }}>Accredited:</span>
                     <span className="coe-footer-label" style={{ left: '246.1pt' }}>Institutional Membership:</span>
                     <span className="coe-footer-label" style={{ left: '470.6pt' }}>Certified: ISO 21001:2018</span>
+                    <SealQr code={sealCode} className="coe-seal-qr" />
                 </div>
 
                 <h2 className="coe-title">C E R T I F I C A T I O N</h2>

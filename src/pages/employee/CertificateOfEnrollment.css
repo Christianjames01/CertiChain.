@@ -103,6 +103,35 @@
     pointer-events: none;
 }
 
+.coe-seal-qr {
+    position: absolute;
+    left: 36pt;
+    top: 612pt;
+    width: 64pt;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Calibri, Carlito, Arial, Helvetica, sans-serif;
+    color: #000;
+}
+
+.coe-seal-qr img {
+    width: 54pt;
+    height: 54pt;
+}
+
+.coe-seal-qr .seal-qr-caption {
+    font-size: 6pt;
+    line-height: 7pt;
+}
+
+.coe-seal-qr .seal-qr-code {
+    font-family: Consolas, 'Courier New', monospace;
+    font-size: 5.5pt;
+    line-height: 7pt;
+    letter-spacing: 0.2pt;
+}
+
 .coe-placed {
     position: absolute;
     max-width: none;

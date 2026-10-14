@@ -437,6 +437,68 @@
     overflow-wrap: anywhere;
 }
 
+.verify-courses {
+    margin: 14px 0 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 4px 16px 12px;
+}
+
+.verify-courses > summary {
+    cursor: pointer;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--blue);
+}
+
+.verify-courses > p {
+    margin: 0 0 10px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--slate);
+}
+
+.verify-courses-scroll {
+    overflow-x: auto;
+}
+
+.verify-courses table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.verify-courses th,
+.verify-courses td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    color: var(--ink);
+}
+
+.verify-courses th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slate);
+}
+
+.verify-courses tr.is-heading td {
+    font-weight: 700;
+    background: var(--paper);
+}
+
+.verify-courses .is-mono {
+    font-family: var(--mono);
+    white-space: nowrap;
+}
+
+.verify-courses-note {
+    margin-top: 10px !important;
+    font-style: italic;
+}
+
 .verify-how {
     margin: 18px 0 0;
     border: 1px solid var(--line);

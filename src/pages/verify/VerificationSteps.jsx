@@ -30,6 +30,7 @@ function CopyButton({ value }) {
 }
 
 function Step({ tone, number, title, children }) {
+    if (!number) return null
     const icon = tone === 'ok' ? <IconCheck /> : tone === 'bad' ? <IconX /> : <IconQuestion />
     return (
         <li className={`verify-step is-${tone}`}>
@@ -115,17 +116,20 @@ function VerificationSteps({ result }) {
     }
 
     const compareTone = chain.mismatch || result.signatureValid === false ? 'bad' : lookupTone === 'ok' ? 'ok' : 'wait'
+    const isDocument = result.kind === 'document'
+    const hasSignature = result.signatureValid != null
+    const n = (step) => (hasSignature || step < 2 ? step : step - 1)
 
     return (
         <details className="verify-how" open>
             <summary>How this was verified</summary>
 
             <ol className="verify-steps">
-                <Step tone="ok" number={1} title="Found the credential">
-                    <p>{result.credential_number} is in the Registrar’s records, issued {formatDate(result.generated_at)}.</p>
+                <Step tone="ok" number={1} title={isDocument ? 'Found the document' : 'Found the credential'}>
+                    <p>{result.credential_number} is in the Registrar’s records, {isDocument ? 'printed' : 'issued'} {formatDate(result.generated_at)}.</p>
                 </Step>
 
-                <Step tone={signatureTone} number={2} title="Checked the Registrar’s digital signature">
+                <Step tone={signatureTone} number={hasSignature ? 2 : 0} title="Checked the Registrar’s digital signature">
                     <p>
                         {result.signatureValid === false
                             ? 'The signature does not match. Someone changed the record after it was signed.'
@@ -133,9 +137,9 @@ function VerificationSteps({ result }) {
                     </p>
                 </Step>
 
-                <Step tone={hashTone} number={3} title="Computed the credential’s fingerprint">
+                <Step tone={hashTone} number={n(3)} title={isDocument ? 'Computed the document’s fingerprint' : 'Computed the credential’s fingerprint'}>
                     <p>
-                        The credential’s details are turned into a unique fingerprint. No personal data is stored on the
+                        The {isDocument ? 'document’s' : 'credential’s'} details are turned into a unique fingerprint. No personal data is stored on the
                         blockchain, only this fingerprint.
                     </p>
                     {chain.hash ? (
@@ -148,7 +152,7 @@ function VerificationSteps({ result }) {
                     )}
                 </Step>
 
-                <Step tone={lookupTone} number={4} title="Looked up the fingerprint on the public blockchain">
+                <Step tone={lookupTone} number={n(4)} title="Looked up the fingerprint on the public blockchain">
                     <p>{lookupText}</p>
                     <p className="verify-step-links">
                         {chain.txUrl && <a href={chain.txUrl} target="_blank" rel="noreferrer">Transaction ↗</a>}
@@ -157,13 +161,15 @@ function VerificationSteps({ result }) {
                     </p>
                 </Step>
 
-                <Step tone={compareTone} number={5} title="Compared the results">
+                <Step tone={compareTone} number={n(5)} title="Compared the results">
                     <p>
                         {compareTone === 'bad'
                             ? 'The record does not match what was originally issued. Do not accept this document.'
                             : compareTone === 'ok'
                                 ? 'The record today produces the same fingerprint that was saved on the blockchain, so it has not been changed since it was issued.'
-                                : 'The signature matches. The blockchain check will be available once recording finishes.'}
+                                : hasSignature
+                                    ? 'The signature matches. The blockchain check will be available once recording finishes.'
+                                    : 'The blockchain check will be available once recording finishes.'}
                         {result.status === 'revoked' && (chain.revokedOnChain || chain.revokedAt) && ' The revocation is also recorded on the blockchain.'}
                     </p>
                 </Step>

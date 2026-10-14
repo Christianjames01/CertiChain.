@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { REGISTRAR_CONTACT } from '../../lib/registrarContact'
 import certichainLogo from '../../assets/certichain-logo.png'
 import VerificationSteps from './VerificationSteps'
+import VerifyDocument from './VerifyDocument'
 import './Verify.css'
 
 const formatDate = (value) =>
@@ -35,6 +36,14 @@ function outcomeFor(result) {
             icon: <IconX />,
             title: 'Revoked credential',
             subtitle: 'The Registrar’s Office cancelled this credential. It is no longer valid.',
+        }
+    }
+    if (result.kind === 'document') {
+        return {
+            tone: 'verified',
+            icon: <IconCheck />,
+            title: 'Genuine document',
+            subtitle: 'Printed by the Holy Cross of Davao College Registrar’s Office and unchanged since.',
         }
     }
     return {
@@ -191,7 +200,7 @@ function VerifyCredential() {
                             type="text"
                             value={term}
                             onChange={(e) => setTerm(e.target.value)}
-                            placeholder="e.g. CERT-000123"
+                            placeholder="e.g. CERT-000123 or DOC-…"
                             className="verify-input"
                             autoComplete="off"
                             spellCheck={false}
@@ -247,6 +256,7 @@ function VerifyCredential() {
                                     </p>
                                 )}
 
+                                {result.kind === 'document' ? <VerifyDocument result={result} /> : (
                                 <dl className="verify-fields">
                                     <div>
                                         <dt>Credential number</dt>
@@ -289,13 +299,16 @@ function VerifyCredential() {
                                         </div>
                                     )}
                                 </dl>
+                                )}
 
+                                {result.signatureValid != null && (
                                 <div className={`verify-signature${result.signatureValid === false ? ' is-bad' : ''}`}>
                                     <span aria-hidden="true">{result.signatureValid === false ? <IconX /> : <IconCheck />}</span>
                                     {result.signatureValid === false
                                         ? 'Digital signature does not match — the record was altered.'
                                         : 'Digital signature valid — the record matches what the Registrar issued.'}
                                 </div>
+                                )}
 
                                 <BlockchainStatus chain={result.blockchain} />
 
