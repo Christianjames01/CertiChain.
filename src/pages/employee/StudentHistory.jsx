@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { supabase } from '../../lib/supabase'
+import { updateStudentRow } from '../../lib/studentRecord'
 import { formatDisplayDateTime } from '../../lib/formatDate'
 import { logActivity } from '../../lib/activityLog'
 import { describeChanges } from '../../lib/describeChanges'
@@ -66,7 +67,7 @@ function StudentHistory() {
 
             const { data: studentData, error: studentError } = await supabase
                 .from('students')
-                .select('student_id, user_id, student_number, student_type, college_id, program_id, year_level, status, address, alternate_phone_number, alternate_email, emergency_contact_name, emergency_contact_number, graduation_year, birth_date')
+                .select('*')
                 .eq('student_id', studentId)
                 .single()
 
@@ -195,6 +196,8 @@ function StudentHistory() {
             lastName: student.lastName,
             suffix: student.suffix,
             birthDate: student.birth_date || '',
+            birthPlace: student.birth_place || '',
+            parentGuardian: student.parent_guardian || '',
             phoneNumber: student.phoneNumber,
             studentNumber: student.student_number,
             collegeId: student.college_id || '',
@@ -278,22 +281,21 @@ function StudentHistory() {
                 throw new Error('Failed to update profile: ' + profileError.message)
             }
 
-            const { error: studentError } = await supabase
-                .from('students')
-                .update({
+            const { error: studentError } = await updateStudentRow(student.student_id, {
                     student_number: form.studentNumber.trim(),
                     college_id: form.collegeId || null,
                     program_id: form.programId || null,
                     year_level: form.yearLevel || null,
                     graduation_year: graduationYear ? Number(graduationYear) : null,
                     birth_date: form.birthDate || null,
+                    birth_place: form.birthPlace.trim() || null,
+                    parent_guardian: form.parentGuardian.trim() || null,
                     address: form.address.trim() || null,
                     alternate_phone_number: form.alternatePhoneNumber.trim() || null,
                     alternate_email: form.alternateEmail.trim() || null,
                     emergency_contact_name: form.emergencyContactName.trim() || null,
                     emergency_contact_number: form.emergencyContactNumber.trim() || null,
                 })
-                .eq('student_id', student.student_id)
 
             if (studentError) {
                 throw new Error('Failed to update student record: ' + studentError.message)
@@ -311,6 +313,8 @@ function StudentHistory() {
             const changes = describeChanges([
                 ['name', student.fullName, [form.firstName, form.middleName, form.lastName, form.suffix].map((v) => v.trim()).filter(Boolean).join(' ')],
                 ['birth date', student.birth_date || '', form.birthDate],
+                ['place of birth', student.birth_place || '', form.birthPlace.trim()],
+                ['parent/guardian', student.parent_guardian || '', form.parentGuardian.trim()],
                 ['personal email', student.alternate_email || '', form.alternateEmail.trim()],
                 ['student number', student.student_number, form.studentNumber.trim()],
                 ['college', student.collegeName, newCollegeName],
@@ -535,7 +539,7 @@ function StudentHistory() {
                         <ProfileSection
                             icon={IconUserCircle}
                             title="Personal Information"
-                            subtitle="Name, birth date and email addresses."
+                            subtitle="Name, birth details, parent/guardian and email addresses."
                             actionLabel="Edit"
                             onAction={() => startEditing('personal')}
                         >
@@ -546,6 +550,8 @@ function StudentHistory() {
                                     { label: 'Last Name', value: student.lastName },
                                     { label: 'Suffix', value: student.suffix },
                                     { label: 'Birth Date', value: student.birth_date ? formatDate(student.birth_date) : '' },
+                                    { label: 'Place of Birth', value: student.birth_place },
+                                    { label: 'Parent / Guardian', value: student.parent_guardian, wide: true },
                                     { label: 'Phone Number', value: student.phoneNumber },
                                     { label: 'Login Email', value: student.email, wide: true },
                                     { label: 'Personal Email', value: student.alternate_email, wide: true },
@@ -619,6 +625,8 @@ function StudentHistory() {
                                 {editField('Last Name', <input className="employee-search-input" value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} disabled={saving} />)}
                                 {editField('Suffix', <input className="employee-search-input" placeholder="e.g. Jr., III" value={form.suffix} onChange={(e) => setForm({ ...form, suffix: e.target.value })} disabled={saving} />)}
                                 {editField('Birth Date', <input className="employee-search-input" type="date" value={form.birthDate} onChange={(e) => setForm({ ...form, birthDate: e.target.value })} disabled={saving} />)}
+                                {editField('Place of Birth', <input className="employee-search-input" placeholder="e.g. Davao City" value={form.birthPlace} onChange={(e) => setForm({ ...form, birthPlace: e.target.value })} disabled={saving} />)}
+                                {editField('Parent / Guardian', <input className="employee-search-input" value={form.parentGuardian} onChange={(e) => setForm({ ...form, parentGuardian: e.target.value })} disabled={saving} />)}
                                 <div className="employee-info-field"><span>Login Email</span><strong>{student.email || 'N/A'}</strong></div>
                                 {editField('Personal Email', <input className="employee-search-input" type="email" value={form.alternateEmail} onChange={(e) => setForm({ ...form, alternateEmail: e.target.value })} disabled={saving} />)}
                             </div>

@@ -94,20 +94,7 @@ function Profile() {
 
             const { data: studentData, error: studentError } = await supabase
                 .from('students')
-                .select(`
-                    student_number,
-                    college_id,
-                    program_id,
-                    year_level,
-                    enrollment_status,
-                    birth_date,
-                    address,
-                    alternate_phone_number,
-                    alternate_email,
-                    emergency_contact_name,
-                    emergency_contact_number,
-                    graduation_year
-                `)
+                .select('*')
                 .eq('user_id', user.id)
                 .single()
 
@@ -428,10 +415,12 @@ function Profile() {
                                     { label: 'Full Name', value: fullName, wide: true },
                                     { label: 'Email', value: profile?.email, wide: true },
                                     { label: 'Birth Date', value: student?.birth_date ? formatDate(student.birth_date) : '' },
+                                    { label: 'Place of Birth', value: student?.birth_place },
+                                    { label: 'Parent / Guardian', value: student?.parent_guardian, wide: true },
                                 ]}
                             />
                             <p className="pf-note">
-                                Name, email, and birth information are managed by the Registrar's Office.
+                                Name, email, birth information, and parent/guardian are managed by the Registrar's Office.
                                 Contact the Registrar to request changes.
                             </p>
                         </ProfileSection>

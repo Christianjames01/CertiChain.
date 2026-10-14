@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { insertStudentRow } from '../../lib/studentRecord'
 import { useScrollLock } from '../../lib/useScrollLock'
 import { useDraftState, clearDraft } from '../../lib/useDraftState'
 import AuthLayout from './AuthLayout'
@@ -38,6 +39,8 @@ function Register() {
     const [phoneNumber, setPhoneNumber] = useDraftState('register', 'phoneNumber', '')
     const [phoneTaken, setPhoneTaken] = useState(false)
     const [birthDate, setBirthDate] = useDraftState('register', 'birthDate', '')
+    const [birthPlace, setBirthPlace] = useDraftState('register', 'birthPlace', '')
+    const [parentGuardian, setParentGuardian] = useDraftState('register', 'parentGuardian', '')
 
     const [studentNumber, setStudentNumber] = useDraftState('register', 'studentNumber', '')
     const [studentNumberTaken, setStudentNumberTaken] = useState(false)
@@ -265,9 +268,7 @@ function Register() {
             return
         }
 
-        const { error: studentError } = await supabase
-            .from('students')
-            .insert({
+        const { error: studentError } = await insertStudentRow({
                 user_id: data.user.id,
                 student_number: studentNumber.trim(),
                 college_id: collegeId,
@@ -276,6 +277,8 @@ function Register() {
                 ...(studentType === 'alumni' ? { student_type: 'alumni', graduation_year: Number(graduationYear) } : {}),
                 enrollment_status: 'active',
                 birth_date: birthDate || null,
+                birth_place: birthPlace.trim() || null,
+                parent_guardian: parentGuardian.trim() || null,
                 address: address.trim() || null,
                 alternate_phone_number: alternatePhoneNumber.trim() || null,
                 alternate_email: (studentType === 'alumni' ? email : alternateEmail).trim() || null,
@@ -473,6 +476,20 @@ function Register() {
                     </div>
                 </div>
 
+                <div className="form-group">
+                    <label className="form-label" htmlFor="birth-place">Place of Birth</label>
+                    <input
+                        id="birth-place"
+                        type="text"
+                        className="form-input"
+                        value={birthPlace}
+                        onChange={(e) => setBirthPlace(e.target.value)}
+                        placeholder="e.g. Davao City"
+                        autoComplete="off"
+                        required
+                    />
+                </div>
+
                 <p className="auth-form-section-title">Academic Information</p>
 
                 <div className="auth-type-toggle" role="radiogroup" aria-label="I am a">
@@ -654,6 +671,20 @@ function Register() {
                     </small>
                 </div>
                 )}
+
+                <div className="form-group">
+                    <label className="form-label" htmlFor="parent-guardian">Parent / Guardian</label>
+                    <input
+                        id="parent-guardian"
+                        type="text"
+                        className="form-input"
+                        value={parentGuardian}
+                        onChange={(e) => setParentGuardian(e.target.value)}
+                        placeholder="Full name of your parent or guardian"
+                        autoComplete="off"
+                        required
+                    />
+                </div>
 
                 <div className="auth-form-row">
                     <div className="form-group">

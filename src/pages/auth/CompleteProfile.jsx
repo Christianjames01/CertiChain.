@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { insertStudentRow } from '../../lib/studentRecord'
 import { establishStudentSession, notifyPreviousDeviceSignedOut } from '../../lib/singleSession'
 import { SUFFIX_NONE, SUFFIX_OPTIONS, validateRegistrationDetails } from '../../lib/registrationValidation'
 import { isStudentNumberTaken, studentNumberTakenMessage, isDuplicateStudentNumberError, isPhoneNumberTaken, phoneNumberTakenMessage } from '../../lib/studentNumberCheck'
@@ -30,6 +31,8 @@ function CompleteProfile() {
     const [graduationYear, setGraduationYear] = useState('')
 
     const [birthDate, setBirthDate] = useState('')
+    const [birthPlace, setBirthPlace] = useState('')
+    const [parentGuardian, setParentGuardian] = useState('')
     const [address, setAddress] = useState('')
     const [alternatePhoneNumber, setAlternatePhoneNumber] = useState('')
     const [alternateEmail, setAlternateEmail] = useState('')
@@ -195,9 +198,7 @@ function CompleteProfile() {
             return
         }
 
-        const { error: studentError } = await supabase
-            .from('students')
-            .insert({
+        const { error: studentError } = await insertStudentRow({
                 user_id: user.id,
                 student_number: studentNumber.trim(),
                 college_id: collegeId,
@@ -206,6 +207,8 @@ function CompleteProfile() {
                 ...(studentType === 'alumni' ? { student_type: 'alumni', graduation_year: Number(graduationYear) } : {}),
                 enrollment_status: 'active',
                 birth_date: birthDate || null,
+                birth_place: birthPlace.trim() || null,
+                parent_guardian: parentGuardian.trim() || null,
                 address: address.trim() || null,
                 alternate_phone_number: alternatePhoneNumber.trim() || null,
                 alternate_email: alternateEmail.trim() || null,
@@ -351,6 +354,20 @@ function CompleteProfile() {
                             required
                         />
                     </div>
+                </div>
+
+                <div className="form-group">
+                    <label className="form-label" htmlFor="birth-place">Place of Birth</label>
+                    <input
+                        id="birth-place"
+                        type="text"
+                        className="form-input"
+                        value={birthPlace}
+                        onChange={(e) => setBirthPlace(e.target.value)}
+                        placeholder="e.g. Davao City"
+                        autoComplete="off"
+                        required
+                    />
                 </div>
 
                 <p className="auth-form-section-title">Academic Information</p>
@@ -531,6 +548,20 @@ function CompleteProfile() {
                     <small style={{ display: 'block', marginTop: 6, fontSize: 12, color: 'var(--slate)' }}>
                         A personal, non-HCDC email you still control after graduation. Your HCDC account is deactivated once you graduate, so switch your login to this address beforehand from Profile &gt; Login Email.
                     </small>
+                </div>
+
+                <div className="form-group">
+                    <label className="form-label" htmlFor="parent-guardian">Parent / Guardian</label>
+                    <input
+                        id="parent-guardian"
+                        type="text"
+                        className="form-input"
+                        value={parentGuardian}
+                        onChange={(e) => setParentGuardian(e.target.value)}
+                        placeholder="Full name of your parent or guardian"
+                        autoComplete="off"
+                        required
+                    />
                 </div>
 
                 <div className="auth-form-row">

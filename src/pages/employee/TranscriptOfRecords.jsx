@@ -254,7 +254,7 @@ function TranscriptOfRecords() {
             setLoadingStudent(true)
             const { data: student, error } = await supabase
                 .from('students')
-                .select('student_id, user_id, student_number, program_id, birth_date, address')
+                .select('*')
                 .eq('student_id', studentId)
                 .single()
             if (error || !student) throw error || new Error('Student not found.')
@@ -309,6 +309,8 @@ function TranscriptOfRecords() {
                 name,
                 studentNumber: student.student_number || '',
                 birthDate: student.birth_date || '',
+                birthPlace: student.birth_place || '',
+                guardian: student.parent_guardian || '',
                 address: student.address || '',
                 collegeOf: programName,
                 graduatedText: programName
