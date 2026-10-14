@@ -1,0 +1,492 @@
+.otr-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 470px) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1100px) {
+    .otr-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.otr-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.otr-label {
+    display: block;
+    margin: 10px 0 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--slate);
+}
+
+.otr-hint {
+    margin-top: 4px;
+    font-size: 11.5px;
+    color: var(--slate);
+}
+
+.otr-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+}
+
+.otr-span-2 {
+    grid-column: span 2;
+}
+
+.otr-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin: 0;
+}
+
+.otr-field > span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--slate);
+}
+
+.otr-field .employee-search-input {
+    max-width: none;
+    width: 100%;
+}
+
+.otr-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+}
+
+.otr-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 460px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.otr-edit-row {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr) 46px 46px 46px auto;
+    gap: 4px;
+    align-items: center;
+}
+
+.otr-edit-row.is-term,
+.otr-edit-row.is-school {
+    grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.otr-edit-row .employee-search-input {
+    max-width: none;
+    width: 100%;
+    padding: 7px 8px;
+    font-size: 12.5px;
+}
+
+.otr-heading-input {
+    font-weight: 700;
+}
+
+.otr-row-actions {
+    display: flex;
+    gap: 2px;
+}
+
+.otr-row-actions button {
+    width: 24px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--white);
+    color: var(--slate);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.otr-row-actions button:hover {
+    color: var(--ink);
+}
+
+/* ---- The transcript pages (8.5 x 13 in, positions in pt) ---- */
+.otr-preview-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.otr-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.otr-page {
+    position: relative;
+    box-sizing: border-box;
+    width: 8.5in;
+    height: 13in;
+    overflow: hidden;
+    background: #fff;
+    color: #000;
+    box-shadow: 0 10px 30px -14px rgba(10, 20, 40, 0.3);
+    font-family: 'Times New Roman', Times, serif;
+    color-scheme: light;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.otr-page.otr-page * {
+    color: #000;
+}
+
+.otr-fixed {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.otr-placed {
+    position: absolute;
+    max-width: none;
+    object-fit: fill;
+}
+
+.otr-page .otr-lh,
+.otr-page .otr-footer-label,
+.otr-page .otr-title {
+    position: absolute;
+    margin: 0;
+    font-family: Calibri, Carlito, Arial, Helvetica, sans-serif;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: normal;
+}
+
+.otr-page .otr-lh {
+    left: 36pt;
+    width: 542pt;
+    font-size: 10pt;
+    text-align: center;
+}
+
+.otr-page .otr-lh-name { top: 39.6pt; font-size: 24pt; font-weight: 700; }
+.otr-page .otr-lh-name .otr-sc { font-size: 19pt; }
+.otr-page .otr-lh-office { top: 67.4pt; font-size: 14pt; font-weight: 700; }
+.otr-page .otr-lh-1 { top: 83.5pt; }
+.otr-page .otr-lh-2 { top: 95.7pt; }
+.otr-page .otr-lh-3 { top: 107.9pt; }
+.otr-page .otr-lh-4 { top: 120.1pt; }
+
+.otr-page .otr-link {
+    color: #0563c1;
+    text-decoration: underline;
+}
+
+/* The title in the Registrar's blue outlined lettering. */
+.otr-page .otr-title {
+    left: 36pt;
+    width: 542pt;
+    top: 140pt;
+    text-align: center;
+    font-size: 17pt;
+    font-weight: 800;
+    letter-spacing: 1.5pt;
+    color: #4a90d9;
+    -webkit-text-stroke: 0.6pt #1f5ca8;
+    text-shadow: 1pt 1pt 0 #c7dcf3;
+}
+
+.otr-page.otr-page .otr-title {
+    color: #4a90d9;
+}
+
+.otr-watermark {
+    position: absolute;
+    left: 180pt;
+    top: 360pt;
+    width: 260pt;
+    height: auto;
+    opacity: 0.12;
+}
+
+.otr-page .otr-footer-label {
+    top: 850.4pt;
+    font-size: 10pt;
+    font-weight: 700;
+}
+
+/* ---- Body flow ---- */
+.otr-body {
+    position: absolute;
+    left: 40pt;
+    right: 36pt;
+    top: 44pt;
+    bottom: 40pt;
+    display: flex;
+    flex-direction: column;
+    font-size: 10pt;
+}
+
+.otr-page.is-first .otr-body {
+    top: 164pt;
+    bottom: 94pt;
+}
+
+.otr-info {
+    border-top: 1.2pt solid #000;
+    font-size: 10pt;
+}
+
+.otr-info-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6pt;
+    min-height: 15pt;
+    border-bottom: 0.75pt solid #000;
+    padding: 1pt 2pt 0;
+}
+
+.otr-k {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.otr-v {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.otr-grow { flex: 1; min-width: 0; }
+.otr-strong { font-weight: 700; }
+.otr-w-sex { width: 90pt; }
+.otr-w-md { width: 150pt; }
+.otr-w-year { width: 70pt; text-align: right; }
+
+.otr-name-top {
+    margin: 0 0 4pt;
+    font-weight: 700;
+    font-size: 10pt;
+    text-decoration: underline;
+}
+
+/* Course table: fixed height per page, vertical column lines to the bottom. */
+.otr-table {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: 1pt solid #000;
+    font-size: 9.5pt;
+}
+
+.otr-table th {
+    border: 1pt solid #000;
+    padding: 1pt 2pt;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.05;
+    vertical-align: middle;
+}
+
+.otr-table .otr-th-title {
+    letter-spacing: 1pt;
+}
+
+.otr-table .otr-th-small {
+    font-size: 7pt;
+    font-weight: 400;
+}
+
+.otr-table td {
+    border-left: 1pt solid #000;
+    border-right: 1pt solid #000;
+    padding: 0 3pt;
+    height: 12.5pt;
+    line-height: 12.5pt;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+
+.otr-table .otr-num {
+    text-align: center;
+}
+
+.otr-row-heading td {
+    border-right: none;
+}
+
+.otr-school,
+.otr-term {
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.otr-row-closed td {
+    font-weight: 700;
+    font-size: 9pt;
+    letter-spacing: 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+.otr-row-text td {
+    white-space: normal;
+    line-height: 13pt;
+    height: auto;
+    padding: 2pt 3pt;
+    text-align: justify;
+}
+
+.otr-row-remarks td {
+    height: 86pt;
+    vertical-align: middle;
+}
+
+.otr-remarks-label {
+    font-weight: 700;
+    margin-left: 40pt;
+}
+
+.otr-filler td {
+    height: auto;
+}
+
+.otr-grading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3pt;
+    border-top: 1.2pt solid #000;
+    padding-top: 2pt;
+    font-size: 8.5pt;
+    line-height: 1.25;
+    text-align: center;
+    font-weight: 700;
+}
+
+.otr-page-no {
+    display: flex;
+    justify-content: flex-end;
+    margin: 2pt 0 0;
+}
+
+.otr-page-no span {
+    border: 0.75pt solid #000;
+    padding: 0 4pt;
+    font-size: 8pt;
+    font-style: italic;
+}
+
+.otr-medium {
+    margin: 2pt 0 0;
+    text-align: center;
+    font-size: 9pt;
+    font-weight: 700;
+    border-top: 1pt solid #000;
+}
+
+.otr-refer {
+    margin: 2pt 0 0;
+    text-align: right;
+    font-size: 9pt;
+    font-weight: 700;
+    font-style: italic;
+    text-decoration: underline;
+}
+
+.otr-otrno {
+    margin: 6pt 0 0 40pt;
+    font-size: 9pt;
+    font-style: italic;
+}
+
+.otr-otrno span {
+    font-weight: 700;
+}
+
+.otr-sign {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 10pt;
+    padding: 0 30pt 0 40pt;
+    font-size: 10pt;
+}
+
+.otr-seal-note {
+    margin: 0 0 12pt;
+    font-style: italic;
+    font-size: 11pt;
+}
+
+.otr-prepared {
+    margin: 0;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+.otr-prepared span {
+    display: inline-block;
+    width: 80pt;
+}
+
+.otr-registrar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.25;
+}
+
+.otr-registrar strong {
+    text-decoration: underline;
+}
+
+/* ---- Printing: only the print copy, one page per sheet. ---- */
+.otr-print-root {
+    display: none;
+}
+
+@media print {
+    body > *:not(.otr-print-root):not(.coe-print-root) {
+        display: none !important;
+    }
+
+    .otr-print-root {
+        display: block !important;
+    }
+
+    .otr-print-root .otr-preview {
+        display: block;
+    }
+
+    .otr-print-root .otr-page {
+        box-shadow: none;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .otr-print-root .otr-page:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+}

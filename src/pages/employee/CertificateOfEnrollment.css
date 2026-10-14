@@ -238,7 +238,7 @@
 }
 
 @media print {
-    body > *:not(.coe-print-root) {
+    body > *:not(.coe-print-root):not(.otr-print-root) {
         display: none !important;
     }
 
