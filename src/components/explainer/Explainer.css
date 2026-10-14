@@ -1,8 +1,3 @@
-/* Explainer player (components/explainer): a video-style motion walkthrough
-   used on the landing page and in each portal's User Guide. The stage has
-   its own fixed palette (light app windows on navy), so it looks the same
-   in the portals' dark mode; the controls and caption follow the page. */
-
 .lpx-player {
     --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
     --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
@@ -161,7 +156,6 @@
     filter: saturate(0.85);
 }
 
-/* Controls */
 .lpx-controls {
     display: flex;
     align-items: center;
@@ -267,7 +261,6 @@
     font-size: 15.5px;
 }
 
-/* Scenes: shared pieces ------------------------------------------------------ */
 .lpx-scene {
     position: absolute;
     inset: 0;
@@ -403,7 +396,6 @@
     100% { transform: scale(1); box-shadow: 0 0 0 0.8em rgba(18, 59, 120, 0); }
 }
 
-/* Intro */
 .lpx-intro {
     gap: 2em;
 }
@@ -563,7 +555,6 @@
 .lpx-intro-tags span:nth-child(2) { animation-delay: 3.8s; }
 .lpx-intro-tags span:nth-child(3) { animation-delay: 4s; }
 
-/* Step 1 -- account */
 .lpx-badge-pop,
 .lpx-verified,
 .lpx-result,
@@ -617,7 +608,6 @@
     color: var(--slate);
 }
 
-/* Step 2 -- request */
 .lpx-doc-list {
     display: flex;
     flex-direction: column;
@@ -727,7 +717,6 @@
     100% { top: 72%; left: 68%; opacity: 0.9; }
 }
 
-/* Step 3 -- payment */
 .lpx-receipt {
     position: relative;
     display: flex;
@@ -883,7 +872,6 @@
     height: 1.8em;
 }
 
-/* Step 4 -- tracking */
 .lpx-tracking .lpx-window {
     width: 24em;
 }
@@ -1046,7 +1034,6 @@
     transform-origin: 50% 10%;
 }
 
-/* Result -- claim & verify */
 .lpx-claim {
     gap: 2.2em;
 }
@@ -1181,7 +1168,6 @@
     animation: lpx-pop 0.6s var(--ease-spring) var(--delay) both;
 }
 
-/* Final -- CTA */
 .lpx-cta {
     flex-direction: column;
     gap: 1.4em;
@@ -1268,7 +1254,6 @@
     transform: translateY(-2px);
 }
 
-/* Narrow players: a taller stage, scenes stack. */
 @container (max-width: 620px) {
     .lpx-stage {
         aspect-ratio: 3 / 4;
@@ -1354,10 +1339,6 @@
     }
 }
 
-
-/* ===================================================================
-   Staff scenes (EmployeeScenes / HeadScenes)
-=================================================================== */
 .lpx-wide {
     width: 30em;
 }
@@ -1445,7 +1426,6 @@
 .lpx-tag.is-green { background: var(--green-tint); color: var(--green); }
 .lpx-tag.is-amber { background: #FFF4DB; color: #9A6200; }
 
-/* Verify payment */
 .lpx-receipt.is-still {
     overflow: hidden;
     animation: lpx-in-left 0.7s var(--ease-out) 0.2s both;
@@ -1489,7 +1469,6 @@
     to { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); }
 }
 
-/* Process and schedule */
 .lpx-sched {
     display: flex;
     flex-direction: column;
@@ -1535,7 +1514,6 @@
     to { opacity: 1; transform: none; border-color: var(--blue); box-shadow: 0 0 0 0.2em rgba(18, 59, 120, 0.12); }
 }
 
-/* Release */
 .lpx-ticket {
     display: flex;
     flex-direction: column;
@@ -1581,7 +1559,6 @@
     border-radius: 0.4em;
 }
 
-/* Chat */
 .lpx-chat {
     display: flex;
     flex-direction: column;
@@ -1668,7 +1645,6 @@
     100% { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; }
 }
 
-/* Head: dashboard */
 .lpx-tiles {
     display: grid;
     grid-template-columns: repeat(4, 7.2em);
@@ -1745,7 +1721,6 @@
     color: var(--slate);
 }
 
-/* Head: assign */
 .lpx-assign {
     gap: 0;
 }
@@ -1853,7 +1828,6 @@
     animation: lpx-pop 0.5s var(--ease-spring) var(--delay) both;
 }
 
-/* Head: publish */
 .lpx-chip-date.is-pick {
     background: var(--blue-tint);
     color: var(--blue);
@@ -1918,7 +1892,6 @@
     to { opacity: 1; transform: none; }
 }
 
-/* Head: calendar */
 .lpx-cal {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -2023,7 +1996,6 @@
         top: 64%;
     }
 
-    /* Side notes stack under the window: show the first only. */
     .lpx-side-stack .lpx-note:nth-child(n + 2) {
         display: none;
     }
@@ -2102,7 +2074,6 @@
     min-width: 12em;
 }
 
-/* Voice-over toggle beside the play button. */
 .lpx-sound {
     display: inline-flex;
     align-items: center;
@@ -2144,10 +2115,6 @@
     50% { opacity: 0.35; }
 }
 
-/* ---- 3D motion ---------------------------------------------------------------
-   A live WebGL backdrop (stage3d.js) behind the scenes, and the scene itself
-   in 3D space: it flies in from depth, sways slowly and tilts toward the
-   pointer; windows float off the backdrop and pop-ups float further out. */
 .lpx-stage.lpx-is-3d {
     --tx: 0;
     --ty: 0;
@@ -2212,7 +2179,6 @@
     transform-style: preserve-3d;
 }
 
-/* Layers: windows off the backdrop, pop-ups and notes further out. */
 .lpx-depth .lpx-window {
     translate: 0 0 1.6em;
     box-shadow:
@@ -2250,7 +2216,6 @@
     .lpx-depth-enter { animation: none; }
 }
 
-/* ---- Student journey scenes (requirements, six-step tracker, pickup) --------- */
 .lpx-before {
     display: flex;
     flex-direction: column;
@@ -2340,7 +2305,6 @@
     z-index: 0;
 }
 
-/* Lines and dots fill in one after the other, up to "Ready for release". */
 .lpx-journey li:nth-child(-n + 5) + li::before,
 .lpx-journey li:nth-child(n + 2):nth-child(-n + 5)::before {
     background: linear-gradient(90deg, var(--green) 50%, var(--line) 50%) 100% 0 / 200% 100%;
@@ -2398,8 +2362,6 @@
 .lpx-now-cycle > i:nth-child(2) { animation: lpx-now 6.5s ease 2.2s both; }
 .lpx-now-cycle > i:nth-child(3) { animation: lpx-fade-in 0.4s ease 4.4s both; }
 
-/* Static tracker for the review / processing / completed scenes: each one
-   marks its own step instead of the filling animation above. */
 .lpx-journey.is-static li.lpx-step::before { animation: none; background: var(--line); }
 .lpx-journey.is-static li.lpx-step.is-done::before,
 .lpx-journey.is-static li.lpx-step.is-now::before { background: var(--green); }

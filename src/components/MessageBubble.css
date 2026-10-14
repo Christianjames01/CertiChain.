@@ -1,6 +1,3 @@
-/* Chat bubble shared by all three Messages pages. Colors come from the
-   portal layout's theme variables, so light and dark mode both work. */
-
 .msg {
     display: flex;
     flex-direction: column;
@@ -29,8 +26,6 @@
     color: var(--slate);
 }
 
-/* ---------- Bubble ---------- */
-
 .msg-bubble {
     padding: 10px 14px;
     border-radius: 12px;
@@ -45,10 +40,6 @@
     color: #fff;
 }
 
-/* Scoped under .msg .msg-bubble so it outranks each portal layout's
-   `.admin-layout p { color: var(--slate) }` (and employee/student
-   equivalents), which otherwise turned the text gray -- nearly invisible
-   on the blue bubble. */
 .msg .msg-bubble .msg-text {
     margin: 0;
     color: var(--ink);
@@ -77,8 +68,6 @@
     font-style: italic;
 }
 
-/* "Seen" under the last message you sent, once the other person has
-   read it -- Messenger-style, so it only ever appears on one bubble. */
 .msg-seen {
     display: block;
     margin-top: 2px;
@@ -86,8 +75,6 @@
     color: var(--slate);
     text-align: right;
 }
-
-/* ---------- Edit / Delete links under own messages ---------- */
 
 .msg-actions {
     display: flex;
@@ -132,8 +119,6 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
-
-/* ---------- Inline editor ---------- */
 
 .msg-editor {
     width: 100%;
@@ -272,8 +257,6 @@
     }
 }
 
-/* ---------- "<name> deleted this message" (admin oversight) ---------- */
-
 .msg .msg-bubble.is-deleted {
     background: var(--surface);
     border: 1px dashed var(--line);
@@ -299,8 +282,6 @@
 .msg.is-self .msg-bubble.is-deleted .msg-time {
     color: var(--slate);
 }
-
-/* ---------- Messenger-style rows (Messages pages) ---------- */
 
 .msg-row {
     display: flex;
@@ -388,7 +369,6 @@
 }
 
 @media (hover: hover) {
-    /* Beside the bubble on hover, so hidden actions take no space. */
     .msg-row .msg-actions {
         position: absolute;
         top: 50%;
@@ -415,8 +395,6 @@
         display: none;
     }
 
-    /* Long press: no text-selection popup on your own bubbles, a small
-       "pressed" look, and the Edit / Delete menu as a floating pill. */
     .msg-row.is-self .msg-bubble {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -469,18 +447,10 @@
     }
 }
 
-/* ---------- Reactions ---------- */
-
-/* Anchors the reaction chip / emoji picker to the bubble itself, not the
-   taller column that also holds the sender label and quote above it or
-   the Seen label below it -- otherwise the chip floats past those and
-   overlaps whatever text sits there. */
 .msg-bubble-wrap {
     position: relative;
 }
 
-/* Extra room below the bubble so the overlapping reaction chip doesn't
-   sit on top of the Seen label or the next message. */
 .msg-bubble-wrap:has(.msg-reactions) {
     margin-bottom: 10px;
 }
@@ -523,8 +493,6 @@
     font-weight: 600;
     color: var(--slate);
 }
-
-/* ---------- Emoji picker (tap the smiley in the actions row) ---------- */
 
 .msg-emoji-picker {
     position: absolute;
@@ -572,8 +540,6 @@
         transition: none;
     }
 }
-
-/* ---------- Replies (quote above the bubble) ---------- */
 
 .msg-quote {
     display: flex;
@@ -644,7 +610,6 @@
     25% { box-shadow: 0 0 0 4px var(--blue-tint); }
 }
 
-/* Other people's messages: the hover menu sits to the right of the bubble. */
 @media (hover: hover) {
     .msg-row:not(.is-self) .msg-actions {
         right: auto;

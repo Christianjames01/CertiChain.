@@ -3,9 +3,6 @@ import DocumentPreviewModal from './DocumentPreviewModal'
 import { IconFile } from './UiIcons'
 import './DocumentThumb.css'
 
-// Thumbnail of a document type's sample image (uploaded by the head in
-// Documents), shown on request lists and pages. Clicking it opens the image
-// full size. Without an image it shows a document icon.
 function DocumentThumb({ url, name, size = 44 }) {
     const [open, setOpen] = useState(false)
     const style = { width: size, height: size }

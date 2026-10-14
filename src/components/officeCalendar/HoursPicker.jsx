@@ -1,8 +1,6 @@
 import { HOURS_PRESETS } from '../../lib/officeHours'
 import './OfficeCalendar.css'
 
-// Office hours for an open day: quick picks (8–5, 8–6, …) plus exact
-// opening and closing times. `value` is { open: 'HH:MM', close: 'HH:MM' }.
 function HoursPicker({ value, onChange, disabled, label = 'Office hours' }) {
     const invalid = value.open && value.close && value.open >= value.close
 

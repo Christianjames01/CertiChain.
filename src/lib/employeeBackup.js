@@ -3,13 +3,6 @@ import { downloadExcelReport } from './reportExport'
 
 const toDate = (v) => (v ? new Date(v) : null)
 
-// Exports everything about one employee before their employees record is
-// permanently deleted (src/pages/admin/Employees.jsx removeEmployee). Their
-// login account and profile aren't touched by that delete, and every
-// request/receipt/etc. they ever touched keeps its own row (the FKs are
-// ON DELETE SET NULL, not CASCADE) -- but the employee record itself
-// (number, position, assignments) is gone for good, so this is the backup
-// for that part.
 export async function exportEmployeeBackup(employee) {
     const employeeId = employee.employee_id
 

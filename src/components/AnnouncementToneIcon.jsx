@@ -1,4 +1,3 @@
-// Icon for an announcement's tone (see announcementTone in lib/announcements).
 function AnnouncementToneIcon({ tone }) {
     if (tone === 'closed') {
         return (

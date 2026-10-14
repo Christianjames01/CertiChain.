@@ -1,17 +1,7 @@
 import hcdcLogo from '../assets/hcdc-logo.png'
 
-// Illustrative mock-ups of each registrar document, drawn as SVG. Shown
-// wherever a document has no real sample image uploaded by the head: the
-// student's New Request page (filled in with the student's own details)
-// and the landing page's Document Catalog (placeholder details).
-
 const YEAR_LEVEL_ORDER = ['First Year', 'Second Year', 'Third Year', 'Fourth Year']
 
-
-// Every document_code in the document_types table gets an explicit entry
-// here so nothing silently falls through to the generic 'letter' layout by
-// accident (that's what happened with "DIP-CTC" and "COGRA" previously --
-// they were listed as "DIP" and "COGR", which never matched anything).
 const SAMPLE_LAYOUT_BY_CODE = {
     TOR: 'grades',
     COG: 'grades',
@@ -51,7 +41,6 @@ const SAMPLE_LAYOUT_BY_CODE = {
     SO: 'letter',
     VAC: 'letter',
 }
-
 
 function sampleLayoutFor(documentCode) {
     return SAMPLE_LAYOUT_BY_CODE[documentCode] || 'letter'
@@ -247,9 +236,6 @@ const GRADES_TERM_LABEL_H = 14
 const GRADES_ROW_H = 15
 const GRADES_FOOTER_SPACE = 90
 
-// A real TOR lists every course across the student's whole academic
-// history -- group all of it by year then term (like the school's own
-// evaluation form) instead of sampling a handful of rows.
 function groupCoursesByYearAndTerm(courses) {
     const yearMap = new Map()
     for (const c of courses) {
@@ -272,8 +258,6 @@ function groupCoursesByYearAndTerm(courses) {
         }))
 }
 
-// Used both to size the SVG (DocumentSample) and to render it (GradesBody)
-// so the two can never drift out of sync with each other.
 function calcGradesContentHeight(student) {
     const courses = student?.curriculumCourses || []
     if (courses.length === 0) return 380
@@ -414,10 +398,6 @@ function GwaBody({ student }) {
     )
 }
 
-// Room names are real, verified facilities from HCDC's own published local
-// directory (IT Laboratory 3, Computer Laboratory, College of Arts and
-// Sciences) rather than invented room numbers -- HCDC doesn't publish a
-// classroom numbering scheme, so a specific "Room 301" would be fabricated.
 function ScheduleBody({ student }) {
     const [major1, major2] = getMajorSubjects(student?.programName, student?.yearLevel)
     const rows = [
@@ -487,10 +467,6 @@ function EvaluationBody({ student }) {
     )
 }
 
-// Generic placeholder badge for the CHED accreditation seal that appears on
-// a real HCDC diploma -- there's no actual CHED emblem asset in this
-// project, so this is a plain labeled circle rather than a fabricated
-// reproduction of the real seal.
 function ChedBadge({ cx, cy, r }) {
     return (
         <g>
@@ -501,12 +477,6 @@ function ChedBadge({ cx, cy, r }) {
     )
 }
 
-// Diploma layout deliberately mirrors the structure of an actual HCDC
-// diploma -- bilingual (Filipino/English) legal-document wording, and
-// signed by the VP for Academic Affairs / Board Chairman / President
-// rather than the Registrar Head every other document uses. Names below
-// are generic placeholders, not the specific individuals who'd actually
-// sign a real one.
 function DiplomaBody({ student }) {
     const fullName = (student?.fullName || 'Juan Dela Cruz').toUpperCase()
     const programName = (student?.programName || 'Bachelor of Science in Information Technology').toUpperCase()
@@ -516,7 +486,6 @@ function DiplomaBody({ student }) {
         <>
             <Watermark centerY={330} />
 
-            {/* Ribbon banner */}
             <polygon points="30,14 60,14 60,50 45,58 30,50" fill="var(--blue-dark)" />
             <polygon points="530,14 500,14 500,50 515,58 530,50" fill="var(--blue-dark)" />
             <rect x="55" y="10" width="450" height="44" rx="2" fill="var(--blue)" stroke="var(--red)" strokeWidth="1.5" />
@@ -580,9 +549,6 @@ function DiplomaBody({ student }) {
     )
 }
 
-// Distinct body text per document_code -- each entry is what follows "This
-// is to certify that / [NAME]" for a standard certification letter. Kept
-// short and code-specific rather than one paragraph reused for every type.
 const CERTIFY_LETTER_LINES = {
     AAD: (p) => [
         `is a bona fide student under the ${p} program of Holy Cross of Davao College.`,
@@ -707,8 +673,6 @@ function CertifyLetterBody({ documentCode, student }) {
     )
 }
 
-// Course Description / Syllabus isn't a certify-that letter at all -- it's a
-// listing of course content, so it gets its own table-shaped arrangement.
 function CourseDescriptionBody({ student }) {
     const rows = [
         ['CC 101', 'Introduction to Computing', 'Overview of computing concepts, hardware, and information systems.'],
@@ -741,9 +705,6 @@ function CourseDescriptionBody({ student }) {
     )
 }
 
-// A Special Order is a CHED-recognized official document, not a plain
-// certify-that letter -- it carries its own reference number and cites the
-// governing authority.
 function SpecialOrderBody({ student }) {
     const programName = student?.programName || 'Bachelor of Science in Information Technology'
 
@@ -828,21 +789,10 @@ export function DocumentSample({ name, documentCode, student }) {
     const layout = sampleLayoutFor(documentCode)
     const Body = SAMPLE_BODY[layout] || LetterBody
 
-    // Every other layout is a short, fixed illustrative mockup -- only
-    // 'grades' (TOR/COG/POG/CGCE) renders the student's real, full-length
-    // curriculum, which needs a canvas sized to fit however long that is.
-    // 'diploma' draws its own ribbon header and three-signature footer
-    // (a diploma isn't signed by the Registrar Head like every other
-    // document), so it skips the shared header/footer entirely.
     const height = layout === 'grades' ? calcGradesContentHeight(student) : layout === 'diploma' ? 620 : 380
     const footerY = height - 68
     const isDiploma = layout === 'diploma'
 
-    // This mockup represents a physical printed document -- it must always
-    // look like paper (dark ink on a white page), never invert with the
-    // app's dark mode. Re-pinning the tokens it draws with here, rather
-    // than rewriting every fill/stroke inside it, keeps it immune to
-    // whatever dark-mode values are in effect on an ancestor element.
     const paperColors = {
         '--white': '#FFFFFF',
         '--ink': '#101827',

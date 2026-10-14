@@ -1,11 +1,5 @@
 import { supabase } from './supabase'
 
-// "What's the status of my request?" in Messages. A student picks a request
-// and sends a status inquiry; the automatic reply comes from the
-// auto_reply_request_status() database function. Staff get a one-click
-// "Reply with status" that fills in the same wording.
-
-// Same wording as the student's request page (and the database function).
 const STATUS_TEXT = {
     pending: ['Pending', 'Your request is waiting for Registrar processing. Pay at the Finance Office and upload your official receipt.'],
     payment_pending: ['Payment Pending', 'Pay at the Finance Office, then upload your official receipt so the Registrar can verify it.'],
@@ -26,7 +20,6 @@ export const isOpenRequest = (r) => !CLOSED.includes(r.status)
 
 const INQUIRY = /^Status inquiry: ([A-Z]+-[\w-]+|all my requests)/
 
-// Asking about every request at once.
 export const ALL_REQUESTS = 'ALL'
 
 export function inquiryText(request) {
@@ -37,7 +30,6 @@ export function inquiryText(request) {
     return `Status inquiry: ${request.request_number}${doc}. Hi! May I know the current status of my request?`
 }
 
-// The request number a message asks about, ALL_REQUESTS, or null.
 export function inquiryRequestNumber(text) {
     const found = (text || '').match(INQUIRY)?.[1] || null
     return found === 'all my requests' ? ALL_REQUESTS : found
@@ -45,7 +37,6 @@ export function inquiryRequestNumber(text) {
 
 export const inquiryLabel = (number) => (number === ALL_REQUESTS ? 'all their requests' : number)
 
-// Groups for the "Ask about a request" menu.
 export function groupRequests(requests) {
     const groups = [
         { key: 'open', label: 'In progress', items: requests.filter((r) => !['completed', 'cancelled', 'rejected'].includes(r.status)) },
@@ -56,8 +47,6 @@ export function groupRequests(requests) {
     return groups.filter((g) => g.items.length > 0)
 }
 
-// "Status update for your requests:" with one line per request, for staff
-// answering an all-requests inquiry from `studentUserId`.
 async function summaryReplyFor(studentUserId) {
     const { data: student, error } = await supabase
         .from('students')
@@ -86,8 +75,6 @@ async function summaryReplyFor(studentUserId) {
     )].join('\n')
 }
 
-// The newest unanswered status inquiry message in a conversation (sent by
-// someone other than `selfId` with no reply from `selfId` after it), or null.
 export function pendingInquiry(messages, selfId) {
     for (let i = messages.length - 1; i >= 0; i--) {
         const m = messages[i]
@@ -98,8 +85,6 @@ export function pendingInquiry(messages, selfId) {
     return null
 }
 
-// "Status update for REQ-000123 (Transcript of Records): Processing. ..."
-// for staff to send. Throws if the request can't be read.
 export async function statusReplyFor(requestNumber, studentUserId) {
     if (requestNumber === ALL_REQUESTS) return summaryReplyFor(studentUserId)
 

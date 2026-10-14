@@ -8,13 +8,6 @@ import { formatDisplayDateTime } from '../lib/formatDate'
 import { useLiveRefresh } from '../lib/useLiveRefresh'
 import './RequestHandoffs.css'
 
-// Who has handled a request, and passing it on. The employee handling a
-// request passes it to a colleague for processing / production, and -- once
-// it's ready for claiming -- to the claiming section (releasing staff). The
-// head sees the whole chain, including their own assignments, and can pass
-// it on too. All checks are enforced by handoff_request() in the database
-// (see 20261012020000_request_handoffs); the trail is written by a trigger.
-
 const CLAIMING_STATUSES = ['ready_for_claiming', 'scheduled', 'claimed']
 const MAX_NOTE = 500
 
@@ -44,7 +37,6 @@ function RequestHandoffs({ request, cardClassName, canPass = false, onPassed }) 
             .order('created_at', { ascending: true })
 
         if (error) {
-            // Table not created yet (migration pending): hide the section.
             if (error.code === 'PGRST205' || error.code === '42P01') setUnavailable(true)
             else console.error('LOAD HANDOFFS ERROR:', error)
             setLoading(false)
@@ -64,7 +56,6 @@ function RequestHandoffs({ request, cardClassName, canPass = false, onPassed }) 
         setLoading(false)
     }
 
-    // Active employees who can receive the request, with names.
     const loadStaff = async () => {
         const { data: employees } = await supabase
             .from('employees')
@@ -92,8 +83,6 @@ function RequestHandoffs({ request, cardClassName, canPass = false, onPassed }) 
 
     if (unavailable || !requestId) return null
 
-    // Default to the next sensible step for where the request is now; the
-    // claiming section only once the request is ready for claiming.
     const stage = pickedStage && (pickedStage !== 'claiming' || atClaimingStage)
         ? pickedStage
         : atClaimingStage ? 'claiming' : 'production'

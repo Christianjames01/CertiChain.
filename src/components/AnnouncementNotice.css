@@ -1,7 +1,3 @@
-/* Student-facing announcement banner (also the admin editor's live preview).
-   Tone colors come from the portal layout's theme variables, so light and
-   dark mode are handled by the layout, not here. */
-
 .announcement-notice {
     --notice-accent: var(--blue-accent, var(--blue));
     --notice-tint: var(--blue-tint);
@@ -83,7 +79,6 @@
     overflow-wrap: anywhere;
 }
 
-/* The rich text editor wraps content in <p>; keep the title on one line. */
 .announcement-notice-title p {
     display: inline;
     margin: 0;

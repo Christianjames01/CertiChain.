@@ -118,7 +118,6 @@
     color: var(--ink);
 }
 
-/* ---- The transcript pages (8.5 x 13 in, positions in pt) ---- */
 .otr-preview-wrap {
     position: sticky;
     top: 20px;
@@ -209,7 +208,6 @@
     text-decoration: underline;
 }
 
-/* The title in the Registrar's blue outlined lettering. */
 .otr-page .otr-title {
     left: 36pt;
     width: 542pt;
@@ -242,7 +240,6 @@
     font-weight: 700;
 }
 
-/* ---- Body flow ---- */
 .otr-body {
     position: absolute;
     left: 38pt;
@@ -295,7 +292,6 @@
     letter-spacing: 0.2pt;
 }
 
-/* Course table: open on the left, vertical column lines run to the bottom. */
 .otr-table {
     width: 100%;
     flex: 1;
@@ -516,7 +512,6 @@
     text-decoration: underline;
 }
 
-/* ---- Printing: only the print copy, one page per sheet. ---- */
 .otr-print-root {
     display: none;
 }

@@ -12,8 +12,6 @@ import { FilePicker } from '../pages/student/StudentUi'
 import './Representative.css'
 import { friendlyError } from '../lib/friendlyError'
 
-// Upload one representative file (photos are shrunk first; PDFs go up as
-// they are) and return its storage path.
 async function uploadRepresentativeFile(original, kind, studentId, requestId) {
     const file = await shrinkImage(original)
     if (file.size > MAX_FILE_MB * 1024 * 1024) throw new Error(`Files must not exceed ${MAX_FILE_MB} MB.`)
@@ -24,7 +22,6 @@ async function uploadRepresentativeFile(original, kind, studentId, requestId) {
     return path
 }
 
-// Student side: authorize someone else to claim this request's document.
 function RepresentativeStudentCard({ request }) {
     const [representative, setRepresentative] = useState(null)
     const [lastRemoval, setLastRemoval] = useState(null)
@@ -38,8 +35,7 @@ function RepresentativeStudentCard({ request }) {
     const [contact, setContact] = useState('')
     const [letterFile, setLetterFile] = useState(null)
     const [idFile, setIdFile] = useState(null)
-    // Replacing one rejected file straight from its row.
-    const [replacing, setReplacing] = useState(null) // file key being uploaded
+    const [replacing, setReplacing] = useState(null)
 
     const requestId = request?.request_id
     const closed = CLOSED_STATUSES.includes(request?.status)
@@ -64,7 +60,6 @@ function RepresentativeStudentCard({ request }) {
         if (requestId) refresh()
     }, [requestId])
 
-    // Staff approving/rejecting a file shows up here without a reload.
     useLiveRefresh(['claim_representatives', 'claim_representative_removals'], () => { if (requestId) refresh() })
 
     if (!loaded || unavailable) return null
@@ -128,7 +123,6 @@ function RepresentativeStudentCard({ request }) {
 
             if (error) throw new Error(error.message)
 
-            // Replaced files are no longer needed.
             const stale = []
             if (representative && letterFile) stale.push(representative.authorization_letter_path)
             if (representative && idFile) stale.push(representative.valid_id_path)
@@ -145,8 +139,6 @@ function RepresentativeStudentCard({ request }) {
         }
     }
 
-    // Upload a new picture for one file (e.g. the rejected valid ID); the
-    // other file keeps its review.
     const replaceFile = async (fileDef, picked) => {
         if (!picked) return
         const limitMb = isShrinkable(picked) ? Math.max(MAX_FILE_MB, MAX_ORIGINAL_IMAGE_MB) : MAX_FILE_MB
@@ -278,7 +270,6 @@ function RepresentativeStudentCard({ request }) {
                         </p>
                     )}
 
-                    {/* Locked while under review and once approved; only a rejection opens it again. */}
                     {!closed && representative.status === 'rejected' && (
                         <div className="rep-actions">
                             <button type="button" className="rep-link" onClick={startForm}>Change details or files</button>

@@ -2,30 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { captchaEnabled, loadTurnstile, TURNSTILE_SITE_KEY } from '../lib/captcha'
 import './CaptchaCheck.css'
 
-// A different real photo every time the check opens or resets -- not the
-// HCDC building, just whatever Lorem Picsum (https://picsum.photos) hands
-// back for a random seed. Plain CSS background-image, so no canvas/CORS
-// concerns.
 const pickRandomPhoto = () => `https://picsum.photos/seed/${Math.random().toString(36).slice(2)}/300/150`
-
-// Slide-puzzle check for the sign-up, sign-in and forgot-password forms:
-// drag the slider until the piece fits the gap in the campus photo.
-//
-// The puzzle is the part people see; the real bot check is Cloudflare
-// Turnstile, whose token Supabase verifies on the server. It starts in the
-// background as soon as the check opens (it can take several seconds), so
-// the check usually passes the moment the puzzle is solved. Cloudflare's own
-// widget only appears if it needs an extra step.
-//
-// Some browsers (strict privacy settings, incognito, VPNs, school networks)
-// get an extra Cloudflare checkbox: the page says "tick the box below". If
-// Cloudflare never answers (usually an ad blocker or privacy shield blocking
-// it), the check gives up after CHECK_TIMEOUT_MS with a clear message instead
-// of spinning forever.
-//
-// Calls onToken(token) when passed and onToken(null) when it expires or
-// fails. Tokens are single-use: remount it (change its `key`) after each
-// attempt. Renders nothing when CAPTCHA isn't enabled (see lib/captcha.js).
 
 const WIDTH = 300
 const HEIGHT = 150
@@ -33,7 +10,6 @@ const PIECE = 46
 const TOLERANCE = 6
 const CHECK_TIMEOUT_MS = 45000
 
-// Shown after a failure; after two, suggest what usually causes it.
 const failureMessage = (count, base) => count >= 2
     ? `${base} If it keeps failing, turn off your ad blocker or privacy shield (e.g. Brave Shields) for this site, leave private/incognito mode, or try Chrome or Edge.`
     : `${base} Please slide the puzzle again.`
@@ -53,17 +29,14 @@ function CaptchaCheck({ onToken }) {
     const [puzzle, setPuzzle] = useState(newPuzzle)
     const [photoUrl, setPhotoUrl] = useState(pickRandomPhoto)
     const [offset, setOffset] = useState(0)
-    const [state, setState] = useState('idle') // idle | dragging | wrong | checking | done | error
+    const [state, setState] = useState('idle')
     const [error, setError] = useState('')
-    // Cloudflare asked for its own tick (shown under the puzzle).
     const [needsTick, setNeedsTick] = useState(false)
 
-    // Cloudflare runs in the background from the moment the check opens, so
-    // it's usually finished by the time the puzzle is solved.
-    const tokenRef = useRef(null) // Cloudflare's answer, waiting for the puzzle
-    const solvedRef = useRef(false) // puzzle solved, waiting for Cloudflare
+    const tokenRef = useRef(null)
+    const solvedRef = useRef(false)
     const runningRef = useRef(false)
-    const pendingErrorRef = useRef(null) // Cloudflare failed before the puzzle was solved
+    const pendingErrorRef = useRef(null)
     const autoRetriesRef = useRef(0)
     const watchdog = useRef(null)
     const failures = useRef(0)
@@ -73,7 +46,6 @@ function CaptchaCheck({ onToken }) {
         watchdog.current = null
     }
 
-    // Start (or restart) Cloudflare's check in the background.
     const runCloudflare = useCallback(() => {
         const turnstile = window.turnstile
         if (!turnstile || widgetRef.current === null || runningRef.current) return
@@ -97,7 +69,6 @@ function CaptchaCheck({ onToken }) {
         onTokenRef.current?.(token)
     }, [])
 
-    // Show a failure, and get a fresh Cloudflare check going for the next try.
     const fail = useCallback((base) => {
         stopWatchdog()
         failures.current += 1
@@ -110,8 +81,6 @@ function CaptchaCheck({ onToken }) {
         runCloudflare()
     }, [runCloudflare])
 
-    // A Cloudflare failure: silently start over once while the student is
-    // still on the puzzle; otherwise (or the second time) report it.
     const cloudflareFailed = useCallback((message) => {
         runningRef.current = false
         if (!solvedRef.current && autoRetriesRef.current < 1) {
@@ -139,8 +108,6 @@ function CaptchaCheck({ onToken }) {
                     execution: 'execute',
                     appearance: 'interaction-only',
                     theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
-                    // Report failures instead of retrying silently behind a
-                    // spinner (cloudflareFailed decides what to do).
                     retry: 'never',
                     callback: (token) => {
                         runningRef.current = false
@@ -151,7 +118,6 @@ function CaptchaCheck({ onToken }) {
                         runningRef.current = false
                         tokenRef.current = null
                         if (solvedRef.current) {
-                            // Passed but not used in time: start over.
                             solvedRef.current = false
                             onTokenRef.current?.(null)
                             setPuzzle(newPuzzle())
@@ -168,7 +134,6 @@ function CaptchaCheck({ onToken }) {
                     'timeout-callback': () => {
                         cloudflareFailed('Verification timed out.')
                     },
-                    // Cloudflare wants a tick: no time limit while it waits.
                     'before-interactive-callback': () => {
                         stopWatchdog()
                         setNeedsTick(true)
@@ -192,7 +157,7 @@ function CaptchaCheck({ onToken }) {
         return () => {
             cancelled = true
             clearTimeout(watchdog.current)
-            try { if (widgetRef.current !== null) window.turnstile?.remove(widgetRef.current) } catch { /* gone */ }
+            try { if (widgetRef.current !== null) window.turnstile?.remove(widgetRef.current) } catch {  }
             widgetRef.current = null
             onTokenRef.current?.(null)
         }
@@ -209,12 +174,9 @@ function CaptchaCheck({ onToken }) {
         setOffset(0)
         setState('idle')
         setError('')
-        // Keep a Cloudflare answer that's already in; otherwise make sure a
-        // check is running.
         if (!tokenRef.current) runCloudflare()
     }, [runCloudflare])
 
-    // Puzzle solved: use Cloudflare's answer if it's in, else wait for it.
     const check = (finalOffset) => {
         if (Math.abs(finalOffset - puzzle.x) > TOLERANCE) {
             setState('wrong')
@@ -246,8 +208,6 @@ function CaptchaCheck({ onToken }) {
 
         setState('checking')
         if (!runningRef.current) runCloudflare()
-        // No answer from Cloudflare (blocked, or a very slow network): give
-        // up with a clear message rather than spinning forever.
         stopWatchdog()
         watchdog.current = setTimeout(() => fail('The security check is taking too long.'), CHECK_TIMEOUT_MS)
     }
@@ -292,7 +252,6 @@ function CaptchaCheck({ onToken }) {
     if (!captchaEnabled) return null
 
     const photo = { backgroundImage: `url(${photoUrl})`, backgroundSize: `${WIDTH}px ${HEIGHT}px` }
-
 
     return (
         <div className={`captcha-puzzle is-${state}`} style={{ '--puzzle-w': `${WIDTH}px` }}>

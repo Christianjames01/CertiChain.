@@ -3,8 +3,6 @@ import { IconCalendar } from '../UiIcons'
 import { EVENT_PRESETS, eachDateInRange, formatDateShort, isWeekendDate } from '../../lib/officeCalendar'
 import './OfficeCalendar.css'
 
-// Apply one event/note to every day in a date range (e.g. a whole
-// enrollment week) in a single action.
 function RangeModal({
     portal,
     start,
@@ -25,7 +23,6 @@ function RangeModal({
 
     const handleStartChange = (value) => {
         onStartChange(value)
-        // Keep the range valid when the start jumps past the current end.
         if (value && end && value > end) onEndChange(value)
     }
 

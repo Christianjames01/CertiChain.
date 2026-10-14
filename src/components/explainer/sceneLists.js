@@ -2,10 +2,6 @@ import * as Employee from './EmployeeScenes'
 import * as Head from './HeadScenes'
 import * as Student from './StudentScenes'
 
-// Scene lists for ExplainerPlayer. Each scene: key, the View component,
-// chapter label, title, caption text and how long it plays (ms).
-
-// Student story: from the first request to a completed, claimed document.
 export const STUDENT_SCENES = [
     { key: "intro", View: Student.SceneIntro, chapter: "Intro", title: "Registrar documents, tracked online", text: "CertiChain is HCDC’s online registrar service. Once you're assessed, paid and verified at the Registrar's Office, track your documents from one account — no more trips just to check your status.", ms: 6000 },
     { key: "account", View: Student.SceneAccount, chapter: "Account", title: "Create your account", text: "Register with your student details. The Registrar verifies your record, so only real students can request.", ms: 5500 },
@@ -19,7 +15,6 @@ export const STUDENT_SCENES = [
     { key: "cta", View: Student.SceneCta, chapter: "Start", title: "Request, track and claim, all online", text: "Create a free account and request your first document today.", ms: 5000 },
 ]
 
-// Employee story: an assigned request from receipt to release.
 export const EMPLOYEE_SCENES = [
     { key: 'assigned', View: Employee.SceneEmpIntro, chapter: 'Intro', title: 'Your assigned requests', text: 'Requests from your colleges and programs are routed to you automatically, newest first, with their status.', ms: 5500 },
     { key: 'verify', View: Employee.SceneEmpVerify, chapter: 'Step 1', title: 'Verify the payment', text: 'Check the uploaded official receipt against the request — number, amount and that it hasn’t been used before.', ms: 6500 },
@@ -29,7 +24,6 @@ export const EMPLOYEE_SCENES = [
     { key: 'cta', View: Employee.SceneStaffCta, chapter: 'Try it', title: 'Now try it on the real pages', text: 'Start the guided demo to walk through each page of your portal.', ms: 5000 },
 ]
 
-// Registrar Head story: overview, assignment, publishing, office days, oversight.
 export const HEAD_SCENES = [
     { key: 'dashboard', View: Head.SceneHeadDash, chapter: 'Overview', title: 'The whole office at a glance', text: 'Live totals for every status and the week’s requests, updating as your staff work.', ms: 5500 },
     { key: 'assign', View: Head.SceneHeadAssign, chapter: 'Step 1', title: 'Assign requests to staff', text: 'Requests are routed to employees by college and program; assign or reassign any request in one click.', ms: 6000 },

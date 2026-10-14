@@ -1,5 +1,3 @@
-/* Shared line icons (UiIcons.jsx). */
-
 .ui-icon {
     display: inline-block;
     flex-shrink: 0;
@@ -8,7 +6,6 @@
     vertical-align: -0.14em;
 }
 
-/* An icon before a label ("[icon] Schedule Claiming"). */
 .ui-icon.is-leading {
     margin-right: 0.4em;
 }

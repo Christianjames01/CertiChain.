@@ -3,10 +3,6 @@ import { useScrollLock } from '../lib/useScrollLock'
 import { IconX } from './UiIcons'
 import './Modal.css'
 
-// Shared dialog for forms and confirmations across all portals.
-// title: heading; subtitle (optional): one line under it; icon (optional):
-// a line-icon component shown in a tile beside the title. Esc closes it
-// (calls onClose, which may ignore the request while saving).
 function Modal({ title, subtitle, icon: Icon, onClose, children, maxWidth, closeOnBackdropClick = false }) {
     useScrollLock()
     const titleId = useId()

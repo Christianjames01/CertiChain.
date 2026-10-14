@@ -1,8 +1,3 @@
-// Shared checks for the student sign-up forms (Register and the Google
-// Complete Profile step). Every field is required; these catch values that
-// are filled in but unusable, which the browser's `required` can't.
-
-// Picked from the suffix dropdown when the student has none -- saved as null.
 export const SUFFIX_NONE = 'none'
 
 export const SUFFIX_OPTIONS = ['Jr.', 'Sr.', 'II', 'III', 'IV', 'V']

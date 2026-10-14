@@ -1,15 +1,9 @@
-/* Profile page, shared by every portal (see ProfileParts.jsx). Same look as
-   the detail pages: a header card with the blue-to-red top bar, then cards
-   with an icon and fields as tiles. */
-
 .pf-page {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-/* Let wide children (e.g. the stat tiles, which scroll sideways on phones)
-   shrink instead of stretching the page. */
 .pf-page > *,
 .pf-column > * {
     min-width: 0;
@@ -34,7 +28,6 @@
     }
 }
 
-/* ---- Header card ---------------------------------------------------------- */
 .pf-hero {
     position: relative;
     display: flex;
@@ -178,7 +171,6 @@
     text-decoration: underline;
 }
 
-/* ---- Section cards -------------------------------------------------------- */
 .pf-card {
     padding: 22px 24px;
     border: 1px solid var(--line);
@@ -252,7 +244,6 @@
     cursor: default;
 }
 
-/* ---- Fields --------------------------------------------------------------- */
 .pf-fields {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -307,7 +298,6 @@
     color: var(--slate);
 }
 
-/* ---- Sign-in & security rows ---------------------------------------------- */
 .pf-rows {
     display: flex;
     flex-direction: column;
@@ -356,7 +346,6 @@
     color: var(--slate);
 }
 
-/* The two-factor block brings its own text and buttons. */
 .pf-row-main .pf-action {
     margin-top: 2px;
 }
@@ -371,7 +360,6 @@
     margin-top: 10px;
 }
 
-/* ---- Assignments ---------------------------------------------------------- */
 .pf-list {
     display: flex;
     flex-direction: column;
@@ -413,7 +401,6 @@
     color: var(--blue-accent, var(--blue));
 }
 
-/* ---- Phones --------------------------------------------------------------- */
 @media (max-width: 640px) {
     .pf-page,
     .pf-layout,

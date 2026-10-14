@@ -1,8 +1,3 @@
-// Spoken voice-over for the demos (the walkthrough videos and the guided
-// demo), using the browser's built-in text-to-speech -- no audio files.
-// Browsers only allow sound after a click, so each player has a Sound
-// button; the choice is remembered on this device.
-
 export const narrationSupported = () => typeof window !== 'undefined' && 'speechSynthesis' in window
 
 const PREF_KEY = (name) => `certichain_demo_sound:${name}`
@@ -17,10 +12,9 @@ export function readSoundPref(name, fallback = false) {
 }
 
 export function writeSoundPref(name, on) {
-    try { localStorage.setItem(PREF_KEY(name), on ? '1' : '0') } catch { /* storage unavailable */ }
+    try { localStorage.setItem(PREF_KEY(name), on ? '1' : '0') } catch {  }
 }
 
-// An English voice, preferring Philippine, then US, then any English.
 let cachedVoice = null
 function pickVoice() {
     if (cachedVoice) return cachedVoice
@@ -39,7 +33,6 @@ if (narrationSupported()) {
     window.speechSynthesis.addEventListener?.('voiceschanged', () => { cachedVoice = null })
 }
 
-// Symbols read badly aloud.
 function forSpeech(text) {
     return String(text)
         .replace(/₱\s?(\d[\d,.]*)/g, '$1 pesos')
@@ -51,17 +44,9 @@ function forSpeech(text) {
         .trim()
 }
 
-// Lines already said (or queued) for the current scene/step. The players
-// can ask for the same line again when they re-render; it's only said once.
 let saidLines = new Set()
-// Who asked for what is being said (so one player stopping doesn't cut off
-// another's voice).
 let currentOwner = null
 
-// interrupt: stop whatever is being said first (a new scene or step);
-// otherwise it's queued after it (captions within a step).
-// force: say it again even if it was already said (the viewer replayed it).
-// owner: who is talking, for stopSpeaking(owner).
 export function say(text, { interrupt = false, force = false, owner = null } = {}) {
     if (!narrationSupported() || !text) return
     const line = forSpeech(text)
@@ -85,8 +70,6 @@ export function say(text, { interrupt = false, force = false, owner = null } = {
     synth.speak(u)
 }
 
-// Pause / sound off / leaving: stop, and let the lines be said again later.
-// With an owner, only if that owner is the one talking.
 export function stopSpeaking(owner) {
     if (owner !== undefined && owner !== currentOwner) return
     currentOwner = null
@@ -94,7 +77,6 @@ export function stopSpeaking(owner) {
     if (narrationSupported()) window.speechSynthesis.cancel()
 }
 
-// Still talking (or about to)?
 export function speaking() {
     return narrationSupported() && (window.speechSynthesis.speaking || window.speechSynthesis.pending)
 }

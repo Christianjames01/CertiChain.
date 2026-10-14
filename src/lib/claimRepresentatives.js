@@ -1,7 +1,5 @@
 import { supabase } from './supabase'
 
-// Authorized representatives for claiming (20260926020000_claim_representatives).
-
 export const REPRESENTATIVE_BUCKET = 'claim-authorizations'
 
 export const RELATIONSHIPS = ['Parent', 'Guardian', 'Sibling', 'Spouse', 'Relative', 'Friend', 'Other']
@@ -12,10 +10,8 @@ export const REPRESENTATIVE_STATUS = {
     rejected: { label: 'Not approved', tone: 'rejected' },
 }
 
-// Requests that can still be claimed by someone.
 export const CLOSED_STATUSES = ['completed', 'cancelled', 'rejected']
 
-// The two files, each reviewed on its own (20260929030000_representative_file_review).
 export const REPRESENTATIVE_FILES = [
     { key: 'letter', label: 'Signed authorization letter', short: 'authorization letter', pathKey: 'authorization_letter_path', statusKey: 'letter_status', noteKey: 'letter_note' },
     { key: 'id', label: 'Representative’s valid ID', short: 'valid ID', pathKey: 'valid_id_path', statusKey: 'id_status', noteKey: 'id_note' },
@@ -27,8 +23,6 @@ export const FILE_STATUS = {
     rejected: { label: 'Rejected', tone: 'rejected' },
 }
 
-// Files have their own status once the migration is applied; before that,
-// both follow the overall status.
 export const hasFileReview = (rep) => !!rep && 'letter_status' in rep
 export const fileStatusOf = (rep, file) => (hasFileReview(rep) ? rep[file.statusKey] : rep.status) || 'pending'
 export const fileNoteOf = (rep, file) => (hasFileReview(rep) ? rep[file.noteKey] : rep.status === 'rejected' ? rep.review_note : null)
@@ -38,7 +32,6 @@ export const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp,application/pdf'
 
 const COLUMNS = 'representative_id, request_id, student_id, full_name, relationship, contact_number, authorization_letter_path, valid_id_path, status, review_note, reviewed_at, created_at, updated_at'
 
-// Missing table (migration not applied yet) -> null so pages can hide the feature.
 const isMissingTable = (error) => error && (error.code === 'PGRST205' || error.code === '42P01')
 const isMissingColumn = (error) => error && (error.code === '42703' || /letter_status|id_status/i.test(error.message || ''))
 
@@ -50,7 +43,6 @@ export async function loadRepresentative(requestId) {
         .maybeSingle()
 
     let { data, error } = await query(COLUMNS + ', letter_status, letter_note, id_status, id_note')
-    // Before the per-file review migration: the overall status only.
     if (isMissingColumn(error)) ({ data, error } = await query(COLUMNS))
 
     if (isMissingTable(error)) return { unavailable: true, representative: null }
@@ -58,8 +50,6 @@ export async function loadRepresentative(requestId) {
     return { unavailable: false, representative: data }
 }
 
-// Representatives the student removed from this request, newest first
-// (20260929060000_representative_removals). [] until that migration is applied.
 export async function loadRepresentativeRemovals(requestId) {
     const { data, error } = await supabase
         .from('claim_representative_removals')
@@ -74,7 +64,6 @@ export async function loadRepresentativeRemovals(requestId) {
     return data || []
 }
 
-// request_id -> representative, for release-window lists.
 export async function loadRepresentativesByRequestIds(requestIds) {
     const ids = [...new Set((requestIds || []).filter(Boolean))]
     if (ids.length === 0) return {}

@@ -3,10 +3,6 @@ import { downloadExcelReport } from './reportExport'
 
 const toDate = (v) => (v ? new Date(v) : null)
 
-// Exports everything about one request before it's permanently deleted
-// from All Requests (delete_resolved_request) -- the official receipt,
-// requirement files, claim schedule and any issued credential, all as one
-// Excel workbook. Mirrors exportStudentBackup/exportEmployeeBackup.
 export async function exportRequestBackup(request) {
     const requestId = request.request_id
 

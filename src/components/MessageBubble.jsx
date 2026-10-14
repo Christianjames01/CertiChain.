@@ -30,20 +30,6 @@ const SmileIcon = () => (
     </svg>
 )
 
-// One chat bubble, shared by the student, employee, and admin Messages
-// pages. Edit and Delete only appear on the viewer's own messages
-// (`isSelf`); editing turns the bubble into an inline editor card.
-//
-// `deletedNote`, e.g. "You deleted a message" / "Yul deleted a message":
-// the message was unsent, so the placeholder replaces the text and there
-// are no actions.
-//
-// Messenger-style runs (see ChatMessages): `groupStart` / `groupEnd` square
-// off the corners between consecutive bubbles from one sender, and
-// `avatar` (other people's messages) shows beside the last one. Edit and
-// Delete appear on hover, or on a long press on phones (like Messenger).
-// `onReply` adds Reply to the menu (any message); `quote` ({ label, text,
-// onClick }) shows the answered message above a reply.
 function MessageBubble({ messageId, isSelf, senderLabel, badge, text, time, edited, deletedNote, onEdit, onDelete, onReply, quote, disabled, avatar, groupStart = true, groupEnd = true, seen = false, reactions = [], myReaction = null, onReact }) {
     const [editing, setEditing] = useState(false)
     const [revealed, setRevealed] = useState(false)
@@ -51,8 +37,6 @@ function MessageBubble({ messageId, isSelf, senderLabel, badge, text, time, edit
     const rowRef = useRef(null)
     const pressTimer = useRef(null)
 
-    // Long press opens the Edit / Delete menu; tapping anywhere else
-    // closes it (and the emoji picker, if open).
     useEffect(() => {
         if (!revealed && !pickerOpen) return undefined
         const close = (e) => {
@@ -82,8 +66,6 @@ function MessageBubble({ messageId, isSelf, senderLabel, badge, text, time, edit
         onTouchMove: cancelPress,
         onTouchEnd: cancelPress,
         onTouchCancel: cancelPress,
-        // Android fires contextmenu on long press (and desktop on right
-        // click): show our menu instead of the browser's.
         onContextMenu: (e) => {
             e.preventDefault()
             cancelPress()
@@ -94,7 +76,6 @@ function MessageBubble({ messageId, isSelf, senderLabel, badge, text, time, edit
     const [saving, setSaving] = useState(false)
     const inputRef = useRef(null)
 
-    // Focus with the cursor at the end, and grow the box to fit the text.
     useEffect(() => {
         const el = inputRef.current
         if (!editing || !el) return

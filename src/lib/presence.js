@@ -4,13 +4,6 @@ import { supabase } from './supabase'
 const HEARTBEAT_MS = 45_000
 const PRESENCE_POLL_MS = 30_000
 
-// Pings the server every ~45s while the tab is open and visible, so the
-// superadmin's "online now" status and Messages' "Active now" reflect
-// reality. Best effort: a failed ping never affects the page it's running
-// on. Also clears presence immediately on tab-hide/close instead of
-// waiting out the server-side staleness window (see go_offline()) --
-// otherwise switching tabs or closing the window still reads "online" for
-// up to 90s afterward.
 export function usePresenceHeartbeat(active) {
     useEffect(() => {
         if (!active) return undefined
@@ -19,7 +12,6 @@ export function usePresenceHeartbeat(active) {
             try {
                 await supabase.rpc('heartbeat')
             } catch {
-                // Not worth surfacing -- the next tick tries again.
             }
         }
 
@@ -47,10 +39,6 @@ export function usePresenceHeartbeat(active) {
     }, [active])
 }
 
-// Polls whether a Messages conversation partner is online, for an
-// "Active now" / "Active 5m ago" line in the chat header. Scoped
-// server-side to people the caller has actually messaged (see the
-// get_conversation_presence RPC) -- not a general online-status lookup.
 export function useConversationPresence(otherUserId) {
     const [presence, setPresence] = useState(null)
 
@@ -88,9 +76,6 @@ export function useConversationPresence(otherUserId) {
     return presence
 }
 
-// "Active now" / "Active 5m ago" -- same relative-time vocabulary as the
-// rest of the app, trimmed to presence's two states. Returns null once
-// it's stale enough (a week+) that showing it isn't useful.
 export function presenceLabel(presence) {
     if (!presence) return null
     if (presence.online) return 'Active now'

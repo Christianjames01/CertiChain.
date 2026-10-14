@@ -68,8 +68,6 @@ function MfaSetup({ linkButtonClassName = 'employee-link-button' }) {
         let { data, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
 
         if (enrollError?.message?.toLowerCase().includes('already exists')) {
-            // A stale factor survived the cleanup above (e.g. left over from another
-            // browser/session) -- clean up again and give it one more try.
             await removeUnverifiedFactors()
             ;({ data, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp' }))
         }

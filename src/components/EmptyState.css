@@ -1,11 +1,3 @@
-/* Shared empty-state box (components/EmptyState.jsx), used by the student,
-   employee, and admin/head portals -- same dashed-box footprint as the
-   plain "No X found." text (.admin-empty / .employee-empty /
-   .student-empty), just with an optional icon and call-to-action. Relies
-   on each portal's own --surface/--ink/--slate/--line/--blue tokens
-   (defined on .admin-layout / .employee-layout / .student-layout), so it
-   only themes correctly inside those three portals. */
-
 .ui-empty-state {
     display: flex;
     flex-direction: column;

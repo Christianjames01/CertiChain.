@@ -1,7 +1,6 @@
 import { supabase } from './supabase'
 import { loadDirectoryProfiles } from './directoryProfiles'
 
-// Labels for request_handoffs.stage (see 20261012020000_request_handoffs).
 export const HANDOFF_STAGES = {
     assigned: 'Assigned',
     processing: 'Processing',
@@ -9,7 +8,6 @@ export const HANDOFF_STAGES = {
     claiming: 'Claiming section',
 }
 
-// Display info for employees: employee_id -> { name, position, scope, userId }.
 export async function loadEmployeeNames(employeeIds) {
     const ids = [...new Set((employeeIds || []).filter(Boolean))]
     if (ids.length === 0) return {}

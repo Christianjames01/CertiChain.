@@ -3,10 +3,6 @@ import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { SkeletonPageContent } from './Skeleton'
 
-// Gates /employee/add-employee to employees a registrar head/admin has
-// granted can_add_employees. The real enforcement is server-side (the
-// create-employee-account edge function checks the same flag) -- this is
-// just so an employee without the grant doesn't land on a dead-end page.
 function RequireCanAddEmployees({ children }) {
     const [loading, setLoading] = useState(true)
     const [allowed, setAllowed] = useState(false)

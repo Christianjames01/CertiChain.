@@ -1,7 +1,3 @@
-// Office hours ("8:00 AM – 5:00 PM") for days the office is open: set on an
-// Office Calendar open day or an "Office open" announcement, and shown to
-// students on their dashboard. Times are 'HH:MM' strings (Postgres `time`).
-
 export const DEFAULT_HOURS = { open: '08:00', close: '17:00' }
 
 export const HOURS_PRESETS = [
@@ -20,9 +16,6 @@ function formatClock(time) {
     return d.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })
 }
 
-// "8:00 AM – 5:00 PM", or '' when not set. A range spanning the fixed
-// noon-to-1pm lunch break shows as two blocks ("8:00 AM–12:00 NN, 1:00–5:00
-// PM") instead of implying the office stays open straight through lunch.
 export function formatHours(open, close) {
     if (!open || !close) return ''
     if (open <= '12:00' && close >= '13:00') {
@@ -31,15 +24,12 @@ export function formatHours(open, close) {
     return `${formatClock(open)} – ${formatClock(close)}`
 }
 
-// Until the office-hours migration is applied, an open day's hours are kept
-// in its note as "Office hours: 8:00 AM – 5:00 PM".
 const NOTE_HOURS = /\s*(?:·\s*)?Office hours: ([^·]+)/
 
 export function hoursOf(row) {
     return formatHours(row?.open_time, row?.close_time) || row?.note?.match(NOTE_HOURS)?.[1]?.trim() || ''
 }
 
-// Compact hours for tight spots like a calendar cell: "8AM–5PM".
 export function shortHours(row) {
     return hoursOf(row)
         .replace(/:00/g, '')
@@ -61,12 +51,8 @@ export function validHours(hours) {
     return !!hours?.open && !!hours?.close && hours.open < hours.close
 }
 
-// open_time / close_time columns come from a migration; until it's applied
-// the write is retried without them so opening a day still works.
 const missingHoursColumn = (error) => /open_time|close_time/i.test(error?.message || '')
 
-// `hoursInNote`: when the columns are missing, keep the hours in the row's
-// note instead (open days), so students still see them.
 export async function writeWithHours(run, row, hours, { hoursInNote = false } = {}) {
     const withHours = validHours(hours) ? { ...row, open_time: hours.open, close_time: hours.close } : row
     let result = await run(withHours)

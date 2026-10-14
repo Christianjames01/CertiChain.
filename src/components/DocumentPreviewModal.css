@@ -112,12 +112,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Pan is driven entirely by the image's own translate() offset (see
-       DocumentPreviewModal.jsx) rather than native scroll -- a
-       transform: scale()'d child doesn't reliably grow the browser's
-       scrollable overflow region in every direction, which made the
-       top-left of a zoomed image unreachable via overflow: auto. Hidden
-       here since our own transform already handles all of it. */
     overflow: hidden;
 }
 

@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase'
 import { dashboardPathForRole } from '../lib/roleRedirect'
 import PageLoading from './PageLoading'
 
-// Only visitors who aren't signed in see the landing page, so load it then.
 const LandingPage = lazy(() => import('../pages/LandingPage/LandingPage'))
 
 function HomeRoute() {

@@ -4,15 +4,6 @@ import './ReceiptChecks.css'
 
 const normalize = (n) => (n || '').replace(/\s/g, '').toUpperCase()
 
-// What staff should know before verifying an official receipt (shown on the
-// request pages and the Official Receipts list):
-//   - its receipt number,
-//   - the group it belongs to when one receipt was applied to several
-//     requests, with the total the receipt has to show (verifying or
-//     rejecting one applies to all of them -- see the receipt safeguards
-//     migration),
-//   - warnings when the same photo or receipt number is on another request.
-// Degrades to just the number before that migration is applied.
 function ReceiptChecks({ receipt, compact = false }) {
     const [group, setGroup] = useState([])
     const [samePhoto, setSamePhoto] = useState([])

@@ -1,6 +1,3 @@
-// In-app user manual content, per role. Each section: { id, title, summary,
-// steps: [string], tips?: [string] }. Rendered by components/UserGuide.jsx.
-
 const STATUS_STEPS = [
     'Pending — your request was received and is waiting for review.',
     'Payment Pending — upload a photo of the official receipt from your already-paid, already-verified assessment.',

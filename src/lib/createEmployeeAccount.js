@@ -5,15 +5,11 @@ import { supabase } from './supabase'
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
 const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
-// The head adds an employee through the create-employee-account function
-// (server side, so no Cloudflare security check). Until that function is
-// deployed, it falls back to the old sign-up, which does need the check.
 export async function createEmployeeAccount(fields) {
     const { data, error } = await supabase.functions.invoke('create-employee-account', { body: fields })
 
     if (!error && data?.user) return data.user
 
-    // The function answered with its own error (e.g. email already used).
     if (error instanceof FunctionsHttpError && error.context?.status !== 404) {
         let message = error.message
         let details
@@ -22,14 +18,12 @@ export async function createEmployeeAccount(fields) {
             message = body?.error || message
             details = body?.details
         } catch {
-            // keep the generic message
         }
         const thrown = new Error(message)
         if (details) thrown.details = details
         throw thrown
     }
 
-    // Not deployed yet (404) or unreachable: use the old way.
     if (error instanceof FunctionsHttpError || error instanceof FunctionsFetchError || error instanceof FunctionsRelayError) {
         return createBySignUp(fields)
     }

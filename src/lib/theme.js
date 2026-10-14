@@ -27,7 +27,6 @@ export function useTheme() {
         try {
             localStorage.setItem(STORAGE_KEY, next)
         } catch {
-            // localStorage unavailable (private browsing, etc.) -- theme just won't persist.
         }
         setTheme(next)
     }

@@ -1,11 +1,3 @@
-// The Registrar's Office contact details, in one place so every screen that
-// shows them (Help & Support, the "waiting for verification" screen) stays
-// in sync. `*Href` values are dialable/linkable forms of the display text.
-//
-// The flat telephone/mobile fields below are the Main Campus numbers, kept
-// for screens that only show one set of contact details. `campuses` holds
-// both campuses for screens that should show Bajada too.
-
 export const REGISTRAR_CONTACT = {
     office: 'Office of Registration and Records Management (ORRM)',
     address: 'Sta. Ana Avenue corner C. De Guzman Street, Brgy. 14-B, Davao City, Philippines',

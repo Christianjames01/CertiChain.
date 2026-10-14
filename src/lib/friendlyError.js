@@ -1,8 +1,3 @@
-// Turns technical errors into sentences a student understands.
-// friendlyError(err, 'We couldn't submit your request.')
-//   -> "We couldn't submit your request. Please check your internet connection and try again."
-// Messages the app wrote for people (no codes or table names) pass through.
-
 const RULES = [
     [/failed to fetch|networkerror|network request failed|load failed|timeout|timed out/i, 'Please check your internet connection and try again.'],
     [/jwt|token (is )?expired|not logged in|session/i, 'Your session has ended. Please log in again.'],
@@ -12,13 +7,8 @@ const RULES = [
     [/storage|bucket|object/i, 'The file could not be uploaded. Please try again.'],
 ]
 
-// Looks technical (codes, SQL words, stack-ish text): don't show it as is.
 const TECHNICAL = /\b(error|exception|sql|relation|column|constraint|violat|syntax|null value|uuid|pgrst|supabase|status \d{3}|code \d+)\b/i
 
-// Postgres includes the offending column/value separately from its main
-// message, e.g. details: 'Key (employee_number)=(EMP-2024-001) already exists.'
-// -- read it when present so the modal can name the actual duplicate instead
-// of a generic "this already exists".
 const DUPLICATE_KEY = /23505|duplicate key/i
 const DUPLICATE_DETAIL = /Key \(([a-z0-9_]+)\)=\(([^)]*)\) already exists/i
 

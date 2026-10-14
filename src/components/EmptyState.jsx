@@ -1,9 +1,6 @@
 import { Link } from 'react-router-dom'
 import './EmptyState.css'
 
-// A helpful empty state: what's missing, why, and what to do. Shared by
-// the student, employee, and admin/head portals so "no data yet" looks
-// the same everywhere instead of each portal inventing its own box.
 export function EmptyState({ icon, title, text, action }) {
     return (
         <div className="ui-empty-state">

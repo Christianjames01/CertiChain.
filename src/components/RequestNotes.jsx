@@ -6,12 +6,6 @@ import { formatDisplayDateTime } from '../lib/formatDate'
 import { useLiveRefresh } from '../lib/useLiveRefresh'
 import './RequestNotes.css'
 
-// Internal notes on a request, shared by the head's and employees' request
-// pages -- e.g. "Assigned employee is absent until Monday, Maria covering".
-// Staff-only: students never see these (see 20260926000000_request_notes).
-// Authors can edit/delete their own notes; `canDeleteAny` (the head) can
-// delete anyone's; anyone on staff can pin a note to keep it on top.
-
 const CATEGORIES = [
     { value: 'general', label: 'General' },
     { value: 'absence', label: 'Absence / coverage' },
@@ -39,7 +33,6 @@ function RequestNotes({ request, cardClassName, canDeleteAny = false }) {
 
     const requestId = request?.request_id
 
-    // Starts with loading=true; later reloads (after a change) update in place.
     const loadNotes = async () => {
         if (!requestId) return
 
@@ -51,7 +44,6 @@ function RequestNotes({ request, cardClassName, canDeleteAny = false }) {
             .order('created_at', { ascending: false })
 
         if (error) {
-            // Table not created yet (migration pending): show a gentle notice.
             if (error.code === 'PGRST205' || error.code === '42P01') setUnavailable(true)
             else console.error('LOAD NOTES ERROR:', error)
         } else {
@@ -68,9 +60,6 @@ function RequestNotes({ request, cardClassName, canDeleteAny = false }) {
 
     useLiveRefresh(['request_notes'], loadNotes)
 
-    // Lets the assigned employee know someone left a note on their request --
-    // skipped when there's no assignee yet, or when they wrote the note
-    // themselves (they don't need to be told about their own note).
     const notifyAssignedEmployee = async (noteBody) => {
         if (!request.assigned_employee_id) return
 

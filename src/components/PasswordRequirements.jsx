@@ -1,7 +1,6 @@
 import { PASSWORD_REQUIREMENTS } from '../lib/passwordStrength'
 import { IconCheck } from './UiIcons'
 
-// Hidden until the user starts typing, then shows each rule ticking off live.
 function PasswordRequirements({ password }) {
     if (!password) return null
 

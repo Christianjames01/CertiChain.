@@ -1,10 +1,3 @@
-// Reference list of Holy Cross of Davao College's actual colleges and
-// programs, used to populate "Add College"/"Add Program" as a dropdown
-// instead of free text -- avoids typos/inconsistent naming when adding
-// one that's already known. Matches what's already seeded in this
-// project's database; extend these two arrays if a genuinely new
-// college or program needs to be addable that isn't listed here yet.
-
 export const HCDC_COLLEGES = [
     { code: 'CCJE', name: 'College of Criminal Justice Education' },
     { code: 'CET', name: 'College of Engineering and Technology' },

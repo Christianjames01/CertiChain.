@@ -2,8 +2,6 @@ import certichainLogo from '../../assets/certichain-logo.png'
 import { Icon } from './icons'
 import { CtaButton, QrMark, Window } from './parts'
 
-// Employee story: an assigned request from receipt to release.
-
 const ROWS = [
     { who: 'JD', name: 'Juan Dela Cruz', req: 'REQ-000124 · Transcript', pill: 'Receipt uploaded', tone: 'blue' },
     { who: 'MS', name: 'Maria Santos', req: 'REQ-000121 · Good Moral', pill: 'Processing', tone: 'amber' },

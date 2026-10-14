@@ -20,10 +20,6 @@
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
-  /* `none` would also block the browser from faking italics on faces with
-     no real italic weight loaded (Inter/Fraunces here only import upright
-     weights) -- `style` keeps weight/small-caps synthesis off but lets
-     italic actually render instead of silently doing nothing. */
   font-synthesis: style;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -54,7 +50,6 @@
   }
 }
 
-
 html[data-theme="dark"] {
   color-scheme: dark;
 }
@@ -66,8 +61,6 @@ html[data-theme="light"] {
 html[data-theme="dark"] .admin-layout,
 html[data-theme="dark"] .employee-layout,
 html[data-theme="dark"] .student-layout {
-  /* Fills (buttons, bubbles, sidebar) keep the brand navy in dark mode;
-     text, borders and chart lines use the lighter accent so they stay readable. */
   --blue: #123B78;
   --blue-accent: #6FA8F5;
   --blue-tint: rgba(111, 168, 245, 0.18);
@@ -84,7 +77,6 @@ html[data-theme="dark"] .student-layout {
   --danger-bg-soft: rgba(255, 107, 129, 0.14);
   --danger-text: #FF8A9B;
 }
-
 
 @media (max-width: 640px) {
 
@@ -113,7 +105,6 @@ html[data-theme="dark"] .student-layout {
     justify-content: center;
   }
 }
-
 
 html,
 body,
@@ -177,7 +168,6 @@ code {
   background: var(--code-bg);
 }
 
-
 @keyframes icon-spinner-spin {
   to {
     transform: rotate(360deg);
@@ -196,12 +186,8 @@ code {
   flex-shrink: 0;
 }
 
-
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
 
-/* Alerts and confirmations (SweetAlert) look like the app's own dialogs
-   (components/Modal.css): brand bar on top, pill buttons, Cancel on the
-   left in neutral, the main action on the right. */
 .swal2-popup {
   position: relative;
   overflow: hidden;
@@ -314,13 +300,11 @@ code {
   background: #123B78 !important;
 }
 
-
 html[data-theme="dark"] .admin-layout .form-input,
 html[data-theme="dark"] .employee-layout .form-input,
 html[data-theme="dark"] .student-layout .form-input {
   background: var(--surface);
 }
-
 
 html[data-theme="dark"] .swal2-popup {
   border-color: rgba(255, 255, 255, 0.14) !important;
@@ -364,7 +348,6 @@ html[data-theme="dark"] .swal2-textarea:focus {
   box-shadow: 0 0 0 3px rgba(111, 168, 245, 0.2) !important;
 }
 
-
 .theme-toggle-fab {
   position: fixed;
   top: 14px;
@@ -391,10 +374,6 @@ html[data-theme="dark"] .swal2-textarea:focus {
   width: 17px;
   height: 17px;
 }
-/* ---- iPhone / touch devices ------------------------------------------
-   iOS Safari zooms the page into any field whose text is under 16px, so
-   fields use 16px on touch screens, and text never inflates in landscape.
-   Alerts fit the visible screen on phones. */
 html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -433,7 +412,6 @@ html {
     }
 }
 
-/* Profile photo inside any round avatar (components/AvatarFace.jsx). */
 .avatar-face-photo {
     width: 100%;
     height: 100%;
@@ -448,7 +426,6 @@ html {
     padding: 0;
 }
 
-/* ---- Walk-in queue: demo button, sample note, moving tickets ------------- */
 .queue-demo-button span {
   font-size: 10px;
 }
@@ -477,7 +454,6 @@ html {
   text-transform: uppercase;
 }
 
-/* A ticket slides in when it lands in a section (e.g. called -> Now Serving). */
 [data-demo="serving"] > [class$="-list-card"],
 [data-demo="waiting"] > [class$="-list-card"],
 [data-demo="history"] > [class$="-list-card"] {
@@ -496,10 +472,6 @@ html {
   }
 }
 
-/* Buttons without their own colour take the surrounding text colour. Without
-   this, a phone/PC in dark mode gives them the browser's white "button text"
-   even when the portal is in light mode -- white text on white cards.
-   :where() keeps this weaker than any class that sets a colour. */
 :where(.student-layout, .employee-layout, .admin-layout) button {
   color: inherit;
 }

@@ -1,9 +1,3 @@
-/* Shared list-page look for the employee and student portals, matching the
-   Registrar Head's pages (see admin/AdminPages.css): summary tiles, cards
-   with hover and tiled details, avatars, footer actions, search with an
-   icon, chip counts and section titles. Uses each portal's theme tokens. */
-
-/* ---- Summary tiles (components/PageStats.jsx) ---------------------- */
 .page-stats {
     margin-bottom: 22px;
 }
@@ -18,7 +12,6 @@
     transform: none;
 }
 
-/* ---- List cards ------------------------------------------------------ */
 .employee-list-card,
 .student-list-card {
     border-radius: 14px;
@@ -52,7 +45,6 @@
     text-transform: uppercase;
 }
 
-/* ---- Title row with an avatar / icon --------------------------------- */
 .ui-card-title {
     display: flex;
     align-items: flex-start;
@@ -92,7 +84,6 @@
     height: 20px;
 }
 
-/* ---- Footer actions --------------------------------------------------- */
 .ui-card-actions {
     display: flex;
     flex-wrap: wrap;
@@ -131,7 +122,6 @@
     cursor: not-allowed;
 }
 
-/* ---- Toolbar: search with icon + chips -------------------------------- */
 .ui-toolbar {
     display: flex;
     align-items: center;
@@ -184,7 +174,6 @@
     color: var(--blue-accent, var(--blue));
 }
 
-/* ---- Walk-in queue number badge ---------------------------------------- */
 .ui-queue-badge {
     display: inline-flex;
     align-items: center;
@@ -218,7 +207,6 @@
     color: var(--slate);
 }
 
-/* ---- Activity log rows ------------------------------------------------ */
 .ui-log-action {
     display: inline-block;
     padding: 3px 10px;
@@ -231,7 +219,6 @@
     white-space: nowrap;
 }
 
-/* ---- Header card on detail pages ---------------------------------------- */
 .ui-detail-hero {
     position: relative;
     display: flex;
@@ -330,7 +317,6 @@
     }
 }
 
-/* ---- Date badge ("SEP / 29") on claiming cards ---------------------------- */
 .ui-date-badge {
     display: flex;
     flex-direction: column;
@@ -371,9 +357,6 @@
     background: var(--success-text, #1e8a5f);
 }
 
-/* Phones: a header with a status pill puts the document image and the
-   pill on the first row and the title/details full width below, instead
-   of squeezing the title between them. */
 @media (max-width: 640px) {
     .ui-detail-hero:has(> [class*="status-pill"]) {
         flex-wrap: wrap;
@@ -398,8 +381,6 @@
     }
 }
 
-/* Phones: list card details two per row (an odd last one spans the row)
-   instead of one tall stack per card. */
 @media (max-width: 640px) {
     .employee-list-card .employee-info-grid,
     .student-list-card .student-info-grid {

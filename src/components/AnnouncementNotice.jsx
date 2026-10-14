@@ -10,9 +10,6 @@ const TONE_LABEL = {
     general: 'Announcement',
 }
 
-// The student-facing announcement banner. Also rendered inside the admin
-// editor as a live preview, so what admins see there is exactly what
-// students get on their dashboard.
 function AnnouncementNotice({ announcement, titleFallback, messageFallback }) {
     const tone = announcementTone(announcement)
     const titleHtml = sanitizeAnnouncementHtml(announcement.title) || titleFallback || ''

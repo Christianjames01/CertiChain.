@@ -2,10 +2,6 @@ import { useEffect, useRef } from 'react'
 import CaptchaCheck from './CaptchaCheck'
 import './CaptchaCheck.css'
 
-// Pop-up with the slide-puzzle security check, opened by getCaptchaToken()
-// (lib/captcha.js) when the user presses Log in / Create account / Send
-// reset link, so the forms themselves stay clean. onDone(token) once it's
-// solved and verified, onDone(null) if the user closes it.
 function CaptchaPrompt({ onDone }) {
     const doneRef = useRef(false)
 
@@ -37,7 +33,6 @@ function CaptchaPrompt({ onDone }) {
                 </button>
                 <CaptchaCheck
                     onToken={(token) => {
-                        // Show "Verified" for a moment, then continue.
                         if (token) setTimeout(() => finish(token), 700)
                     }}
                 />

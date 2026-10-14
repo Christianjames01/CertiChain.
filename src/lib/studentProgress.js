@@ -1,15 +1,3 @@
-// What a request means for the STUDENT, in plain words: where it is on the
-// six-step journey, what's happening now, what (if anything) they need to do,
-// and what comes next. Used by the dashboard, My Requests and the request
-// page so every screen answers the same four questions the same way.
-//
-// describeRequest(request, extras?)
-//   request: { request_id, status, auto_rejected_at?, rejection_reason? }
-//   extras (optional, when the page knows them):
-//     requirements: [{ status }]  -- request_requirements rows
-//     schedule: { claim_date|scheduled_date, claim_time|scheduled_time, status }
-//     credential: { credential_number, status }
-
 export const PROGRESS_STEPS = [
     { key: 'submitted', label: 'Request submitted' },
     { key: 'payment', label: 'Payment & requirements' },
@@ -35,18 +23,6 @@ function formatTime(time) {
     return d.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })
 }
 
-/**
- * Returns {
- *   step: 0..5 current step index (null when stopped),
- *   stopped: 'cancelled' | 'rejected' | null,
- *   statusLabel: short friendly status,
- *   tone: 'action' | 'waiting' | 'success' | 'stopped',
- *   now: "What's happening now?",
- *   todo: "What should I do?" (string),
- *   action: { label, to } | null  -- the button when the student must act,
- *   next: "What happens next?",
- * }
- */
 export function describeRequest(request, { requirements = null, schedule = null, credential = null } = {}) {
     const id = request?.request_id
     const status = request?.status
@@ -190,7 +166,6 @@ export function describeRequest(request, { requirements = null, schedule = null,
     }
 }
 
-// Statuses that count as "active" (not finished).
 export const ACTIVE_STATUSES = ['pending', 'payment_pending', 'receipt_uploaded', 'receipt_verified', 'processing', 'lacking_requirements', 'ready_for_claiming']
 
 export const needsAction = (request, extras) => describeRequest(request, extras).tone === 'action'

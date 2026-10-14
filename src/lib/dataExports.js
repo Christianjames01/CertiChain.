@@ -1,8 +1,3 @@
-// Super Admin "Data Export" page: manual, on-demand exports of whole tables
-// for record-keeping. Not a backup system -- there is no automated/scheduled
-// job and no restore path. Reuses downloadExcelReport's existing navy-header
-// convention (src/lib/reportExport.js), same as employeeBackup.js/
-// studentBackup.js/requestBackup.js, but for every row instead of one.
 import { supabase } from './supabase'
 import { downloadExcelReport } from './reportExport'
 
@@ -173,9 +168,6 @@ export async function exportAllRequests() {
 }
 
 export async function exportAllCredentials() {
-    // Deliberately excludes the `signature` column -- it's not secret, just
-    // not relevant to a records export; integrity status is covered by the
-    // Security Center's own tooling, not this page.
     const { data: credentials } = await supabase
         .from('credentials')
         .select('credential_number, status, student_id, document_type_id, generated_at, released_at, revoked_at, revocation_reason')

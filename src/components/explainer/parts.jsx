@@ -1,6 +1,3 @@
-// Building blocks shared by the explainer scenes.
-
-// A small app window: traffic-light dots, a title and a body.
 export function Window({ title, children, className = '' }) {
     return (
         <div className={`lpx-window ${className}`}>
@@ -10,8 +7,6 @@ export function Window({ title, children, className = '' }) {
     )
 }
 
-// A decorative, QR-looking pattern: three finder squares plus a fixed
-// pseudo-random fill (same every render).
 const QR_N = 21
 const QR_CELLS = (() => {
     const finder = (x, y) => {
@@ -47,7 +42,6 @@ export function QrMark({ size = 64 }) {
     )
 }
 
-// The last scene's buttons: a link (href) or an action (onClick).
 export function CtaButton({ action, className }) {
     if (!action) return null
     return action.href

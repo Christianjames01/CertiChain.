@@ -31,8 +31,6 @@ function RequireFullEmployeeAccess({ children }) {
         setLoading(false)
     }
 
-    // Re-check when the head changes this employee's access, so a page
-    // they lose access to sends them to the dashboard right away.
     useLiveRefresh(['employees', 'notifications'], () => checkAccess())
 
     if (loading) {

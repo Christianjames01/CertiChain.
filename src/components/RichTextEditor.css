@@ -15,8 +15,6 @@
     opacity: 0.65;
 }
 
-/* ---------- Toolbar ---------- */
-
 .rich-text-toolbar {
     display: flex;
     align-items: center;
@@ -89,8 +87,6 @@
     cursor: not-allowed;
 }
 
-/* ---------- Size dropdown ---------- */
-
 .rich-text-select-wrap {
     position: relative;
     display: inline-flex;
@@ -158,8 +154,6 @@
     color: var(--ink);
     background: var(--surface);
 }
-
-/* ---------- Text color (split button + popover) ---------- */
 
 .rich-text-color {
     position: relative;
@@ -277,8 +271,6 @@
     cursor: pointer;
 }
 
-/* ---------- Editable area ---------- */
-
 .rich-text-body {
     min-height: 120px;
     max-height: 320px;
@@ -313,8 +305,6 @@
     padding-left: 22px;
 }
 
-/* Browsers leave a stray <br> behind after clearing a contentEditable, so
-   :empty alone misses it -- the component also flags emptiness itself. */
 .rich-text-editor.is-empty .rich-text-body {
     position: relative;
 }

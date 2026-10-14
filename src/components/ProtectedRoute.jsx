@@ -15,8 +15,6 @@ function ProtectedRoute({ children, allowedRoles }) {
         checkUser()
     }, [])
 
-    // Lets the superadmin's console show who is online right now. Runs for
-    // every signed-in, active account -- it only ever records the caller.
     usePresenceHeartbeat(profile?.status === 'active')
 
     const checkUser = async () => {

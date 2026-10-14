@@ -3,15 +3,6 @@ import { supabase } from './supabase'
 import { getCaptchaToken } from './captcha'
 import { notifyError } from './notify'
 
-// Asks the signed-in staff member to re-enter their password before a
-// sensitive manual action (e.g. manually changing a request's status), and
-// checks it with the server. Returns true only when the password is correct.
-//
-// The check runs in the database (verify_my_password -- no sign-in, so no
-// Cloudflare security check). Until that migration is applied it falls back
-// to a normal sign-in, which does need the security check.
-
-// Supabase's "function doesn't exist" answer.
 const missingFunction = (error) => error?.code === 'PGRST202'
     || (/verify_my_password/i.test(error?.message || '') && /not find|does not exist/i.test(error?.message || ''))
 

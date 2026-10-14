@@ -2,9 +2,6 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import PageLoading from './components/PageLoading'
 
-// Each page is downloaded the first time it's opened (code splitting), so
-// signing in doesn't mean downloading every page of every portal.
-
 import ProtectedRoute from './components/ProtectedRoute'
 import RequireFullEmployeeAccess from './components/RequireFullEmployeeAccess'
 import RequireCanAddEmployees from './components/RequireCanAddEmployees'
@@ -102,8 +99,6 @@ const SuperAdminSecurity = lazy(() => import('./pages/superadmin/SuperAdminSecur
 const SuperAdminSystemHealth = lazy(() => import('./pages/superadmin/SuperAdminSystemHealth'))
 const SuperAdminDataExport = lazy(() => import('./pages/superadmin/SuperAdminDataExport'))
 
-// Pages shared by the system admin and the registrar head. Paths are relative
-// to the portal (/admin or /head).
 const PORTAL_PAGES = [
     ['/dashboard', <AdminDashboard />],
     ['/requests', <AllRequests />],
@@ -223,13 +218,9 @@ function App() {
           element={<VerifyCredential />}
         />
 
-        {/* Public narrated 3D walkthrough of the workflow (capstone defense /
-            system demo). */}
         <Route path="/system-workflow" element={<SystemWorkflow />} />
         <Route path="/showreel" element={<Showreel />} />
 
-        {/* Standalone, no portal sidebar -- meant to be opened full-screen
-            on a lobby TV/monitor and left running. */}
         <Route
           path="/queue-display"
           element={
@@ -426,8 +417,6 @@ function App() {
 
         </Route>
 
-        {/* The system admin (/admin) and the registrar head (/head) share the
-            same portal pages; each portal has its own guard below. */}
         <Route
           element={
             <ProtectedRoute allowedRoles={['admin']}>

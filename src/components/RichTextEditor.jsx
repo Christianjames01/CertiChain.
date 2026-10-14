@@ -7,8 +7,6 @@ const COLORS = [
     '#1E8A5F', '#123B78', '#6FA8F5', '#8A1F2B',
 ]
 
-// Real pixel sizes rather than vague labels -- 14px matches the editor's own
-// default body text, so it's included as the implicit "normal" size.
 const SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 40]
 
 const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform)
@@ -41,15 +39,6 @@ function plainText(html) {
     return (html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim()
 }
 
-// A minimal formatting toolbar over a contentEditable div, so the registrar
-// head can bold/italicize/underline/color/size announcement text without a
-// heavy rich-text library. Uses the (deprecated but universally supported)
-// execCommand API -- acceptable here since this is a small internal admin
-// tool, not a product-facing editor. The resulting HTML is untrusted and
-// must be sanitized (see lib/sanitizeHtml.js) before it's stored or shown.
-//
-// `singleLine` is for short fields like a title: Enter is ignored and the
-// list buttons are hidden.
 function RichTextEditor({ value, onChange, disabled, placeholder, editorKey, id, ariaLabel, singleLine = false, showCount = false }) {
     const ref = useRef(null)
     const savedRange = useRef(null)
@@ -60,24 +49,14 @@ function RichTextEditor({ value, onChange, disabled, placeholder, editorKey, id,
     const [lastColor, setLastColor] = useState(COLORS[2])
     const [text, setText] = useState(() => plainText(value))
 
-    // Only set innerHTML on mount (and when `editorKey` changes, e.g.
-    // switching from "new" to editing a different announcement) -- doing
-    // it on every value change would fight the browser's own cursor
-    // position while typing.
     useEffect(() => {
         if (ref.current) {
-            // Cleaned like everywhere else announcements are shown.
             ref.current.innerHTML = sanitizeAnnouncementHtml(value || '')
             setText(plainText(value))
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorKey])
 
-    // Reflect whatever formatting is active right where the cursor/selection
-    // currently sits, the same way a real editor's toolbar highlights the
-    // active buttons. Also remember the selection, because using the size
-    // dropdown or color input moves focus out of the editor and would
-    // otherwise lose which text the admin had highlighted.
     useEffect(() => {
         const handleSelectionChange = () => {
             const selection = document.getSelection()
@@ -99,7 +78,6 @@ function RichTextEditor({ value, onChange, disabled, placeholder, editorKey, id,
         return () => document.removeEventListener('selectionchange', handleSelectionChange)
     }, [])
 
-    // Close the color menu on outside click or Escape.
     useEffect(() => {
         if (!colorOpen) return
 
@@ -148,10 +126,6 @@ function RichTextEditor({ value, onChange, disabled, placeholder, editorKey, id,
         exec('foreColor', hex)
     }
 
-    // execCommand('fontSize', ...) only understands the legacy 1-7 <font>
-    // scale, not real pixel numbers -- apply size 7 as a marker, then swap
-    // every resulting <font size="7"> for a <span style="font-size:Npx">
-    // so the dropdown's numbers are the actual rendered size, not a guess.
     const applyFontSize = (px) => {
         if (disabled) return
         restoreSelection()
@@ -165,9 +139,6 @@ function RichTextEditor({ value, onChange, disabled, placeholder, editorKey, id,
         emitChange()
     }
 
-    // Pasting from Word, Google Docs, or a web page drags in fonts, classes,
-    // and layout markup the sanitizer would mostly strip anyway -- paste
-    // plain text and let the admin format it with the toolbar instead.
     const handlePaste = (e) => {
         e.preventDefault()
         let pasted = e.clipboardData.getData('text/plain')
@@ -179,8 +150,6 @@ function RichTextEditor({ value, onChange, disabled, placeholder, editorKey, id,
         if (singleLine && e.key === 'Enter') e.preventDefault()
     }
 
-    // Keep focus (and the selection) inside the editor when a toolbar button
-    // is pressed, instead of letting the button steal it.
     const keepFocus = (e) => e.preventDefault()
 
     const toolButton = ({ command, mark, label, shortcut, icon }) => (

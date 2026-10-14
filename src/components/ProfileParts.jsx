@@ -1,10 +1,6 @@
 import { IconPencil } from './UiIcons'
 import './ProfileUi.css'
 
-// Shared building blocks for the Profile page of every portal (student,
-// employee, Registrar Head), in the same style as the detail pages: a header
-// card with the photo, section cards with an icon, and fields as tiles.
-
 export const IconShield = () => (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 3 5 6v5.5c0 4.2 2.9 7.8 7 9.5 4.1-1.7 7-5.3 7-9.5V6Z" />
@@ -27,8 +23,6 @@ export const IconKey = () => (
     </svg>
 )
 
-// The top card: photo (with a change button when onChangePhoto is given),
-// name, a line under it and small tags.
 export function ProfileHero({ photoUrl, name, initials, eyebrow, subtitle, tags = [], onChangePhoto, uploading = false }) {
     return (
         <section className="pf-hero">
@@ -69,8 +63,6 @@ export function ProfileHero({ photoUrl, name, initials, eyebrow, subtitle, tags 
     )
 }
 
-// A card with an icon, a title (and optional line under it) and an optional
-// button on the right.
 export function ProfileSection({ icon: Icon, title, subtitle, actionLabel, onAction, children }) {
     return (
         <section className="pf-card">
@@ -91,7 +83,6 @@ export function ProfileSection({ icon: Icon, title, subtitle, actionLabel, onAct
     )
 }
 
-// Label/value tiles. An empty value shows "Not set" in grey.
 export function ProfileFields({ fields }) {
     return (
         <div className="pf-fields">
@@ -107,7 +98,6 @@ export function ProfileFields({ fields }) {
     )
 }
 
-// One row in the "Sign-in & security" card.
 export function SecurityRow({ icon: Icon, title, text, actionLabel, onAction, actionDisabled = false, children }) {
     return (
         <div className="pf-row">

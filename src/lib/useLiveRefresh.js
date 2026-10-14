@@ -1,18 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { supabase } from './supabase'
 
-// Keeps a list/dashboard page up to date without a manual reload.
-//
-//   useLiveRefresh(['document_requests'], loadRequests)
-//
-// `refresh` is called as refresh({ silent: true }) -- pages use that to skip
-// their loading skeleton so the list just updates in place. It runs:
-//   - shortly after any change to the given tables (Supabase Realtime; RLS
-//     means each user only hears about rows they can see). A burst of
-//     changes is batched into one reload.
-//   - when the tab becomes visible again, in case changes were missed.
-//   - every POLL_MS while visible, as a safety net if Realtime is down or
-//     the table isn't in the realtime publication yet.
 const DEBOUNCE_MS = 700
 const POLL_MS = 60_000
 

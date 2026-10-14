@@ -1,9 +1,6 @@
 import { Icon } from './icons'
 import { Window } from './parts'
 
-// Registrar Head story: overview, assignment, publishing, office days,
-// oversight.
-
 const TILES = [
     { label: 'Requests', value: '128', tone: 'blue' },
     { label: 'Pending', value: '12', tone: 'amber' },

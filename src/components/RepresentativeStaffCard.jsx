@@ -12,12 +12,8 @@ import {
 import DocumentPreviewModal from './DocumentPreviewModal'
 import './Representative.css'
 
-// Staff side (head and employees): review the student's authorized
-// representative -- the signed letter and the valid ID each approved or
-// rejected on their own -- and see who is allowed to claim.
 function RepresentativeStaffCard({ request, cardClassName }) {
     const [representative, setRepresentative] = useState(null)
-    // Representatives the student removed (newest first).
     const [removals, setRemovals] = useState([])
     const [loaded, setLoaded] = useState(false)
     const [saving, setSaving] = useState(false)
@@ -56,7 +52,6 @@ function RepresentativeStaffCard({ request, cardClassName }) {
         </>
     )
 
-    // No representative now, but the student removed one: say so.
     if (!representative) {
         if (removals.length === 0) return null
         return (
@@ -133,7 +128,6 @@ function RepresentativeStaffCard({ request, cardClassName }) {
         return isConfirmed ? value.trim() : null
     }
 
-    // One file: approve, or reject with a reason.
     const reviewFile = async (file, status) => {
         let note = null
         if (status === 'rejected') {
@@ -169,7 +163,6 @@ function RepresentativeStaffCard({ request, cardClassName }) {
         )
     }
 
-    // Before the per-file migration: the old whole-representative review.
     const rejectWhole = async () => {
         const note = await askReason('representative')
         if (!note) return

@@ -3,10 +3,6 @@ import ExplainerPlayer from './explainer/ExplainerPlayer'
 import { EMPLOYEE_SCENES, HEAD_SCENES, STUDENT_SCENES } from './explainer/sceneLists'
 import './UserGuide.css'
 
-// In-app user manual: a short motion walkthrough for the role, then
-// searchable, collapsible sections with numbered steps. Content lives in
-// lib/userGuideContent.js; each portal passes its own.
-
 const WALKTHROUGHS = {
     student: { scenes: STUDENT_SCENES, label: 'How requesting a document works' },
     employee: { scenes: EMPLOYEE_SCENES, label: 'How handling a request works' },

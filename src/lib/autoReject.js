@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabase'
 
-// Requests the student never acts on are rejected automatically, and removed
-// later (20260929070000_auto_reject_flagged_requests,
-// 20260930010000_auto_reject_unpaid_requests):
-//   flagged -- Lacking Requirements, nothing uploaded since the flag;
-//   unpaid  -- Pending / Payment Pending, no receipt and nothing uploaded.
-// Only requests with no official receipt on file.
 export const AUTO_REJECT_DAYS = 7
 export const AUTO_DELETE_DAYS = 7
 
@@ -19,12 +13,10 @@ function kindOf(request) {
     return null
 }
 
-// { kind, since, rejectOn, deleteOn } for the request page notices.
 export function useAutoReject(request) {
     const kind = kindOf(request)
     const requestId = request?.request_id
     const version = request?.updated_at
-    // Whether a receipt is on file (then the rule doesn't apply).
     const [receiptCheck, setReceiptCheck] = useState({ key: null, has: false })
     const key = kind ? `${requestId}:${version}` : null
 

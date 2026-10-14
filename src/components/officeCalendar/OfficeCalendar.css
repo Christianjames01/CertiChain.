@@ -1,8 +1,3 @@
-/* ===================================================
-   OFFICE CALENDAR -- shared by the admin and employee portals.
-   Theme colors come from the portal layout's variables.
-=================================================== */
-
 .ocal-layout {
     --ocal-event: var(--warning-text, #B45309);
     --ocal-event-bg: var(--warning-bg, rgba(255, 193, 7, 0.18));
@@ -18,8 +13,6 @@
     align-items: start;
     margin-top: 20px;
 }
-
-/* ---------- Shared bits ---------- */
 
 .ocal-count {
     display: inline-flex;
@@ -106,8 +99,6 @@
 .ocal-dot.is-event { background: var(--ocal-event, var(--warning-text, #B45309)); }
 .ocal-dot.is-open { background: var(--ocal-open, var(--blue-accent, var(--blue))); }
 .ocal-dot.is-claim { background: var(--ocal-claim, var(--success-text, #1e8a5f)); }
-
-/* ---------- Sidebar ---------- */
 
 .ocal-sidebar {
     position: sticky;
@@ -259,14 +250,11 @@
     opacity: 1;
 }
 
-/* Touch screens have no hover -- keep the remove button visible. */
 @media (hover: none) {
     .ocal-upcoming-remove {
         opacity: 1;
     }
 }
-
-/* ---------- Month panel ---------- */
 
 .ocal-main {
     min-width: 0;
@@ -347,8 +335,6 @@
     background: var(--danger-bg-soft, rgba(200, 16, 46, 0.08));
     color: var(--danger-text, var(--red));
 }
-
-/* ---------- Grid ---------- */
 
 .ocal-grid {
     display: grid;
@@ -516,8 +502,6 @@
     display: none;
 }
 
-/* ---------- Legend ---------- */
-
 .ocal-legend {
     display: flex;
     flex-wrap: wrap;
@@ -553,8 +537,6 @@
     border-radius: 50%;
     background: var(--ocal-today);
 }
-
-/* ---------- Day & range modals ---------- */
 
 .ocal-day {
     display: flex;
@@ -836,8 +818,6 @@
     }
 }
 
-/* ---------- Responsive ---------- */
-
 @media (max-width: 1100px) {
     .ocal-layout {
         grid-template-columns: 250px minmax(0, 1fr);
@@ -849,7 +829,6 @@
         grid-template-columns: 1fr;
     }
 
-    /* Month first on smaller screens; the look-ahead follows. */
     .ocal-sidebar {
         order: 2;
         position: static;
@@ -933,8 +912,6 @@
     }
 }
 
-/* ---------- Upcoming Claiming (sidebar, below Coming up) ---------- */
-
 .ocal-sidebar-head.ocal-sidebar-head-section {
     margin-top: 18px;
     padding-top: 16px;
@@ -946,7 +923,6 @@
     --item-bg: var(--ocal-claim-bg);
 }
 
-/* ---- Office hours picker (HoursPicker.jsx) ------------------------------ */
 .hours-picker {
     display: flex;
     flex-direction: column;
@@ -1039,8 +1015,6 @@
     margin: 6px 0 10px;
 }
 
-/* ---- System look (same cards, icon tiles and pill buttons as the detail
-   and Profile pages) ------------------------------------------------------ */
 .ocal-sidebar,
 .ocal-main {
     border-radius: 16px;
@@ -1150,18 +1124,11 @@
     }
 }
 
-/* Summary tiles under the page header. */
 .admin-page-header-row + .page-stats,
 .employee-page-header-row + .page-stats {
     margin-top: 22px;
 }
 
-/* =====================================================================
-   REDESIGN -- same markup and behaviour, new look. Later rules override
-   the ones above.
-===================================================================== */
-
-/* ---- Month panel -------------------------------------------------------- */
 .ocal-main {
     position: relative;
     overflow: hidden;
@@ -1202,7 +1169,6 @@
     color: var(--slate);
 }
 
-/* Previous / Today / Next as one segmented pill. */
 .ocal-nav {
     gap: 0;
     padding: 3px;
@@ -1243,7 +1209,6 @@
     color: var(--slate);
 }
 
-/* ---- Grid: one connected calendar ---------------------------------------- */
 .ocal-grid {
     gap: 1px;
     overflow: hidden;
@@ -1323,7 +1288,6 @@
     border-color: transparent;
 }
 
-/* Today: red line along the top and a red day number. */
 .ocal-cell.is-today {
     box-shadow: inset 0 3px 0 var(--ocal-today);
 }
@@ -1352,7 +1316,6 @@
     box-shadow: inset 0 0 0 1px var(--line);
 }
 
-/* Day tags: rounded, with a coloured dot. */
 .ocal-chips {
     gap: 4px;
     margin-top: 2px;
@@ -1390,7 +1353,6 @@
     color: var(--blue-accent, var(--blue));
 }
 
-/* ---- Legend as chips ----------------------------------------------------- */
 .ocal-legend {
     gap: 8px;
     margin-top: 16px;
@@ -1430,7 +1392,6 @@
     margin: 2px;
 }
 
-/* ---- Sidebar: timeline rows ---------------------------------------------- */
 .ocal-sidebar {
     box-shadow: 0 18px 40px -32px rgba(16, 24, 39, 0.45);
 }
@@ -1496,7 +1457,6 @@
     background: var(--paper);
 }
 
-/* ---- Day and range dialogs ----------------------------------------------- */
 .ocal-day {
     gap: 20px;
 }
@@ -1583,7 +1543,6 @@
     border-radius: 14px;
 }
 
-/* ---- Phones -------------------------------------------------------------- */
 @media (max-width: 640px) {
     .ocal-main {
         padding: 20px 12px 14px;

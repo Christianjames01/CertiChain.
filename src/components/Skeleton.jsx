@@ -1,9 +1,5 @@
 import './Skeleton.css'
 
-// Shared loading placeholders for every role (admin, employee, student).
-// Each group is wrapped in a live region so screen readers announce
-// "Loading…" once, while the shimmer blocks themselves stay hidden from them.
-
 function LoadingRegion({ label = 'Loading…', className = '', children, style }) {
     return (
         <div className={`skeleton-region ${className}`} role="status" aria-live="polite" aria-busy="true" style={style}>
@@ -54,7 +50,6 @@ export function SkeletonStatGrid({
     )
 }
 
-// Varying widths so a stack of cards reads like real content, not a grid of clones.
 const TITLE_WIDTHS = ['48%', '38%', '56%', '42%', '52%']
 const SUBTITLE_WIDTHS = ['28%', '34%', '22%', '30%', '26%']
 
@@ -132,8 +127,6 @@ export function SkeletonDetailCard({ fields = 6 }) {
     )
 }
 
-// Page body placeholder: header, a detail card and a short list. Used where a
-// whole page is still deciding what to show (e.g. access checks).
 export function SkeletonPageContent() {
     return (
         <div className="skeleton-page-content">
@@ -144,9 +137,6 @@ export function SkeletonPageContent() {
     )
 }
 
-// Full-screen app shell (sidebar + content) shown while the signed-in
-// user's role and account status are being checked, before any portal
-// layout has rendered.
 export function SkeletonAppShell() {
     return (
         <div className="skeleton-app-shell">
@@ -173,15 +163,6 @@ export function SkeletonAppShell() {
         </div>
     )
 }
-
-// ---------------------------------------------------------------------------
-// Layout-matched page skeletons.
-//
-// Each page describes its own layout as a list of blocks, and the skeleton is
-// built from that portal's real classes (admin-card, employee-info-grid,
-// student-list-card, ...), so the placeholder has the same spacing, borders
-// and columns as the page that replaces it -- nothing jumps when data lands.
-// ---------------------------------------------------------------------------
 
 const FIELD_VALUE_WIDTHS = ['80%', '62%', '90%', '70%', '55%', '84%']
 
@@ -340,9 +321,6 @@ function SkeletonListBlock({ portal, block }) {
 
 const CELL_WIDTHS = ['72%', '54%', '86%', '46%', '64%', '58%']
 
-// A placeholder table drawn with the portal's real table classes, for list
-// pages that render a table (logs, issued certificates, course lists, ...).
-// columns: number of columns, or their header labels (shown as-is).
 export function SkeletonTable({ portal = 'admin', columns = 4, rows = 5, wrapperStyle }) {
     const heads = Array.isArray(columns) ? columns : Array.from({ length: columns }, () => null)
     return (
@@ -371,8 +349,6 @@ export function SkeletonTable({ portal = 'admin', columns = 4, rows = 5, wrapper
     )
 }
 
-// The profile-style details page (components/ProfileParts): hero, stat
-// tiles, then two columns of field cards.
 function SkeletonProfilePageBlock({ block }) {
     const { stats = 4, left = [8, 9], right = [2] } = block
     const card = (fields, key, rowsInsteadOfFields = false) => (
@@ -448,16 +424,6 @@ function SkeletonProfilePageBlock({ block }) {
     )
 }
 
-/**
- * blocks: an array of
- *   { type: 'back' }
- *   { type: 'header', avatar?, subtitle?, action?, titleWidth? }
- *   { type: 'profile' }
- *   { type: 'card', title?, action?, pill?, fields?, factRows?, lines?, buttons?, rows?, media? }
- *   { type: 'list', title?, count?, fields?, action? }
- *   { type: 'profilePage', stats?, left?: [fieldCounts], right?: [rowCounts] }
- *   { type: 'table', title?, columns?, rows? }
- */
 export function SkeletonPage({ portal, blocks }) {
     return (
         <LoadingRegion label="Loading page…">
@@ -485,15 +451,9 @@ export function SkeletonPage({ portal, blocks }) {
     )
 }
 
-// ---------------------------------------------------------------------------
-// Dashboard skeleton, shaped like the real tiles and charts in
-// components/DashboardStats.css and pages/admin/DashboardCharts.css.
-// ---------------------------------------------------------------------------
-
 const COLUMN_HEIGHTS = [35, 20, 55, 30, 70, 25, 45, 60, 40, 85, 50, 30, 65, 45]
 
 export function SkeletonDashboard({ portal = 'admin', alerts = 0, overview = 3, status = 5, charts = true, quickLinks = 0, twoCol = false, list = 0, listsFirst = false, headerLinks = 0 }) {
-    // Built as pieces so the order can follow each dashboard's real layout.
     const chartsEl = charts ? (
             <div className="dash-charts-grid">
                 <div className="dash-chart-card skeleton-card">

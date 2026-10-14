@@ -1,8 +1,5 @@
 import { supabase } from './supabase'
 
-// Student display info for request/claim lists: student_id -> { name, number }.
-// Names live on profiles (by user_id), numbers on students, so this is two
-// lookups. Missing rows just fall back to the student number.
 export async function loadStudentsById(studentIds) {
     const ids = [...new Set((studentIds || []).filter(Boolean))]
     if (ids.length === 0) return {}

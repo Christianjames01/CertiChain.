@@ -19,19 +19,13 @@ import './OfficeCalendar.css'
 
 const WEEKDAY_HEADS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-// Chips shown inside a day cell before collapsing the rest into "+N more",
-// so busy days don't stretch the whole week's row.
 const MAX_CELL_CHIPS = 2
 
-// How many "Coming up" entries to show before the "Show all" toggle.
 const UPCOMING_PREVIEW = 6
 
-// "Upcoming Claiming": how many days to list before "Show all", and how
-// many students to name per day before "+N more".
 const CLAIM_DAYS_PREVIEW = 5
 const CLAIM_NAMES_PER_DAY = 3
 
-// Claim appointments still ahead (not claimed, missed, or cancelled).
 const INACTIVE_CLAIM_STATUSES = ['claimed', 'missed', 'cancelled', 'completed']
 
 const ChevronLeft = () => (
@@ -66,8 +60,6 @@ function plural(n, word) {
     return `${n} ${word}${n === 1 ? '' : 's'}`
 }
 
-// Sidebar + month grid for the Office Calendar. Purely presentational: the
-// admin and employee pages own the data, scoping, and every mutation.
 function CalendarBoard({
     loading,
     error,
@@ -107,8 +99,6 @@ function CalendarBoard({
         return { eventDays, openDays, claims }
     }, [monthGrid, eventsByDate, openDaysByDate, claimSchedulesByDate])
 
-    // One "Coming up" timeline: range events collapsed into a single entry,
-    // plus Monday/weekend open days, in date order.
     const upcoming = useMemo(() => {
         const eventItems = groupConsecutiveEvents(upcomingEvents).map((g) => ({
             type: 'event',
@@ -133,7 +123,6 @@ function CalendarBoard({
 
     const visibleUpcoming = showAllUpcoming ? upcoming : upcoming.slice(0, UPCOMING_PREVIEW)
 
-    // Upcoming claiming days, soonest first, each with its appointments by time.
     const upcomingClaimDays = useMemo(() => Object.entries(claimSchedulesByDate)
         .filter(([date]) => date >= today)
         .map(([date, list]) => ({
@@ -148,7 +137,6 @@ function CalendarBoard({
     const [showAllClaimDays, setShowAllClaimDays] = useState(false)
     const [studentsById, setStudentsById] = useState({})
 
-    // Names for the students on upcoming claim days.
     useEffect(() => {
         const ids = upcomingClaimDays.flatMap((d) => d.claims.map((cs) => cs.student_id)).filter(Boolean)
         if (ids.length === 0) return undefined
@@ -268,7 +256,6 @@ function CalendarBoard({
                     {hiddenCount > 0 && <span className="ocal-chip-more">+{hiddenCount} more</span>}
                 </span>
 
-                {/* Phones have no room for text chips -- show one dot per kind. */}
                 {chips.length > 0 && (
                     <span className="ocal-dots" aria-hidden="true">
                         {openEntry && <span className="ocal-dot is-open" />}

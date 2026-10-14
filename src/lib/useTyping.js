@@ -1,24 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from './supabase'
 
-// "… is typing" for the Messages pages, over Supabase Realtime broadcast
-// (nothing is stored). Everyone listens on their own `typing:<userId>`
-// channel; while typing, a page pings each person in the conversation on
-// theirs. A ping lasts a few seconds, so a closed tab or lost connection
-// clears itself.
-//
-//   const { typingUserIds, sendTyping } = useTyping(myUserId)
-//   sendTyping([recipientId, ...])          // on every keystroke (throttled)
-//   sendTyping([recipientId, ...], false)   // after sending / clearing
 const SHOW_MS = 5000
 const RESEND_MS = 2500
 
 const topicFor = (userId) => `typing:${userId}`
 
 export function useTyping(selfId) {
-    const [typing, setTyping] = useState({}) // userId -> shown until (ms)
-    const outgoing = useRef({}) // recipientId -> { channel, ready }
-    const lastSent = useRef({}) // recipientId -> ms
+    const [typing, setTyping] = useState({})
+    const outgoing = useRef({})
+    const lastSent = useRef({})
 
     useEffect(() => {
         if (!selfId) return undefined

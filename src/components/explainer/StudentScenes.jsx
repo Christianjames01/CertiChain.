@@ -2,10 +2,6 @@ import certichainLogo from '../../assets/certichain-logo.png'
 import { Icon } from './icons'
 import { CtaButton, Window } from './parts'
 
-// Student story scenes, one per stage of the real request journey:
-// Submitted -> Payment & requirements -> Registrar review -> Processing ->
-// Ready for release -> Completed (the same six steps the student portal shows).
-
 export function SceneIntro() {
     return (
         <div className="lpx-scene lpx-intro">
@@ -148,7 +144,6 @@ export function ScenePayment() {
 
 const JOURNEY = ['Submitted', 'Payment & requirements', 'Registrar review', 'Processing', 'Ready for release', 'Completed']
 
-// The request as it shows on My Requests: document, number and status pill.
 function TrackHead({ status, done = false }) {
     return (
         <div className="lpx-track-head">
@@ -159,8 +154,6 @@ function TrackHead({ status, done = false }) {
     )
 }
 
-// The six steps from the student's request page: earlier steps done, the
-// current one highlighted; once completed, every step is done.
 function StepTrack({ current }) {
     return (
         <ol className="lpx-journey is-static">

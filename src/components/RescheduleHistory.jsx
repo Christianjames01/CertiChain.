@@ -17,19 +17,8 @@ function formatClaimSlot(date, time) {
     return time ? `${day} at ${d.toLocaleTimeString('en-PH', { hour: 'numeric', minute: '2-digit' })}` : day
 }
 
-// Every reschedule request the student sent for this claim schedule, with
-// whether staff handled it (and the date they moved it to). Used on the
-// admin and employee Claim Schedule pages.
-//
-// `pending` is the schedule's current reschedule_requested_at/reason, used
-// if the history table isn't there yet or doesn't have this request.
-// `lastReason` (with `lastUpdatedAt` / `lastSlot`) is the schedule's
-// reschedule_reason after staff handled it -- shown as handled when there's
-// no history row for it, so the student's message never just disappears.
-// `reloadKey` re-fetches after staff save a new date.
 function RescheduleHistory({ scheduleId, pending, lastReason, lastUpdatedAt, lastSlot, reloadKey }) {
     const [rows, setRows] = useState([])
-    // Bumped when a reschedule request changes, to re-fetch live.
     const [liveTick, setLiveTick] = useState(0)
     useLiveRefresh(['claim_reschedule_requests'], () => setLiveTick((n) => n + 1))
 

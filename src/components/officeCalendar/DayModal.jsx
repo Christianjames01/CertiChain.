@@ -12,9 +12,6 @@ const TrashIcon = () => (
     </svg>
 )
 
-// Detail view for one calendar day: weekend open/closed status, claim
-// appointments, events/notes, and the add-event form. `portal` ('admin' or
-// 'employee') picks the matching button/pill classes for that layout.
 function DayModal({
     portal,
     date,

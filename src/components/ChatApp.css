@@ -1,8 +1,3 @@
-/* Messenger-style Messages layout (components/ChatApp.jsx). Uses each
-   portal's theme tokens, so light and dark mode both work. */
-
-/* Chat colors: other people's bubbles and the input fields need to stand
-   out from the chat background in dark mode too. */
 .chat-app {
     --chat-other: var(--paper);
     --chat-field: var(--paper);
@@ -30,7 +25,6 @@ html[data-theme="dark"] .chat-app {
     --chat-self: #2466C8;
 }
 
-/* ---- Conversation list -------------------------------------------------- */
 .chat-sidebar {
     display: flex;
     flex-direction: column;
@@ -229,7 +223,6 @@ html[data-theme="dark"] .chat-app {
     text-align: center;
 }
 
-/* ---- Avatars ------------------------------------------------------------ */
 .chat-avatar {
     display: inline-flex;
     align-items: center;
@@ -271,7 +264,6 @@ html[data-theme="dark"] .chat-app {
     background: var(--slate);
 }
 
-/* ---- Open conversation ---------------------------------------------------- */
 .chat-pane {
     display: flex;
     flex-direction: column;
@@ -525,7 +517,6 @@ html[data-theme="dark"] .chat-app {
     line-height: 1.5;
 }
 
-/* ---- Phones: list is the page, the chat opens full screen ---------------- */
 @media (max-width: 880px) {
     .chat-app {
         display: block;
@@ -597,7 +588,6 @@ html[data-theme="dark"] .chat-app {
     }
 }
 
-/* ---- "… is typing" -------------------------------------------------------- */
 .chat-item-preview.is-typing {
     font-style: italic;
     font-weight: 600;
@@ -651,7 +641,6 @@ html[data-theme="dark"] .chat-app {
     }
 }
 
-/* ---- "Ask about a request" (student Messages) ------------------------------ */
 .req-ask {
     position: relative;
 }
@@ -747,7 +736,6 @@ html[data-theme="dark"] .chat-app {
 .req-ask-status.status-cancelled,
 .req-ask-status.status-lacking_requirements { background: var(--danger-bg-soft, rgba(200, 16, 46, 0.1)); color: var(--danger-text, var(--red)); }
 
-/* ---- "Replying to …" bar above the message box ---------------------------- */
 .chat-replying {
     display: flex;
     align-items: center;

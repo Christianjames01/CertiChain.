@@ -1,11 +1,6 @@
-// Excel export for the head's Reports page. exceljs is loaded only when an
-// export is requested, so it doesn't weigh down every page.
-
 const HEADER_FILL = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF123B78' } }
 const PESO_FORMAT = '"₱"#,##0.00'
 
-// sheets: [{ name, columns: [{ header, key, width, format? }], rows: [{...}] }]
-// meta: lines shown above the first sheet's table (title, period, generated at)
 export async function downloadExcelReport(fileName, sheets, meta = []) {
     const { default: ExcelJS } = await import('exceljs')
     const workbook = new ExcelJS.Workbook()
@@ -16,7 +11,6 @@ export async function downloadExcelReport(fileName, sheets, meta = []) {
         const ws = workbook.addWorksheet(sheet.name.slice(0, 31))
         let startRow = 1
 
-        // Report title/period only on the first sheet.
         if (index === 0 && meta.length) {
             meta.forEach((line, i) => {
                 const row = ws.getRow(i + 1)

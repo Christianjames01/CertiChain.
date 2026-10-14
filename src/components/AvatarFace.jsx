@@ -1,5 +1,3 @@
-// Contents of a round avatar: the person's uploaded profile photo, or
-// their initials when they haven't uploaded one (or it fails to load).
 import { useState } from 'react'
 
 const initialsOf = (name) =>

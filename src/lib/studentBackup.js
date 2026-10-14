@@ -3,11 +3,6 @@ import { downloadExcelReport } from './reportExport'
 
 const toDate = (v) => (v ? new Date(v) : null)
 
-// Exports everything about one student before their account is permanently
-// deleted: profile, every document request, receipt and credential on file,
-// and claim schedules. This Excel file is the only record left afterward --
-// deleting the account removes all of this from the database (see
-// deleteStudentAccount / delete-student-account).
 export async function exportStudentBackup(student) {
     const studentId = student.student_id
 

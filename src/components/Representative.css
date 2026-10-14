@@ -1,5 +1,3 @@
-/* Authorized representative cards (student + staff) and release-window badge. */
-
 .rep-card {
     margin-top: 16px;
 }
@@ -199,7 +197,6 @@
     font-size: 13px;
 }
 
-/* Badge on release-window / claiming lists */
 .rep-badge {
     display: inline-flex;
     align-items: center;
@@ -226,7 +223,6 @@
     color: var(--danger-text, var(--red, #C8102E));
 }
 
-/* ---- Per-file review (letter and valid ID) -------------------------------- */
 .rep-file-list {
     display: flex;
     flex-direction: column;
@@ -285,7 +281,6 @@
     margin: 0;
 }
 
-/* Student: replace a rejected file. */
 .rep-replace {
     position: relative;
     display: inline-flex;
@@ -312,7 +307,6 @@
     cursor: wait;
 }
 
-/* ---- Removed representatives (history) ---------------------------------- */
 .rep-removals-block {
     margin-top: 14px;
     padding-top: 12px;

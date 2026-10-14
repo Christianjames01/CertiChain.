@@ -1,10 +1,6 @@
 import { supabase } from './supabase'
 import { hoursOf, noteWithoutHours } from './officeHours'
 
-// Date helpers shared by the admin and employee Office Calendar pages.
-// Dates are handled as local 'YYYY-MM-DD' strings throughout so they compare
-// cleanly with the office_open_days / office_events / claim_schedules columns.
-
 export function formatLocal(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
@@ -42,17 +38,12 @@ export function getToday() {
     return formatLocal(new Date())
 }
 
-// Days of the week the office is closed unless a date is marked open in
-// office_open_days: Sunday, Monday and Saturday. Tuesday-Friday are open by
-// default. Mirrored in supabase/functions/mark-missed-claims.
 export const CLOSED_WEEKDAYS = [0, 1, 6]
 
 export function isClosedWeekday(dow) {
     return CLOSED_WEEKDAYS.includes(dow)
 }
 
-// True for dates that are closed by default (Mondays and weekends) -- the
-// ones staff can mark open in the Office Calendar.
 export function isWeekendDate(dateStr) {
     return isClosedWeekday(toDate(dateStr).getDay())
 }
@@ -61,8 +52,6 @@ export function weekdayName(dateStr) {
     return toDate(dateStr).toLocaleDateString('en-PH', { weekday: 'long' })
 }
 
-// For staff scheduling a claim: true when the date is closed by default and
-// nobody has marked it open in the Office Calendar.
 export async function isClosedWithoutOpening(dateStr) {
     if (!isWeekendDate(dateStr)) return false
 
@@ -80,9 +69,6 @@ export function addDays(dateStr, delta) {
     return formatLocal(new Date(d.getFullYear(), d.getMonth(), d.getDate() + delta))
 }
 
-// Every date from start to end, inclusive, as 'YYYY-MM-DD' strings -- used
-// to apply one event/note to a whole span of days (e.g. the 20th to the
-// 26th) in a single action instead of one day at a time.
 export function eachDateInRange(startStr, endStr) {
     const dates = []
     let cursor = toDate(startStr)
@@ -94,8 +80,6 @@ export function eachDateInRange(startStr, endStr) {
     return dates
 }
 
-// Full weeks (Sun-Sat) covering the month, including the trailing/leading
-// days of the neighboring months so the grid is always a clean rectangle.
 export function buildMonthGrid(viewDate) {
     const year = viewDate.getFullYear()
     const month = viewDate.getMonth()
@@ -111,7 +95,6 @@ export function buildMonthGrid(viewDate) {
     return cells
 }
 
-// "Today", "Tomorrow", "In 5 days" -- for the upcoming list.
 export function relativeDayLabel(dateStr, today = getToday()) {
     const diff = Math.round((toDate(dateStr) - toDate(today)) / 86400000)
     if (diff === 0) return 'Today'
@@ -120,10 +103,6 @@ export function relativeDayLabel(dateStr, today = getToday()) {
     return null
 }
 
-// A range event is stored as one row per day; collapse runs of the same
-// title on consecutive days so "Enrollment Week" shows once, not 7 times.
-// Expects `events` sorted by event_date; overlapping ranges with different
-// titles are tracked separately.
 export function groupConsecutiveEvents(events) {
     const groups = []
     const openByTitle = new Map()
@@ -152,8 +131,6 @@ export function claimTime(cs) {
     return cs.claim_time || cs.scheduled_time
 }
 
-// Quick-fill presets for the most common day notes, so staff don't have to
-// retype the same wording each time (e.g. every fiesta/holiday closure).
 export const EVENT_PRESETS = [
     'Mental Health Break',
     'Office Closed — Fiesta',
@@ -164,14 +141,6 @@ export const EVENT_PRESETS = [
 
 const escapeHtml = (text) => String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
 
-// Automatic notices for the student dashboard, shaped like announcements so
-// they render with AnnouncementNotice:
-//   - "closed today" on a Monday/weekend that nobody opened,
-//   - one "office open" notice per Monday/weekend staff opened in the next
-//     two weeks (office_open_days),
-//   - a standing reminder of the regular office days.
-// If office_open_days can't be read (migration not applied yet), the
-// weekday rule alone is used.
 export async function fetchOfficeScheduleNotices() {
     const today = getToday()
     const until = addDays(today, 14)

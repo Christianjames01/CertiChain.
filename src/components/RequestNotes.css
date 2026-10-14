@@ -1,6 +1,3 @@
-/* Staff notes on a request (RequestNotes.jsx). Uses the portal's theme
-   tokens, so it matches both the admin and employee layouts. */
-
 .rn-head {
     display: flex;
     align-items: flex-start;
@@ -26,7 +23,6 @@
     text-align: center;
 }
 
-/* Composer */
 .rn-composer {
     display: flex;
     flex-direction: column;
@@ -73,7 +69,6 @@
     cursor: default;
 }
 
-/* Category colors on the saved notes' labels */
 .rn-chip.is-static.rn-cat-absence {
     background: var(--warning-bg, #fff3cd);
     border-color: transparent;
@@ -145,7 +140,6 @@
     cursor: not-allowed;
 }
 
-/* Notes list */
 .rn-list {
     display: flex;
     flex-direction: column;

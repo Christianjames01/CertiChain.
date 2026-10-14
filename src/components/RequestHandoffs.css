@@ -1,6 +1,3 @@
-/* Request handling trail + "pass on" form (RequestHandoffs.jsx). Uses the
-   portal's theme tokens, so it matches both the admin and employee layouts. */
-
 .rh-head {
     display: flex;
     align-items: flex-start;

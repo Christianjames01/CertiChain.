@@ -4,11 +4,6 @@ import { useScrollLock } from '../lib/useScrollLock'
 import { dividerLabel } from '../lib/chatTime'
 import './ChatApp.css'
 
-// Messenger-style building blocks shared by the student, employee and
-// Registrar Head Messages pages: a conversation list beside the open chat
-// on desktop; on phones the list is the page and the chat opens full screen
-// with a back arrow (`chatOpen`).
-
 const MOBILE_QUERY = '(max-width: 880px)'
 const GROUP_GAP_MS = 5 * 60 * 1000
 const DIVIDER_GAP_MS = 30 * 60 * 1000
@@ -26,8 +21,6 @@ function useIsMobile() {
     return mobile
 }
 
-// One avatar, or two overlapping ones for a conversation between two
-// other people (the Registrar Head's oversight view).
 export function ChatAvatar({ people = [], size = 44 }) {
     const shown = people.filter(Boolean).slice(0, 2)
 
@@ -58,11 +51,6 @@ export function ChatApp({ chatOpen, children }) {
 
     useScrollLock(fullScreen)
 
-    // Full-screen chat on phones, with the keyboard open:
-    //  - pin the page behind it (iOS ignores overflow: hidden and scrolls the
-    //    whole document to reveal the focused box, dragging the chat along);
-    //  - size the chat to the visible area above the keyboard. iOS keeps the
-    //    layout viewport when the keyboard opens, so follow visualViewport.
     useEffect(() => {
         const el = ref.current
         if (!fullScreen || !el) return undefined
@@ -196,12 +184,6 @@ export function ChatHeader({ onBack, people, title, subtitle, typing, actions })
     )
 }
 
-// Scrollable message area. Adds time dividers after long gaps and tells
-// each message where it sits in a run from the same sender, so bubbles can
-// stack like Messenger (one name on top, one avatar and time at the end).
-// Stays pinned to the newest message unless the reader scrolled up.
-// `typing`: { people, label } while someone in the conversation is
-// typing -- shown as a bubble with animated dots after the last message.
 export function ChatMessages({ messages, threadKey, empty, renderMessage, typing }) {
     const ref = useRef(null)
     const pinned = useRef(true)
@@ -223,8 +205,6 @@ export function ChatMessages({ messages, threadKey, empty, renderMessage, typing
         lastKey.current = threadKey
     }, [threadKey, messages, isTyping])
 
-    // When the chat area shrinks (the phone keyboard opening, the message
-    // box growing), keep the newest message in view.
     useEffect(() => {
         const el = ref.current
         if (!el || typeof ResizeObserver === 'undefined') return undefined
@@ -265,19 +245,11 @@ export function ChatMessages({ messages, threadKey, empty, renderMessage, typing
     )
 }
 
-// On phones and tablets Enter adds a new line and the send button sends,
-// like Messenger; with a keyboard, Enter sends and Shift+Enter adds a line.
 const touchTyping = () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
 
-// `replyingTo`: { name, text } while answering a message (with
-// `onCancelReply`); the box gets focus when a reply starts.
 export function ChatComposer({ value, onChange, onSend, sending, placeholder, canSend, above, replyingTo, onCancelReply }) {
     const ref = useRef(null)
 
-    // Grow the box with its text. On phones the chat starts hidden behind
-    // the conversation list, where the box measures 0 tall -- so skip while
-    // hidden and measure again once it's shown (the ResizeObserver fires
-    // when it gets a real size), instead of leaving it collapsed.
     const grow = () => {
         const el = ref.current
         if (!el || el.offsetWidth === 0) return

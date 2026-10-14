@@ -1,9 +1,5 @@
 import './UiIcons.css'
 
-// Line icons matching the portal sidebars (24px grid, 1.75 stroke,
-// currentColor), used instead of emoji or text symbols. They size to the
-// surrounding text (1em) unless a size is passed.
-
 function Svg({ size, className = '', children, ...rest }) {
     return (
         <svg
@@ -108,7 +104,6 @@ export const IconStar = ({ filled = false, ...p }) => (
     </Svg>
 )
 
-// Read-only star rating, e.g. <StarRating value={4} />.
 export function StarRating({ value, max = 5, size }) {
     return (
         <span className="ui-stars" role="img" aria-label={`${value} out of ${max} stars`}>

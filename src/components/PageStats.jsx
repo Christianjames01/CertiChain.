@@ -1,12 +1,6 @@
 import { Skeleton } from './Skeleton'
 import './DashboardStats.css'
 
-// Summary tiles at the top of admin list pages, in the same style as the
-// head's dashboard. stats: [{ label, value, note?, Icon?, warn?, onClick? }].
-// A tile with onClick is a button (e.g. to switch a filter).
-//
-// loading: draws placeholder tiles in the same grid (one per stat), so the
-// tiles keep their space while the page loads instead of popping in.
 function PageStats({ stats, loading = false }) {
     if (loading) {
         return (

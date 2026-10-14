@@ -1,6 +1,3 @@
-/* Shared dialog (Modal.jsx). Uses the portal's theme tokens so it matches
-   the page in light and dark mode; the fallbacks cover pages without them. */
-
 .app-modal-backdrop {
     position: fixed;
     inset: 0;
@@ -32,7 +29,6 @@
     animation: app-modal-rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* Brand accent along the top edge. */
 .app-modal-card::before {
     content: "";
     position: absolute;
@@ -129,8 +125,6 @@
     color: var(--ink, #101827);
 }
 
-/* ---- Content inside dialogs ---------------------------------------- */
-
 .app-modal-body > p:first-child {
     padding: 10px 12px;
     border-radius: 10px;
@@ -138,9 +132,6 @@
     color: var(--slate, #57616F);
 }
 
-/* Form fields are styled here too, so a dialog looks right on pages that
-   don't load the auth stylesheet (pages/auth/Auth.css) -- e.g. Add
-   Employee on the Employees page. */
 .app-modal-body .form-group {
     display: flex;
     flex-direction: column;
@@ -202,8 +193,6 @@
     line-height: 1.45;
 }
 
-/* Every portal's buttons inside a dialog look like the dialog's own
-   pill buttons (app-modal-btn). */
 .app-modal-body .auth-submit,
 .app-modal-body .admin-primary-button,
 .app-modal-body .employee-primary-button,
@@ -262,15 +251,12 @@
     filter: brightness(0.92);
 }
 
-/* ---- Forms and actions (Profile dialogs, two-factor setup) ------------ */
-
 .app-modal-form {
     display: flex;
     flex-direction: column;
     gap: 16px;
 }
 
-/* Two fields per row; wide fields, notes and the actions span both. */
 .app-modal-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -282,8 +268,6 @@
     grid-column: 1 / -1;
 }
 
-/* Cancel on the left, the main (or reject) action on the right, whatever
-   order the buttons are written in. */
 .app-modal-actions {
     display: flex;
     flex-wrap: wrap;
@@ -350,7 +334,6 @@
     cursor: not-allowed;
 }
 
-/* A titled group of fields (e.g. Add Employee: Name, Employment, ...). */
 .app-modal-section {
     display: flex;
     flex-direction: column;
@@ -398,7 +381,6 @@
     margin-top: -2px;
 }
 
-/* A short explanation at the top of a dialog. */
 .app-modal-hint {
     padding: 10px 12px;
     border-radius: 10px;
@@ -408,7 +390,6 @@
     color: var(--slate, #57616F);
 }
 
-/* Clickable result rows (e.g. picking a student). */
 .app-modal-body .admin-list-card {
     border-radius: 12px;
 }
@@ -423,7 +404,6 @@
     to { opacity: 1; transform: none; }
 }
 
-/* Phones: a bottom sheet that slides up. */
 @media (max-width: 560px) {
     .app-modal-backdrop {
         align-items: flex-end;

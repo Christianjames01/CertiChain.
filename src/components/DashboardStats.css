@@ -1,7 +1,3 @@
-/* Shared statistics tiles for the head and employee dashboards. */
-
-/* Status palette, validated for contrast and color-blind separation
-   against the card surface in each theme (dark mode uses its own steps). */
 .admin-layout,
 .employee-layout {
     --status-pending: #2a78d6;
@@ -105,7 +101,6 @@ html[data-theme="dark"] .employee-layout {
     color: var(--slate);
 }
 
-/* The icon tile carries the color; values and labels stay in text colors. */
 .dash-stat-icon {
     width: 32px;
     height: 32px;
@@ -158,8 +153,6 @@ html[data-theme="dark"] .employee-layout {
     color: var(--ink);
 }
 
-/* Share-of-total bar: the fill carries the status color, the track is a
-   light step of the same hue so the bar reads as one unit. */
 .dash-stat-meter {
     height: 6px;
     margin-top: 6px;
@@ -199,8 +192,6 @@ html[data-theme="dark"] .employee-layout {
         transform: none;
     }
 }
-
-/* ---------- Attention alerts (missed claims, reschedule requests) ---------- */
 
 .dash-alert-grid {
     display: grid;
@@ -269,8 +260,6 @@ html[data-theme="dark"] .employee-layout {
     font-weight: 700;
 }
 
-/* ---------- Quick links ---------- */
-
 .dash-quick-links {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -331,8 +320,6 @@ html[data-theme="dark"] .employee-layout {
     color: var(--blue-accent, var(--blue));
     transform: translateX(2px);
 }
-
-/* ---------- Two-column lists (appointments, recent requests) ---------- */
 
 .dash-two-col {
     display: grid;
@@ -424,8 +411,6 @@ html[data-theme="dark"] .employee-layout {
     }
 }
 
-/* ---------- Employee dashboard header (greeting + quick links) ---------- */
-
 .dash-greeting {
     display: flex;
     align-items: flex-end;
@@ -498,8 +483,6 @@ html[data-theme="dark"] .employee-layout {
     color: var(--blue-accent, var(--blue));
 }
 
-/* How long a request has waited: neutral, amber from 3 days, red from 5.
-   The day count is always shown, so color is never the only signal. */
 .dash-wait {
     flex-shrink: 0;
     padding: 3px 9px;
@@ -520,8 +503,6 @@ html[data-theme="dark"] .employee-layout {
     color: var(--danger-text, var(--red-dark));
     background: var(--danger-bg-soft);
 }
-
-/* ---------- Head dashboard: refresh, panels, workload, feed ---------- */
 
 .dash-updated {
     display: inline-flex;
@@ -555,7 +536,6 @@ html[data-theme="dark"] .employee-layout {
     cursor: default;
 }
 
-/* A headline tile that needs the head's attention (e.g. unassigned work). */
 .dash-overview-tile.is-warn {
     --tile-color: var(--status-ready);
     border-color: color-mix(in srgb, var(--status-ready) 45%, var(--line));
@@ -608,7 +588,6 @@ html[data-theme="dark"] .employee-layout {
     grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 }
 
-/* Initials avatar used by the workload, feed and student lists. */
 .dash-avatar {
     width: 34px;
     height: 34px;
@@ -629,8 +608,6 @@ html[data-theme="dark"] .employee-layout {
     font-size: 11px;
 }
 
-/* Team workload: one bar per employee, single hue; unusually heavy
-   loads (over 1.5x the team average) switch to the attention color. */
 .dash-workload {
     list-style: none;
     margin: 0 -8px;
@@ -719,7 +696,6 @@ html[data-theme="dark"] .employee-layout {
     color: var(--danger-text, #B42318);
 }
 
-/* Recent activity feed */
 .dash-feed {
     list-style: none;
     margin: 0;
@@ -778,7 +754,6 @@ html[data-theme="dark"] .employee-layout {
     padding-top: 2px;
 }
 
-/* Recently registered students: compact cards in a grid */
 .dash-students {
     list-style: none;
     margin: 0;
@@ -841,10 +816,6 @@ html[data-theme="dark"] .employee-layout {
     }
 }
 
-/* Scroll quick links and stat/alert tiles as a single row on mobile instead
-   of stacking into a tall column -- appended last so it wins the cascade over
-   the grid and flex-wrap rules above. Mirrors .admin-filter-row and
-   .student-stat-grid in the page stylesheets. */
 @media (max-width: 640px) {
     .dash-greeting-links,
     .dash-alert-grid,
@@ -892,8 +863,6 @@ html[data-theme="dark"] .employee-layout {
     }
 }
 
-/* Phones: summary tiles two per row and more compact, so they don't fill
-   the whole first screen of a list page. */
 @media (max-width: 640px) {
     .page-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));

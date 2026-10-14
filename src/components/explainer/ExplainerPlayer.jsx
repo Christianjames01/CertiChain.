@@ -3,18 +3,6 @@ import { Icon } from './icons'
 import { narrationSupported, readSoundPref, say, speaking, stopSpeaking, writeSoundPref } from '../../lib/narration'
 import './Explainer.css'
 
-// A video-style motion walkthrough (no video file): animated copies of the
-// app's screens, one scene per chapter, with chapters, pause/play and
-// replay. It plays once it's scrolled into view; pausing freezes the scene
-// animations too. Visitors who prefer reduced motion get still scenes they
-// can step through.
-//
-// scenes: [{ key, chapter, title, text, ms, View }] -- View receives `cta`.
-// onEnd: called when the last scene finishes.
-// soundKey / defaultSound: the voice-over (Sound button) -- remembered per key.
-// cta: { title?, caption?, primary: { label, href | onClick }, secondary? } for
-// the last scene (key "cta").
-
 const reducedMotion = () =>
     typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
 
@@ -37,7 +25,6 @@ function useSeen(ref, threshold) {
     return seen || typeof IntersectionObserver === 'undefined'
 }
 
-// The 3D backdrop needs WebGL; without it the flat gradient stays.
 function webglAvailable() {
     try {
         const canvas = document.createElement('canvas')
@@ -50,15 +37,11 @@ function webglAvailable() {
 function ExplainerPlayer({ scenes, cta, autoplay = true, label = 'Walkthrough', onEnd, soundKey = 'walkthrough', defaultSound = false }) {
     const rootRef = useRef(null)
     const inView = useSeen(rootRef, 0.45)
-    // One clock: which scene, how far into it, and whether the end was reached.
     const [clock, setClock] = useState({ scene: 0, elapsed: 0, ended: false, run: 0 })
-    // null until the viewer presses play/pause: until then it autoplays the
-    // first time the player is on screen.
     const [choice, setChoice] = useState(null)
     const playing = !clock.ended && (choice === null ? autoplay && inView && !reducedMotion() : choice)
     const { scene, elapsed, ended, run } = clock
 
-    // ---- 3D: live backdrop + pointer tilt -------------------------------------
     const stageRef = useRef(null)
     const backdropRef = useRef(null)
     const backdrop3d = useRef(null)
@@ -80,10 +63,8 @@ function ExplainerPlayer({ scenes, cta, autoplay = true, label = 'Walkthrough', 
         }
     }, [])
     useEffect(() => { backdrop3d.current?.setScene(scene) }, [scene, has3d])
-    // The backdrop keeps moving once the player has been seen (even paused).
     useEffect(() => { backdrop3d.current?.setActive(inView) }, [inView, has3d])
 
-    // Tilt toward the pointer (CSS variables, no re-render).
     const onPointerMove = (e) => {
         const el = stageRef.current
         if (!el || reducedMotion()) return
@@ -100,7 +81,6 @@ function ExplainerPlayer({ scenes, cta, autoplay = true, label = 'Walkthrough', 
         backdrop3d.current?.setPointer(0, 0)
     }
 
-    // Voice-over: each scene waits for the narrator to finish.
     const [soundOn, setSoundOn] = useState(() => narrationSupported() && readSoundPref(soundKey, defaultSound))
     const soundRef = useRef(soundOn)
     useEffect(() => { soundRef.current = soundOn })
@@ -125,8 +105,6 @@ function ExplainerPlayer({ scenes, cta, autoplay = true, label = 'Walkthrough', 
         return () => cancelAnimationFrame(frame)
     }, [playing, scenes])
 
-    // Tell the page when the last scene has finished (e.g. the lobby TV
-    // goes back to the queue).
     const onEndRef = useRef(onEnd)
     useEffect(() => { onEndRef.current = onEnd })
     useEffect(() => { if (ended) onEndRef.current?.() }, [ended])
@@ -134,11 +112,7 @@ function ExplainerPlayer({ scenes, cta, autoplay = true, label = 'Walkthrough', 
     const current = scenes[scene]
     const narration = `${current.title}. ${current.key === 'cta' && cta?.caption ? cta.caption : current.text}`
 
-    // Say each scene once. Only a replay (run changes) says it again; a
-    // re-render doesn't restart it.
     const spokenRunRef = useRef(run)
-    // Whether this player is the one talking (another player on the page
-    // mustn't cut it off).
     const talkingRef = useRef(false)
     const [owner] = useState(() => Symbol('explainer'))
     useEffect(() => {
@@ -149,7 +123,6 @@ function ExplainerPlayer({ scenes, cta, autoplay = true, label = 'Walkthrough', 
         say(narration, { interrupt: true, force: replay, owner })
     }, [soundOn, playing, narration, run, owner])
 
-    // Quiet when paused or the sound is turned off, and when leaving.
     useEffect(() => {
         if ((!soundOn || !playing) && talkingRef.current) {
             talkingRef.current = false
