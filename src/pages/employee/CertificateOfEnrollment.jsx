@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
 import { confirmModal, notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
 import { newSealCode, sealPrintedDocument } from '../../lib/documentSeal'
-import SealQr from '../../components/SealQr'
 import { friendlyError } from '../../lib/friendlyError'
 import PageStats from '../../components/PageStats'
 import { IconFileStack, IconCalendarCheck } from '../admin/icons'
@@ -206,9 +205,9 @@ function CertificateOfEnrollment() {
             loadMyCounts()
             if (sealError) {
                 console.error('SEAL CERTIFICATE ERROR:', sealError)
-                notifyWarning('Certificate logged, but its verification QR could not be registered.')
+                notifyWarning('Certificate logged, but its verification record could not be saved.')
             } else {
-                notifySuccess('Certificate logged and sealed for verification.')
+                notifySuccess('Certificate logged.')
             }
         } catch (err) {
             console.error('SAVE CERTIFICATE ERROR:', err)
@@ -245,7 +244,6 @@ function CertificateOfEnrollment() {
                     <span className="coe-footer-label" style={{ left: '53.5pt' }}>Accredited:</span>
                     <span className="coe-footer-label" style={{ left: '246.1pt' }}>Institutional Membership:</span>
                     <span className="coe-footer-label" style={{ left: '470.6pt' }}>Certified: ISO 21001:2018</span>
-                    <SealQr code={sealCode} className="coe-seal-qr" />
                 </div>
 
                 <h2 className="coe-title">C E R T I F I C A T I O N</h2>

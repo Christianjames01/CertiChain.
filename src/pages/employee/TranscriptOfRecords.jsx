@@ -4,7 +4,6 @@ import { supabase } from '../../lib/supabase'
 import { logActivity } from '../../lib/activityLog'
 import { confirmModal, notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
 import { newSealCode, sealPrintedDocument } from '../../lib/documentSeal'
-import SealQr from '../../components/SealQr'
 import sealImg from '../../assets/coe/seal.png'
 import hcdc75Img from '../../assets/coe/hcdc-75.png'
 import pacuImg from '../../assets/coe/pacu.png'
@@ -405,9 +404,9 @@ function TranscriptOfRecords() {
         setSealCode(newSealCode())
         if (sealError) {
             console.error('SEAL TRANSCRIPT ERROR:', sealError)
-            notifyWarning('Transcript recorded, but its verification QR could not be registered.')
+            notifyWarning('Transcript recorded, but its verification record could not be saved.')
         } else {
-            notifySuccess('Transcript recorded and sealed for verification.')
+            notifySuccess('Transcript recorded in your activity log.')
         }
     }
 
@@ -598,7 +597,6 @@ function TranscriptOfRecords() {
 
                             {isLast && (
                                 <div className="otr-sign">
-                                    <SealQr code={sealCode} className="otr-seal-qr" />
                                     <p className="otr-seal-note">not valid without school seal</p>
                                     <p className="otr-prepared" style={{ top: '42pt' }}><span>Prepared by:</span> {form.preparedBy}</p>
                                     <p className="otr-prepared" style={{ top: '56pt' }}><span>Date:&nbsp;&nbsp;:</span> {formatShortDate(form.preparedDate)}</p>
