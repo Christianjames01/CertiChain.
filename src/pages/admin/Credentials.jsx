@@ -13,7 +13,7 @@ import { IconXCircle } from './icons'
 import './AdminPages.css'
 
 const LOAD_LIMIT = 500
-const EXPLORER_TX = 'https://sepolia.etherscan.io/tx/'
+const EXPLORER_TX = `${(import.meta.env.VITE_CHAIN_EXPLORER || 'https://sepolia.etherscan.io').replace(/\/+$/, '')}/tx/`
 
 function chainLabel(c) {
     if (c.chain_status === 'recorded') return c.status === 'revoked' && !c.chain_revoked_at ? 'Recording revocation' : 'Recorded'
