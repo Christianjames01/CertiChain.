@@ -12,10 +12,12 @@ contract CertiChainRegistry {
 
     event Recorded(bytes32 indexed hash, uint64 recordedAt);
     event Revoked(bytes32 indexed hash, uint64 revokedAt);
+    event Sealed(bytes32 indexed hash, bytes encryptedCopy);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     error NotOwner();
     error ZeroAddress();
+    error LengthMismatch();
 
     modifier onlyOwner() {
         if (msg.sender != owner) revert NotOwner();
@@ -34,6 +36,19 @@ contract CertiChainRegistry {
             if (e.recordedAt == 0) {
                 e.recordedAt = nowTs;
                 emit Recorded(hashes[i], nowTs);
+            }
+        }
+    }
+
+    function recordSealed(bytes32[] calldata hashes, bytes[] calldata encryptedCopies) external onlyOwner {
+        if (hashes.length != encryptedCopies.length) revert LengthMismatch();
+        uint64 nowTs = uint64(block.timestamp);
+        for (uint256 i = 0; i < hashes.length; i++) {
+            Entry storage e = entries[hashes[i]];
+            if (e.recordedAt == 0) {
+                e.recordedAt = nowTs;
+                emit Recorded(hashes[i], nowTs);
+                emit Sealed(hashes[i], encryptedCopies[i]);
             }
         }
     }

@@ -118,7 +118,11 @@ function VerificationSteps({ result }) {
     const compareTone = chain.mismatch || result.signatureValid === false ? 'bad' : lookupTone === 'ok' ? 'ok' : 'wait'
     const isDocument = result.kind === 'document'
     const hasSignature = result.signatureValid != null
-    const n = (step) => (hasSignature || step < 2 ? step : step - 1)
+    const copy = chain.encryptedCopy
+    const hasCopy = !!copy?.found
+    const n = (step) => step - (!hasSignature && step >= 2 ? 1 : 0) + (hasCopy && step >= 5 ? 1 : 0)
+    const copyTone = !hasCopy ? 'wait' : copy.decryptFailed ? 'bad' : copy.matches ? 'ok' : 'wait'
+    const decrypted = copy?.decrypted || {}
 
     return (
         <details className="verify-how" open>
@@ -139,8 +143,10 @@ function VerificationSteps({ result }) {
 
                 <Step tone={hashTone} number={n(3)} title={isDocument ? 'Computed the document’s fingerprint' : 'Computed the credential’s fingerprint'}>
                     <p>
-                        The {isDocument ? 'document’s' : 'credential’s'} details are turned into a unique fingerprint. No personal data is stored on the
-                        blockchain, only this fingerprint.
+                        The {isDocument ? 'document’s' : 'credential’s'} details are turned into a unique fingerprint.
+                        {hasCopy
+                            ? ' Only this fingerprint and an encrypted copy are stored on the blockchain, so nothing there is readable without the Registrar’s key.'
+                            : ' No personal data is stored on the blockchain, only this fingerprint.'}
                     </p>
                     {chain.hash ? (
                         <div className="verify-hash-row">
@@ -160,6 +166,37 @@ function VerificationSteps({ result }) {
                         {chain.contractUrl && <a href={chain.contractUrl} target="_blank" rel="noreferrer">CertiChain contract ↗</a>}
                     </p>
                 </Step>
+
+                {hasCopy && (
+                    <Step tone={copyTone} number={n(4) + 1} title="Decrypted the encrypted copy stored on the blockchain">
+                        <p>
+                            The blockchain also holds an encrypted copy of this {isDocument ? 'document' : 'credential'}. It is unreadable to
+                            everyone else. Only the Registrar’s private key can decrypt it.
+                        </p>
+                        <div className="verify-hash-row">
+                            <span>Encrypted</span>
+                            <code className="verify-hash">{copy.encryptedPreview}</code>
+                        </div>
+                        {copy.decryptFailed ? (
+                            <p className="verify-step-muted">The encrypted copy could not be decrypted with the Registrar’s key.</p>
+                        ) : (
+                            <>
+                                <dl className="verify-decrypted">
+                                    {decrypted.number && <div><dt>Number</dt><dd className="is-mono">{decrypted.number}</dd></div>}
+                                    {decrypted.document && <div><dt>Document</dt><dd>{decrypted.document}</dd></div>}
+                                    {decrypted.student && <div><dt>Issued to</dt><dd>{decrypted.student}</dd></div>}
+                                    {decrypted.program && <div><dt>Program</dt><dd>{decrypted.program}</dd></div>}
+                                    {decrypted.issued && <div><dt>Issued</dt><dd>{formatDate(decrypted.issued)}</dd></div>}
+                                </dl>
+                                <p>
+                                    {copy.matches
+                                        ? 'The decrypted copy matches the Registrar’s current record.'
+                                        : 'The decrypted copy differs from the current record (for example, a name was updated after issuing).'}
+                                </p>
+                            </>
+                        )}
+                    </Step>
+                )}
 
                 <Step tone={compareTone} number={n(5)} title="Compared the results">
                     <p>
