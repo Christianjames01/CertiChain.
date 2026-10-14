@@ -21,7 +21,7 @@ const REGISTRAR_NAME = 'MRS. JENNIFER C. YEE'
 const PAGE_WIDTH_PX = 816
 const PRINT_PAGE_RULE = '@page { size: 8.5in 13in; margin: 0; }'
 
-const FOOTER_SHIFT = 144
+const FOOTER_SHIFT = 166
 const HEADER_IMAGES = [
     { src: sealImg, alt: 'Holy Cross of Davao College seal', box: [45.0, 37.0, 78.0, 84.1] },
     { src: hcdc75Img, alt: 'HCDC 75 Years of Grace and Growth', box: [480.2, 32.2, 96.1, 96.1] },
@@ -52,9 +52,10 @@ const GRADING_SYSTEM = [
 const SCHOOL_HEADING = 'HOLY CROSS OF DAVAO COLLEGE  -  Davao City'
 const CLOSED_LINE = 'hcdchcdchcdchcdchcdchcdchcdchcdchcdchcdchcdc*transcriptclosed*hcdchcdchcdchcdchcdchcdchcdchcdchcdchcdchcdc'
 
-// Line budget per page, in course-row heights.
-const FIRST_PAGE_LINES = 34
-const OTHER_PAGE_LINES = 47
+const ROW_PT = 11.75
+const FIRST_PAGE_LINES = 38
+const OTHER_PAGE_LINES = 56
+const SIGN_LINES = 9
 
 const TERM_ORDER = (term) => {
     const t = (term || '').toLowerCase()
@@ -124,25 +125,48 @@ const EMPTY_FORM = {
 }
 
 const linesFor = (item) => {
-    if (item.kind === 'graduated') return Math.max(2, Math.ceil((item.text || '').length / 105))
+    if (item.kind === 'graduated') return Math.ceil((Math.ceil((item.text || '').length / 100) * 13 + 2) / ROW_PT)
     if (item.kind === 'remarks') return 7
     return 1
 }
 
+const capOf = (pageIndex) => (pageIndex === 0 ? FIRST_PAGE_LINES : OTHER_PAGE_LINES)
+const usedOf = (list) => list.reduce((sum, item) => sum + linesFor(item), 0)
+
 function paginate(items) {
     const pages = [[]]
     let used = 0
+    let lastTerm = ''
     for (const item of items) {
-        const cap = pages.length === 1 ? FIRST_PAGE_LINES : OTHER_PAGE_LINES
         const need = linesFor(item)
-        if (used + need > cap && pages[pages.length - 1].length > 0) {
+        if (used + need > capOf(pages.length - 1) && pages[pages.length - 1].length > 0) {
             pages.push([])
             used = 0
+            if (item.kind === 'course' && lastTerm) {
+                pages[pages.length - 1].push({ id: `cont-${item.id}`, kind: 'term', title: `${lastTerm} cont'n....` })
+                used = 1
+            }
         }
+        if (item.kind === 'term') lastTerm = item.title
         pages[pages.length - 1].push(item)
         used += need
     }
+    while (usedOf(pages[pages.length - 1]) + SIGN_LINES > capOf(pages.length - 1)) {
+        const last = pages[pages.length - 1]
+        const moved = []
+        while (last.length > 1 && usedOf(last) + SIGN_LINES > capOf(pages.length - 1)) moved.unshift(last.pop())
+        if (!moved.length) break
+        pages.push(moved)
+    }
     return pages
+}
+
+const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+const boldParts = (text, terms) => {
+    const list = [...terms.filter((t) => t && t.trim().length > 3).map(escapeRe), '[A-Z][a-z]+\\.? \\d{1,2}, \\d{4}']
+    const re = new RegExp(`(${list.join('|')})`, 'g')
+    return text.split(re).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))
 }
 
 function TranscriptOfRecords() {
@@ -347,14 +371,16 @@ function TranscriptOfRecords() {
         if (item.kind === 'school') {
             return (
                 <tr key={item.id} className="otr-row-heading">
-                    <td colSpan={5}><span className="otr-school">{item.title}</span></td>
+                    <td colSpan={2}><span className="otr-school">{item.title}</span></td>
+                    <td /><td /><td />
                 </tr>
             )
         }
         if (item.kind === 'term') {
             return (
                 <tr key={item.id} className="otr-row-heading">
-                    <td colSpan={5}><span className="otr-term">{item.title}</span></td>
+                    <td colSpan={2}><span className="otr-term">{item.title}</span></td>
+                    <td /><td /><td />
                 </tr>
             )
         }
@@ -368,7 +394,7 @@ function TranscriptOfRecords() {
         if (item.kind === 'graduated') {
             return (
                 <tr key={item.id} className="otr-row-text">
-                    <td colSpan={5}>{item.text}</td>
+                    <td colSpan={5}>{boldParts(item.text, ['HOLY CROSS OF DAVAO COLLEGE, INC.', form.collegeOf])}</td>
                 </tr>
             )
         }
@@ -376,7 +402,7 @@ function TranscriptOfRecords() {
             return (
                 <tr key={item.id} className="otr-row-remarks">
                     <td />
-                    <td><span className="otr-remarks-label">REMARKS:</span> <strong>{item.text}</strong>{item.text && ' ........'}</td>
+                    <td><span className="otr-remarks-label">REMARKS:</span>&nbsp;&nbsp;&nbsp; <strong>{item.text}</strong>{item.text && <strong> ........</strong>}</td>
                     <td /><td /><td />
                 </tr>
             )
@@ -384,7 +410,7 @@ function TranscriptOfRecords() {
         return (
             <tr key={item.id}>
                 <td>{item.code}</td>
-                <td>{item.title}</td>
+                <td className="otr-title-cell">{item.title}</td>
                 <td className="otr-num">{item.final}</td>
                 <td className="otr-num">{item.completion}</td>
                 <td className="otr-num">{item.units}</td>
@@ -392,30 +418,63 @@ function TranscriptOfRecords() {
         )
     }
 
+    const infoLine = (cells, className = 'otr-hinfo-line') => (
+        <div className={className}>
+            {cells.map(([left, text, cls], i) => (
+                <span key={i} className={cls} style={{ left: `${left}pt` }}>{text}</span>
+            ))}
+        </div>
+    )
+
     const courseTable = (pageItems, isFirst) => (
         <table className={`otr-table${isFirst ? ' is-first' : ''}`}>
             <colgroup>
-                <col style={{ width: '17%' }} />
-                <col style={{ width: '57%' }} />
+                <col style={{ width: '16%' }} />
+                <col style={{ width: '61%' }} />
                 <col style={{ width: '9%' }} />
-                <col style={{ width: '8%' }} />
-                <col style={{ width: '9%' }} />
+                <col style={{ width: '6.5%' }} />
+                <col style={{ width: '7.5%' }} />
             </colgroup>
             <thead>
-                <tr>
-                    <th rowSpan={2}>Term &amp; Course<br />No.</th>
-                    <th rowSpan={2} className="otr-th-title">D E S C R I P T I V E &nbsp; T I T L E</th>
-                    <th colSpan={2}>GRADE</th>
-                    <th rowSpan={2}>UNITS</th>
-                </tr>
-                <tr>
-                    <th>FINAL</th>
-                    <th className="otr-th-small">Com-<br />pletion</th>
-                </tr>
+                {isFirst ? (
+                    <>
+                        <tr>
+                            <td colSpan={2} className="otr-hinfo">
+                                {infoLine([[2, 'College of:', 'otr-k'], [84, form.collegeOf, 'otr-strong']])}
+                            </td>
+                            <th colSpan={2}>GRADE</th>
+                            <th rowSpan={3}>UNITS</th>
+                        </tr>
+                        <tr>
+                            <td colSpan={2} className="otr-hinfo">
+                                {infoLine([[2, 'Entrance Data:', 'otr-k'], [94, form.entranceData], [200, 'Student I.D. No.:', 'otr-k'], [292, form.studentNumber]])}
+                            </td>
+                            <th rowSpan={2}>FINAL</th>
+                            <th rowSpan={2} className="otr-th-small">Com-<br />pletion</th>
+                        </tr>
+                        <tr>
+                            <th>Term &amp; Course<br />No.</th>
+                            <th className="otr-th-title">D E S C R I P T I V E &nbsp; T I T L E</th>
+                        </tr>
+                    </>
+                ) : (
+                    <>
+                        <tr>
+                            <th rowSpan={2}>Term &amp; Course<br />No.</th>
+                            <th rowSpan={2} className="otr-th-title">D E S C R I P T I V E &nbsp; T I T L E</th>
+                            <th colSpan={2}>GRADE</th>
+                            <th rowSpan={2}>UNITS</th>
+                        </tr>
+                        <tr>
+                            <th>FINAL</th>
+                            <th className="otr-th-small">Com-<br />pletion</th>
+                        </tr>
+                    </>
+                )}
             </thead>
             <tbody>
                 {pageItems.map(renderRow)}
-                <tr className="otr-filler"><td /><td /><td /><td /><td /></tr>
+                {!pageItems.some((item) => item.kind === 'remarks') && <tr className="otr-filler"><td /><td /><td /><td /><td /></tr>}
             </tbody>
         </table>
     )
@@ -463,39 +522,13 @@ function TranscriptOfRecords() {
                         <div className="otr-body">
                             {isFirst ? (
                                 <div className="otr-info">
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Name:</span><span className="otr-v otr-grow otr-strong">{form.name}</span>
-                                        <span className="otr-k">Sex:</span><span className="otr-v otr-w-sex">{form.sex}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Date of Birth:</span><span className="otr-v otr-w-md">{formatLongDate(form.birthDate)}</span>
-                                        <span className="otr-k">Place of Birth:</span><span className="otr-v otr-grow">{form.birthPlace}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Citizenship:</span><span className="otr-v otr-w-md">{form.citizenship}</span>
-                                        <span className="otr-k">ACR No. (If Alien)</span><span className="otr-v otr-grow">{form.acrNo}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Address:</span><span className="otr-v otr-grow">{form.address}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Parent/Guardian:</span><span className="otr-v otr-grow">{form.guardian}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Junior High School Completed at:</span><span className="otr-v otr-grow">{form.juniorHigh}</span>
-                                        <span className="otr-v otr-w-year">{form.juniorHighYear}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Senior High School Completed at:</span><span className="otr-v otr-grow">{form.seniorHigh}</span>
-                                        <span className="otr-v otr-w-year">{form.seniorHighYear}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">College of:</span><span className="otr-v otr-grow otr-strong">{form.collegeOf}</span>
-                                    </div>
-                                    <div className="otr-info-row">
-                                        <span className="otr-k">Entrance Data:</span><span className="otr-v otr-w-md">{form.entranceData}</span>
-                                        <span className="otr-k">Student I.D. No.:</span><span className="otr-v otr-grow">{form.studentNumber}</span>
-                                    </div>
+                                    {infoLine([[2, 'Name:', 'otr-k'], [44, form.name, 'otr-strong'], [310, 'Sex:', 'otr-k'], [374, form.sex]], 'otr-info-row')}
+                                    {infoLine([[2, 'Date of Birth:', 'otr-k'], [82, formatLongDate(form.birthDate)], [197, 'Place of Birth:', 'otr-k'], [322, form.birthPlace]], 'otr-info-row')}
+                                    {infoLine([[2, 'Citizenship:', 'otr-k'], [82, form.citizenship], [305, 'ACR No. (If Alien)', 'otr-k'], [400, form.acrNo]], 'otr-info-row')}
+                                    {infoLine([[2, 'Address:', 'otr-k'], [104, form.address]], 'otr-info-row')}
+                                    {infoLine([[2, 'Parent/Guardian:', 'otr-k'], [104, form.guardian]], 'otr-info-row')}
+                                    {infoLine([[2, 'Junior High School Completed at:', 'otr-k'], [232, form.juniorHigh], [430, form.juniorHighYear]], 'otr-info-row')}
+                                    {infoLine([[2, 'Senior High School Completed at:', 'otr-k'], [232, form.seniorHigh], [430, form.seniorHighYear]], 'otr-info-row')}
                                 </div>
                             ) : (
                                 <p className="otr-name-top">{form.name}</p>
@@ -505,6 +538,7 @@ function TranscriptOfRecords() {
 
                             {gradingBlock}
                             <p className="otr-page-no"><span>Page {index + 1} of {pageCount}</span></p>
+                            <div className="otr-rule" />
 
                             {isFirst && (
                                 <>
@@ -516,11 +550,9 @@ function TranscriptOfRecords() {
 
                             {isLast && (
                                 <div className="otr-sign">
-                                    <div>
-                                        <p className="otr-seal-note">not valid without school seal</p>
-                                        <p className="otr-prepared"><span>Prepared by:</span> {form.preparedBy}</p>
-                                        <p className="otr-prepared"><span>Date:&nbsp;&nbsp;:</span> {formatShortDate(form.preparedDate)}</p>
-                                    </div>
+                                    <p className="otr-seal-note">not valid without school seal</p>
+                                    <p className="otr-prepared" style={{ top: '42pt' }}><span>Prepared by:</span> {form.preparedBy}</p>
+                                    <p className="otr-prepared" style={{ top: '56pt' }}><span>Date:&nbsp;&nbsp;:</span> {formatShortDate(form.preparedDate)}</p>
                                     <div className="otr-registrar">
                                         <strong>{REGISTRAR_NAME}</strong>
                                         <span>REGISTRAR</span>

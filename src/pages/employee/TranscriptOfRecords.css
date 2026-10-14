@@ -120,19 +120,31 @@
 
 /* ---- The transcript pages (8.5 x 13 in, positions in pt) ---- */
 .otr-preview-wrap {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
     display: flex;
     justify-content: center;
     padding: 24px;
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: 12px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+@media (max-width: 1100px) {
+    .otr-preview-wrap {
+        position: static;
+        max-height: none;
+    }
 }
 
 .otr-preview {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    height: max-content;
 }
 
 .otr-page {
@@ -201,7 +213,7 @@
 .otr-page .otr-title {
     left: 36pt;
     width: 542pt;
-    top: 140pt;
+    top: 131pt;
     text-align: center;
     font-size: 17pt;
     font-weight: 800;
@@ -217,15 +229,15 @@
 
 .otr-watermark {
     position: absolute;
-    left: 180pt;
-    top: 360pt;
-    width: 260pt;
+    left: 213pt;
+    top: 383pt;
+    width: 200pt;
     height: auto;
-    opacity: 0.12;
+    opacity: 0.16;
 }
 
 .otr-page .otr-footer-label {
-    top: 850.4pt;
+    top: 872.4pt;
     font-size: 10pt;
     font-weight: 700;
 }
@@ -233,7 +245,7 @@
 /* ---- Body flow ---- */
 .otr-body {
     position: absolute;
-    left: 40pt;
+    left: 38pt;
     right: 36pt;
     top: 44pt;
     bottom: 40pt;
@@ -243,96 +255,111 @@
 }
 
 .otr-page.is-first .otr-body {
-    top: 164pt;
-    bottom: 94pt;
+    top: 156pt;
+    bottom: 68pt;
 }
 
 .otr-info {
-    border-top: 1.2pt solid #000;
-    font-size: 10pt;
+    border-top: 1pt solid #000;
 }
 
-.otr-info-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 6pt;
-    min-height: 15pt;
+.otr-info-row,
+.otr-hinfo-line {
+    position: relative;
+    height: 13pt;
     border-bottom: 0.75pt solid #000;
-    padding: 1pt 2pt 0;
-}
-
-.otr-k {
-    font-weight: 700;
+    font-size: 10pt;
+    line-height: 13pt;
     white-space: nowrap;
 }
 
-.otr-v {
-    white-space: nowrap;
+.otr-info-row > span,
+.otr-hinfo-line > span {
+    position: absolute;
+    top: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.otr-grow { flex: 1; min-width: 0; }
-.otr-strong { font-weight: 700; }
-.otr-w-sex { width: 90pt; }
-.otr-w-md { width: 150pt; }
-.otr-w-year { width: 70pt; text-align: right; }
-
-.otr-name-top {
-    margin: 0 0 4pt;
+.otr-k {
     font-weight: 700;
-    font-size: 10pt;
-    text-decoration: underline;
 }
 
-/* Course table: fixed height per page, vertical column lines to the bottom. */
+.otr-strong {
+    font-weight: 700;
+}
+
+.otr-name-top {
+    margin: 0 0 3pt;
+    font-size: 9.5pt;
+    letter-spacing: 0.2pt;
+}
+
+/* Course table: open on the left, vertical column lines run to the bottom. */
 .otr-table {
     width: 100%;
     flex: 1;
     min-height: 0;
     table-layout: fixed;
     border-collapse: collapse;
-    border: 1pt solid #000;
-    font-size: 9.5pt;
+    font-size: 10pt;
 }
 
 .otr-table th {
     border: 1pt solid #000;
     padding: 1pt 2pt;
-    font-size: 8.5pt;
+    font-size: 9pt;
     font-weight: 700;
     text-align: center;
-    line-height: 1.05;
+    line-height: 1.1;
     vertical-align: middle;
 }
 
+.otr-table th:first-child {
+    border-left: none;
+}
+
 .otr-table .otr-th-title {
-    letter-spacing: 1pt;
+    letter-spacing: 1.6pt;
+    font-size: 8.5pt;
 }
 
 .otr-table .otr-th-small {
-    font-size: 7pt;
+    font-size: 7.5pt;
     font-weight: 400;
 }
 
+.otr-table td.otr-hinfo {
+    padding: 0;
+    border: none;
+}
+
 .otr-table td {
-    border-left: 1pt solid #000;
     border-right: 1pt solid #000;
     padding: 0 3pt;
-    height: 12.5pt;
-    line-height: 12.5pt;
+    height: 11.75pt;
+    line-height: 11.75pt;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: top;
 }
 
+.otr-table td.otr-title-cell {
+    padding-left: 22pt;
+}
+
 .otr-table .otr-num {
     text-align: center;
 }
 
-.otr-row-heading td {
+.otr-table tbody tr:last-child td {
+    border-bottom: 1pt solid #000;
+}
+
+.otr-row-heading td:first-child {
     border-right: none;
+    overflow: visible;
 }
 
 .otr-school,
@@ -341,30 +368,36 @@
     text-decoration: underline;
 }
 
+.otr-table .otr-row-closed td,
+.otr-table .otr-row-text td {
+    border-right: none;
+}
+
 .otr-row-closed td {
     font-weight: 700;
-    font-size: 9pt;
-    letter-spacing: 0;
+    font-size: 9.5pt;
     text-align: center;
-    overflow: hidden;
+    text-overflow: clip;
 }
 
 .otr-row-text td {
+    height: 1pt;
     white-space: normal;
     line-height: 13pt;
-    height: auto;
-    padding: 2pt 3pt;
+    padding: 1pt 0;
     text-align: justify;
+    font-size: 10.5pt;
 }
 
 .otr-row-remarks td {
-    height: 86pt;
+    height: auto;
+    min-height: 82pt;
     vertical-align: middle;
 }
 
 .otr-remarks-label {
     font-weight: 700;
-    margin-left: 40pt;
+    margin-left: 70pt;
 }
 
 .otr-filler td {
@@ -375,11 +408,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 3pt;
-    border-top: 1.2pt solid #000;
-    padding-top: 2pt;
-    font-size: 8.5pt;
-    line-height: 1.25;
+    margin-top: 4pt;
+    font-size: 10pt;
+    line-height: 1.3;
     text-align: center;
     font-weight: 700;
 }
@@ -397,60 +428,70 @@
     font-style: italic;
 }
 
+.otr-rule {
+    margin-top: 2pt;
+    border-top: 1.2pt solid #000;
+}
+
 .otr-medium {
-    margin: 2pt 0 0;
+    margin: 1pt 0 0;
     text-align: center;
-    font-size: 9pt;
+    font-size: 10pt;
     font-weight: 700;
-    border-top: 1pt solid #000;
 }
 
 .otr-refer {
-    margin: 2pt 0 0;
+    margin: 1pt 0 0;
     text-align: right;
-    font-size: 9pt;
+    font-size: 10pt;
     font-weight: 700;
     font-style: italic;
     text-decoration: underline;
 }
 
 .otr-otrno {
-    margin: 6pt 0 0 40pt;
-    font-size: 9pt;
+    margin: 8pt 0 0 52pt;
+    font-size: 10pt;
     font-style: italic;
 }
 
 .otr-otrno span {
+    margin-left: 8pt;
     font-weight: 700;
 }
 
 .otr-sign {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-top: 10pt;
-    padding: 0 30pt 0 40pt;
-    font-size: 10pt;
+    position: relative;
+    height: 104pt;
+    font-size: 11pt;
 }
 
 .otr-seal-note {
-    margin: 0 0 12pt;
+    position: absolute;
+    left: 50pt;
+    top: 6pt;
+    margin: 0;
+    font-family: 'Lucida Calligraphy', 'Monotype Corsiva', 'Times New Roman', serif;
     font-style: italic;
     font-size: 11pt;
 }
 
 .otr-prepared {
+    position: absolute;
+    left: 50pt;
     margin: 0;
     font-style: italic;
-    line-height: 1.4;
 }
 
 .otr-prepared span {
     display: inline-block;
-    width: 80pt;
+    width: 70pt;
 }
 
 .otr-registrar {
+    position: absolute;
+    right: 70pt;
+    top: 62pt;
     display: flex;
     flex-direction: column;
     align-items: center;
