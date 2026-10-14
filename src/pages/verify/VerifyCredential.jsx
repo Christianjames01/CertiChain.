@@ -65,7 +65,7 @@ function BlockchainStatus({ chain }) {
             <div className="verify-signature">
                 <span aria-hidden="true"><IconCheck /></span>
                 <div className="verify-chain-text">
-                    Recorded on the {chain.network} blockchain{chain.recordedAt ? ` on ${formatDate(chain.recordedAt)}` : ''}.
+                    Recorded on the public blockchain{chain.recordedAt ? ` on ${formatDate(chain.recordedAt)}` : ''}.
                     {(chain.revokedOnChain || chain.revokedAt) && <small>The revocation is also recorded on the blockchain.</small>}
                     {chain.txUrl && (
                         <small>
@@ -82,7 +82,7 @@ function BlockchainStatus({ chain }) {
         <div className="verify-signature is-pending">
             <span aria-hidden="true"><IconQuestion /></span>
             <div className="verify-chain-text">
-                Being recorded on the {chain.network} blockchain.
+                Being recorded on the public blockchain.
                 <small>This usually takes a few minutes after the credential is issued. Check again later.</small>
             </div>
         </div>
@@ -349,7 +349,7 @@ function VerifyCredential() {
                     </li>
                     <li>
                         <strong>Blockchain record</strong>
-                        <span>A fingerprint of each credential is saved on the public Ethereum blockchain.</span>
+                        <span>A fingerprint of each credential is saved on a public blockchain.</span>
                     </li>
                     <li>
                         <strong>Free &amp; instant</strong>

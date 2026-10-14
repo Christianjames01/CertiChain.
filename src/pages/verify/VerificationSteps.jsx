@@ -64,7 +64,7 @@ function HashPlayground({ seed }) {
         <details className="verify-playground">
             <summary>Try it yourself: see how a fingerprint changes</summary>
             <p>
-                Edit the text below. Even changing one letter gives a completely different SHA-256 fingerprint,
+                Edit the text below. Even changing one letter gives a completely different fingerprint,
                 and the fingerprint can’t be turned back into the text. That is why a changed record can’t match
                 the fingerprint saved on the blockchain.
             </p>
@@ -102,16 +102,16 @@ function VerificationSteps({ result }) {
     const hashTone = chain.hash ? 'ok' : 'wait'
 
     let lookupTone = 'wait'
-    let lookupText = `Waiting to be recorded on ${chain.network || 'the blockchain'}. This usually takes a few minutes after issuing.`
+    let lookupText = 'Waiting to be recorded on the public blockchain. This usually takes a few minutes after issuing.'
     if (chain.checked && chain.onChain) {
         lookupTone = 'ok'
-        lookupText = `Found on ${chain.network}. The blockchain recorded this fingerprint on ${formatDate(chain.onChainRecordedAt || chain.recordedAt)}.`
+        lookupText = `Found on the public blockchain. It was recorded on ${formatDate(chain.onChainRecordedAt || chain.recordedAt)}.`
     } else if (chain.checked && !chain.onChain && chain.status === 'recorded') {
         lookupTone = 'bad'
-        lookupText = `This fingerprint is not on ${chain.network}. The record was changed after it was recorded.`
+        lookupText = 'This fingerprint is not on the public blockchain. The record was changed after it was recorded.'
     } else if (chain.status === 'recorded') {
         lookupTone = 'ok'
-        lookupText = `Recorded on ${chain.network}${chain.recordedAt ? ` on ${formatDate(chain.recordedAt)}` : ''}. The live check could not be reached just now.`
+        lookupText = `Recorded on the public blockchain${chain.recordedAt ? ` on ${formatDate(chain.recordedAt)}` : ''}. The live check could not be reached just now.`
     }
 
     const compareTone = chain.mismatch || result.signatureValid === false ? 'bad' : lookupTone === 'ok' ? 'ok' : 'wait'
@@ -125,7 +125,7 @@ function VerificationSteps({ result }) {
                     <p>{result.credential_number} is in the Registrar’s records, issued {formatDate(result.generated_at)}.</p>
                 </Step>
 
-                <Step tone={signatureTone} number={2} title="Checked the Registrar’s digital signature (HMAC-SHA256)">
+                <Step tone={signatureTone} number={2} title="Checked the Registrar’s digital signature">
                     <p>
                         {result.signatureValid === false
                             ? 'The signature does not match. Someone changed the record after it was signed.'
@@ -133,10 +133,10 @@ function VerificationSteps({ result }) {
                     </p>
                 </Step>
 
-                <Step tone={hashTone} number={3} title="Computed the credential’s fingerprint (SHA-256)">
+                <Step tone={hashTone} number={3} title="Computed the credential’s fingerprint">
                     <p>
-                        The credential number, student, document, request and issue date are joined and run through
-                        SHA-256. No personal data is stored on the blockchain, only this fingerprint.
+                        The credential’s details are turned into a unique fingerprint. No personal data is stored on the
+                        blockchain, only this fingerprint.
                     </p>
                     {chain.hash ? (
                         <div className="verify-hash-row">
