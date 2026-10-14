@@ -161,13 +161,27 @@ function paginate(items) {
     return pages
 }
 
-const escapeRe = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const BOLD_RE = new RegExp([
+    "[A-Z][A-Z.,&'-]*(?![a-z])(?:\\s+[A-Z][A-Z.,&'-]*(?![a-z])){2,}",
+    '\\bEXEMPTED\\b',
+    '\\bSpecial Order\\b',
+    'PAASCU Level [IVX]+ (?:Re-)?Accredited',
+    '\\b(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\\.? \\d{1,2}, \\d{4}\\.?',
+].map((p) => `(?:${p})`).join('|'), 'g')
 
-const boldParts = (text, terms) => {
-    const list = [...terms.filter((t) => t && t.trim().length > 3).map(escapeRe), '[A-Z][a-z]+\\.? \\d{1,2}, \\d{4}']
-    const re = new RegExp(`(${list.join('|')})`, 'g')
-    return text.split(re).map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))
+const boldParts = (text) => {
+    const out = []
+    let last = 0
+    for (const m of text.matchAll(BOLD_RE)) {
+        if (m.index > last) out.push(text.slice(last, m.index))
+        out.push(<strong key={m.index}>{m[0]}</strong>)
+        last = m.index + m[0].length
+    }
+    if (last < text.length) out.push(text.slice(last))
+    return out
 }
+
+const CLOSED_WIDTH_PT = 538
 
 function TranscriptOfRecords() {
     const [students, setStudents] = useState([])
@@ -387,14 +401,18 @@ function TranscriptOfRecords() {
         if (item.kind === 'closed') {
             return (
                 <tr key={item.id} className="otr-row-closed">
-                    <td colSpan={5}>{CLOSED_LINE}</td>
+                    <td colSpan={5}>
+                        <svg className="otr-closed-svg" width={`${CLOSED_WIDTH_PT}pt`} height="12pt" viewBox={`0 0 ${CLOSED_WIDTH_PT} 12`} aria-label={CLOSED_LINE}>
+                            <text x="0" y="9.6" textLength={CLOSED_WIDTH_PT} lengthAdjust="spacingAndGlyphs">{CLOSED_LINE}</text>
+                        </svg>
+                    </td>
                 </tr>
             )
         }
         if (item.kind === 'graduated') {
             return (
                 <tr key={item.id} className="otr-row-text">
-                    <td colSpan={5}>{boldParts(item.text, ['HOLY CROSS OF DAVAO COLLEGE, INC.', form.collegeOf])}</td>
+                    <td colSpan={5}>{boldParts(item.text)}</td>
                 </tr>
             )
         }

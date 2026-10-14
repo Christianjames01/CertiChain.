@@ -374,10 +374,24 @@
 }
 
 .otr-row-closed td {
-    font-weight: 700;
-    font-size: 9.5pt;
-    text-align: center;
+    height: 12pt;
+    padding: 0;
+    line-height: 0;
     text-overflow: clip;
+}
+
+.otr-closed-svg {
+    display: block;
+    width: 100%;
+    height: 12pt;
+    overflow: visible;
+}
+
+.otr-closed-svg text {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    fill: #000;
 }
 
 .otr-row-text td {
