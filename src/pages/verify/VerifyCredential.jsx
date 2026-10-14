@@ -346,7 +346,7 @@ function VerifyCredential() {
                     </li>
                     <li>
                         <strong>Blockchain record</strong>
-                        <span>A fingerprint of each credential is saved on the public Polygon blockchain.</span>
+                        <span>A fingerprint of each credential is saved on the public Ethereum blockchain.</span>
                     </li>
                     <li>
                         <strong>Free &amp; instant</strong>
