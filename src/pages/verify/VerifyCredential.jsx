@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { REGISTRAR_CONTACT } from '../../lib/registrarContact'
 import certichainLogo from '../../assets/certichain-logo.png'
+import VerificationSteps from './VerificationSteps'
 import './Verify.css'
 
 const formatDate = (value) =>
@@ -297,6 +298,8 @@ function VerifyCredential() {
                                 </div>
 
                                 <BlockchainStatus chain={result.blockchain} />
+
+                                <VerificationSteps result={result} />
                             </div>
                         ) : (
                             <div className="verify-body">
