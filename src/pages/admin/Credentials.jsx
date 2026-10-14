@@ -171,7 +171,17 @@ function Credentials() {
         setAnchoring(false)
 
         if (anchorError) {
-            notifyError('Could not reach the blockchain service. Please try again in a moment.')
+            let detail = ''
+            try {
+                const body = await anchorError.context?.json()
+                detail = body?.error || body?.message || ''
+            } catch (err) {
+                void err
+            }
+            const status = anchorError.context?.status
+            notifyError(detail
+                ? `Blockchain service error${status ? ` (${status})` : ''}: ${detail}`
+                : 'Could not reach the blockchain service. Please try again in a moment.')
             return
         }
         if (data?.configured === false) {
