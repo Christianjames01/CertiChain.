@@ -1,19 +1,3 @@
-#!/usr/bin/env node
-// Load test: N students request a document at the same moment.
-//
-// Runs against the SELF-HOSTED test copy (the VM), never the live site:
-// it creates N temporary student accounts, then all of them at once
-//   1. sign in,
-//   2. open their dashboard (read their own requests),
-//   3. submit a document request,
-//   4. reload their request list,
-// and reports success rate and response times (median / 95th percentile /
-// max) per step. Everything it created is deleted at the end.
-//
-// No dependencies -- plain Node 18+ fetch. Usage (on the VM):
-//   SUPABASE_URL=http://localhost:8000 ANON_KEY=... SERVICE_ROLE_KEY=... \
-//     node scripts/load-test.mjs --students 100
-
 const args = process.argv.slice(2)
 const argValue = (name, fallback) => {
     const i = args.indexOf(name)
@@ -37,8 +21,6 @@ if (/supabase\.co/i.test(URL_BASE) && !args.includes('--allow-cloud')) {
 
 const RUN_ID = Date.now().toString(36)
 const PASSWORD = `LoadTest-${RUN_ID}-Aa1!`
-
-// ---------------------------------------------------------------- helpers
 
 async function call(method, path, { key = ANON, token, body, prefer } = {}) {
     const headers = { apikey: key, Authorization: `Bearer ${token || key}` }
@@ -76,8 +58,6 @@ async function inBatches(items, size, fn) {
     return results
 }
 
-// ------------------------------------------------------------------ setup
-
 async function setup() {
     const [template] = await admin('GET', '/rest/v1/students?select=college_id,program_id,year_level&college_id=not.is.null&program_id=not.is.null&limit=1')
     if (!template) throw new Error('Need at least one existing student with a college and program to copy.')
@@ -97,7 +77,6 @@ async function setup() {
         })
         const userId = user.id || user.user?.id
 
-        // Profile row (usually made by a signup trigger) must be an active student.
         await admin('POST', '/rest/v1/profiles?on_conflict=user_id', {
             user_id: userId, first_name: 'Load', last_name: `Test ${i}`, email, role: 'student', status: 'active',
         }, 'resolution=merge-duplicates,return=minimal').catch(() => {})
@@ -124,8 +103,6 @@ async function setup() {
 
     return { students, documentType }
 }
-
-// ----------------------------------------------------------- the load run
 
 async function studentFlow(student, documentType, timings) {
     let token
@@ -158,8 +135,6 @@ async function studentFlow(student, documentType, timings) {
         call('GET', `/rest/v1/document_requests?select=request_id,request_number,status,requested_at&student_id=eq.${student.studentId}`, { token })))
 }
 
-// ---------------------------------------------------------------- cleanup
-
 async function cleanup(students) {
     if (KEEP || students.length === 0) return
     console.log('\nCleaning up test data…')
@@ -176,8 +151,6 @@ async function cleanup(students) {
     await inBatches(students, 10, (s) => admin('DELETE', `/auth/v1/admin/users/${s.userId}`).catch((e) => console.warn('  user:', e.message)))
     console.log(`Removed ${students.length} test students and ${requestIds.length} test requests.`)
 }
-
-// ------------------------------------------------------------------- main
 
 async function main() {
     console.log(`CertiChain load test → ${URL_BASE}`)

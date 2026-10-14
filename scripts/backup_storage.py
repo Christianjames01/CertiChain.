@@ -23,7 +23,6 @@ FILES_DIR = os.path.join(BACKUP_DIR, 'files')
 with open(os.path.join(BACKUP_DIR, '.cloud_service_key')) as f:
     KEY = f.read().strip()
 
-# Works for both new secret keys (sb_secret_...) and legacy service_role JWTs.
 HEADERS = {'apikey': KEY, 'Authorization': f'Bearer {KEY}'}
 
 
@@ -51,7 +50,7 @@ def list_folder(bucket, prefix):
         for item in items:
             name = item['name']
             path = f'{prefix}/{name}' if prefix else name
-            if item.get('id') is None:  # a folder
+            if item.get('id') is None:
                 yield from list_folder(bucket, path)
             elif name != '.emptyFolderPlaceholder':
                 yield path, (item.get('metadata') or {}).get('size')
@@ -84,7 +83,7 @@ def main():
                     out.write(content)
                 os.replace(target + '.part', target)
                 copied += 1
-            except Exception as err:  # keep going; report at the end
+            except Exception as err:
                 failed += 1
                 print(f'FAILED {bucket}/{path}: {err}', file=sys.stderr)
 
