@@ -22,16 +22,42 @@ const COLORS = {
 const FONT = '"Inter", "Segoe UI", system-ui, sans-serif'
 
 const STATIONS = {
-    request: [-31, 6],
-    upload: [-23, -2],
-    payment: [-14, 7],
-    record: [-5, -6],
-    process: [4, 2],
-    generate: [13, -5],
-    digital: [21, 6],
-    physical: [27, -9],
-    complete: [36, 0],
+    request: [-50, 6],
+    upload: [-42, -2],
+    payment: [-33, 7],
+    record: [-24, -6],
+    process: [-15, 2],
+    generate: [-6, -5],
+    hash: [3, 5],
+    encrypt: [12, -4],
+    chain: [22, 4],
+    digital: [32, -6],
+    physical: [40, 6],
+    complete: [49, -4],
+    verify: [58, 4],
 }
+
+const SAMPLE = {
+    credential: 'CERT-2026124',
+    request: 'REQ-000124',
+    document: 'Transcript of Records',
+    student: 'Juan Dela Cruz',
+    program: 'BS Information Technology',
+    fingerprint: '0x3107b80b4630c607fdaf0c39958ce51322b24270ac2ec840f4a7f072649967cb',
+    edited: '0x9d41c2e07a5f3b18e6d0947c2a1fb85e33c07d6a19e4b2f8c5d1a07e6b39f412',
+    encrypted: '0x01768d2c82ffe7face0944b424b89dc277e4fdd40145aebd50124dde42c1df0abfa9c51922b8b6bd85bcac20',
+    block: '11,914,526',
+    tx: '0x6b6d15ff…dbc1b19',
+    wallet: '0x86BE…12cd9',
+}
+
+const HEX = '0123456789abcdef'
+const scramble = (str, p, seed = 1) =>
+    [...str].map((ch, i) => {
+        if (ch === ' ' || ch === '·') return ch
+        const r = ((i * 9301 + seed * 49297) % 233280) / 233280
+        return r < p ? HEX[(i * 7 + seed * 13 + Math.floor(p * 9)) % 16] : ch
+    }).join('')
 
 const SHOT_FRAMING = {
     request: { at: 'request', y: 2.4, offset: [-7, 6.5, 12] },
@@ -40,13 +66,17 @@ const SHOT_FRAMING = {
     record: { at: 'record', y: 2.8, offset: [-7, 6.5, 12.5] },
     process: { at: 'process', y: 2.4, offset: [-6, 6.5, 12] },
     generate: { at: 'generate', y: 3, offset: [-5, 5, 12] },
+    hash: { at: 'hash', y: 1.7, offset: [-6, 7.5, 15.5] },
+    encrypt: { at: 'encrypt', y: 1.7, offset: [-6, 7.5, 15.5] },
+    chain: { at: 'chain', y: 1.4, offset: [-7, 8, 17] },
     digital: { at: 'digital', y: 2.8, offset: [-5, 5, 11] },
     physical: { at: 'physical', y: 2.8, offset: [-6, 6, 12] },
     complete: { at: 'complete', y: 2.6, dz: -0.4, offset: [-6, 6.5, 13.5] },
+    verify: { at: 'verify', y: 1.6, offset: [-6, 7, 15] },
 }
 const CAMERA = {
-    intro: { target: [3, 0, 0], offset: [-30, 34, 47] },
-    finale: { target: [3, 0, 0], offset: [-26, 38, 51] },
+    intro: { target: [2, 0, -2], offset: [-44, 56, 78] },
+    finale: { target: [2, 0, -2], offset: [-40, 60, 82] },
     ...Object.fromEntries(Object.entries(SHOT_FRAMING).map(([id, f]) => [id, {
         target: [STATIONS[f.at][0], f.y, STATIONS[f.at][1] + (f.dz || 0)],
         offset: f.offset,
@@ -348,7 +378,7 @@ export function createWorkflowScene(container) {
 
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(COLORS.bg)
-    scene.fog = new THREE.Fog(COLORS.bg, 55, 130)
+    scene.fog = new THREE.Fog(COLORS.bg, 75, 175)
 
     const pmrem = new THREE.PMREMGenerator(renderer)
     const envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
@@ -362,8 +392,8 @@ export function createWorkflowScene(container) {
     key.position.set(-20, 40, 26)
     key.castShadow = true
     key.shadow.mapSize.set(2048, 2048)
-    key.shadow.camera.left = -60
-    key.shadow.camera.right = 60
+    key.shadow.camera.left = -80
+    key.shadow.camera.right = 80
     key.shadow.camera.top = 40
     key.shadow.camera.bottom = -40
     key.shadow.camera.far = 140
@@ -381,21 +411,21 @@ export function createWorkflowScene(container) {
 
     const world = new THREE.Group()
     scene.add(world)
-    const platform = new THREE.Mesh(new RoundedBoxGeometry(92, 1.2, 40, 4, 0.5), std(COLORS.floor, { roughness: 0.62, metalness: 0.15 }))
-    platform.position.set(8, -0.6, 0)
+    const platform = new THREE.Mesh(new RoundedBoxGeometry(124, 1.2, 40, 4, 0.5), std(COLORS.floor, { roughness: 0.62, metalness: 0.15 }))
+    platform.position.set(4, -0.6, 0)
     platform.receiveShadow = true
     world.add(platform)
-    const grid = new THREE.GridHelper(92, 46, 0x2c4a74, 0x1a3150)
-    grid.position.set(8, 0.005, 0)
-    grid.scale.z = 40 / 92
+    const grid = new THREE.GridHelper(124, 62, 0x2c4a74, 0x1a3150)
+    grid.position.set(4, 0.005, 0)
+    grid.scale.z = 40 / 124
     grid.material.transparent = true
     grid.material.opacity = 0.35
     world.add(grid)
-    const edge = new THREE.Mesh(new THREE.BoxGeometry(92.2, 0.06, 40.2), new THREE.MeshBasicMaterial({ color: COLORS.floorEdge }))
-    edge.position.set(8, -1.18, 0)
+    const edge = new THREE.Mesh(new THREE.BoxGeometry(124.2, 0.06, 40.2), new THREE.MeshBasicMaterial({ color: COLORS.floorEdge }))
+    edge.position.set(4, -1.18, 0)
     world.add(edge)
 
-    const order = ['request', 'upload', 'payment', 'record', 'process', 'generate', 'digital', 'physical', 'complete']
+    const order = ['request', 'upload', 'payment', 'record', 'process', 'generate', 'hash', 'encrypt', 'chain', 'digital', 'physical', 'complete', 'verify']
     const pathPoints = order.map((k) => new THREE.Vector3(STATIONS[k][0], 0.06, STATIONS[k][1]))
     const curve = new THREE.CatmullRomCurve3(pathPoints, false, 'centripetal')
     const pathMat = new THREE.MeshBasicMaterial({ color: 0x2b5a99, transparent: true, opacity: 0.75, toneMapped: false })
@@ -411,9 +441,9 @@ export function createWorkflowScene(container) {
 
     const pulseGeo = new THREE.SphereGeometry(0.11, 12, 10)
     const pulses = []
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 34; i++) {
         const m = new THREE.Mesh(pulseGeo, new THREE.MeshBasicMaterial({ color: COLORS.sky, transparent: true, opacity: 0.85, toneMapped: false }))
-        m.userData.u = i / 26
+        m.userData.u = i / 34
         world.add(m)
         pulses.push(m)
     }
@@ -423,7 +453,7 @@ export function createWorkflowScene(container) {
     const pos = new Float32Array(particleCount * 3)
     const speeds = new Float32Array(particleCount)
     for (let i = 0; i < particleCount; i++) {
-        pos[i * 3] = -40 + Math.random() * 96
+        pos[i * 3] = -58 + Math.random() * 124
         pos[i * 3 + 1] = Math.random() * 16
         pos[i * 3 + 2] = -22 + Math.random() * 44
         speeds[i] = 0.12 + Math.random() * 0.35
@@ -880,8 +910,8 @@ export function createWorkflowScene(container) {
         const genCard = canvasPanel(2.6, 0.9, (c, w, h, s) => {
             cardBackground(c, w, h, { accent: '#b8892b' })
             if (s.ready) checkMark(c, w * 0.1, h * 0.56, h * 0.16)
-            text(c, s.ready ? 'Document ready' : 'Finishing the document…', w * (s.ready ? 0.2 : 0.07), h * 0.47, h * 0.15, { weight: 800 })
-            text(c, 'Transcript of Records · REQ-000124', w * (s.ready ? 0.2 : 0.07), h * 0.72, h * 0.11, { color: '#5b6b82', weight: 600 })
+            text(c, s.ready ? 'Credential generated' : 'Generating the credential…', w * (s.ready ? 0.2 : 0.07), h * 0.47, h * 0.15, { weight: 800 })
+            text(c, `${SAMPLE.credential} · signed by the Registrar`, w * (s.ready ? 0.2 : 0.07), h * 0.72, h * 0.11, { color: '#5b6b82', weight: 600 })
         })
         genCard.mesh.position.set(2.5, 4.1, 0.6)
         genCard.mesh.rotation.y = -0.25
@@ -889,6 +919,228 @@ export function createWorkflowScene(container) {
         g.add(genCard.mesh)
 
         station.generate = { group: g, pedestal, cert, certPanel, glowMat, genGeo, genStart, genPos, genMat, genCard, genCount }
+    }
+
+    {
+        const g = new THREE.Group()
+        g.position.copy(at('hash'))
+        world.add(g)
+        const pedestal = makePedestal(1.7, COLORS.sky)
+        g.add(pedestal)
+        const machine = new THREE.Group()
+        const shell = new THREE.Mesh(new RoundedBoxGeometry(2.6, 1.7, 1.7, 4, 0.18), std(0x16325c, { roughness: 0.35, metalness: 0.45 }))
+        shell.position.y = 1.15
+        machine.add(shell)
+        const slotMat = new THREE.MeshBasicMaterial({ color: COLORS.sky, toneMapped: false, transparent: true, opacity: 0.5 })
+        const slot = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.16), slotMat)
+        slot.position.set(0, 1.55, 0.86)
+        machine.add(slot)
+        const label = canvasPanel(2.0, 0.42, (c, w, h) => {
+            c.fillStyle = '#0b1730'
+            roundRect(c, 0, 0, w, h, h * 0.25)
+            c.fill()
+            text(c, 'SHA-256 HASHING', w / 2, h / 2 + 1, h * 0.42, { color: '#7cc4ff', weight: 800, align: 'center' })
+        })
+        label.mesh.position.set(0, 0.95, 0.861)
+        machine.add(label.mesh)
+        g.add(shadowed(machine))
+        const coreMat = new THREE.MeshBasicMaterial({ color: COLORS.sky, toneMapped: false, transparent: true, opacity: 0.85 })
+        const core = new THREE.Mesh(new THREE.IcosahedronGeometry(0.38, 1), coreMat)
+        core.position.y = 2.75
+        g.add(core)
+        const rings = [0, 1].map((i) => {
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(0.78 + i * 0.22, 0.03, 8, 64), new THREE.MeshBasicMaterial({ color: i ? COLORS.gold : COLORS.sky, toneMapped: false, transparent: true, opacity: 0.8 }))
+            ring.position.y = 2.75
+            g.add(ring)
+            return ring
+        })
+        const inPanel = canvasPanel(0.8, 1.05, (c, w, h) => {
+            c.fillStyle = '#fffdf6'
+            c.fillRect(0, 0, w, h)
+            c.strokeStyle = '#b8892b'
+            c.lineWidth = 6
+            c.strokeRect(w * 0.05, h * 0.04, w * 0.9, h * 0.92)
+            text(c, 'CREDENTIAL', w / 2, h * 0.14, h * 0.07, { color: '#123b78', weight: 800, align: 'center' })
+            for (let i = 0; i < 6; i++) {
+                c.fillStyle = 'rgba(15,31,56,0.18)'
+                c.fillRect(w * 0.14, h * (0.28 + i * 0.1), w * (0.72 - (i % 3) * 0.12), h * 0.03)
+            }
+        }, { emissive: false, transparent: false })
+        const inDoc = makeDocument(inPanel, 0.8, 1.05)
+        inDoc.userData.start = new THREE.Vector3(-3.4, 2.4, 1.4)
+        inDoc.userData.end = new THREE.Vector3(0, 1.62, 0.7)
+        inDoc.position.copy(inDoc.userData.start)
+        g.add(inDoc)
+        const out = canvasPanel(3.8, 1.6, (c, w, h, st) => {
+            cardBackground(c, w, h, { accent: '#123b78' })
+            cardTitle(c, w, h, 'Fingerprint (SHA-256)')
+            const shown = SAMPLE.fingerprint.slice(0, st.chars || 0)
+            c.font = `700 ${Math.round(h * 0.078)}px "Consolas", "Courier New", monospace`
+            c.fillStyle = '#0f1f38'
+            c.textBaseline = 'middle'
+            c.fillText(shown.slice(0, 34), w * 0.06, h * 0.33)
+            c.fillText(shown.slice(34), w * 0.06, h * 0.46)
+            text(c, 'One-way · cannot be turned back into the data', w * 0.06, h * 0.6, h * 0.055, { color: '#5b6b82', weight: 600 })
+            if (st.alt) {
+                c.fillStyle = 'rgba(200,16,46,0.09)'
+                roundRect(c, w * 0.05, h * 0.69, w * 0.9, h * 0.24, 12)
+                c.fill()
+                text(c, 'If one letter of the record changes:', w * 0.08, h * 0.75, h * 0.052, { color: '#9f1239', weight: 700 })
+                c.font = `700 ${Math.round(h * 0.06)}px "Consolas", "Courier New", monospace`
+                c.fillStyle = '#9f1239'
+                c.fillText(`${SAMPLE.edited.slice(0, 40)}…`, w * 0.08, h * 0.86)
+            }
+        })
+        out.mesh.position.set(0.4, 4.6, 0.6)
+        out.mesh.scale.setScalar(0.001)
+        g.add(out.mesh)
+        station.hash = { group: g, pedestal, inDoc, out, core, coreMat, rings, slotMat }
+    }
+
+    {
+        const g = new THREE.Group()
+        g.position.copy(at('encrypt'))
+        world.add(g)
+        const pedestal = makePedestal(1.6, COLORS.gold)
+        g.add(pedestal)
+        const lock = new THREE.Group()
+        const body = new THREE.Mesh(new RoundedBoxGeometry(1.5, 1.2, 0.55, 4, 0.12), std(COLORS.gold, { roughness: 0.3, metalness: 0.75 }))
+        body.position.y = 0.6
+        lock.add(body)
+        const keyhole = new THREE.Mesh(new THREE.CircleGeometry(0.12, 24), new THREE.MeshBasicMaterial({ color: 0x1f2937 }))
+        keyhole.position.set(0, 0.68, 0.281)
+        lock.add(keyhole)
+        const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.1, 12, 40, Math.PI), std(0xcbd5e1, { roughness: 0.25, metalness: 0.9 }))
+        shackle.position.set(0, 1.55, 0)
+        lock.add(shackle)
+        lock.position.set(0, 0.35, 0)
+        g.add(shadowed(lock))
+        const key = new THREE.Group()
+        const bow = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.05, 10, 28), std(0xe2e8f0, { metalness: 0.9, roughness: 0.25 }))
+        key.add(bow)
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.07, 0.05), std(0xe2e8f0, { metalness: 0.9, roughness: 0.25 }))
+        blade.position.x = 0.4
+        key.add(blade)
+        key.userData.start = new THREE.Vector3(2.6, 2.6, 1.6)
+        key.userData.end = new THREE.Vector3(0.36, 1.03, 0.45)
+        key.position.copy(key.userData.start)
+        key.rotation.y = Math.PI
+        g.add(shadowed(key))
+        const card = canvasPanel(3.6, 2.0, (c, w, h, st) => {
+            const p = st.p || 0
+            cardBackground(c, w, h, { accent: p >= 1 ? '#b8892b' : '#123b78' })
+            cardTitle(c, w, h, p >= 1 ? 'Encrypted copy (AES-256)' : p > 0 ? 'Encrypting…' : 'Credential copy')
+            if (p < 1) {
+                const rows = [['Number', SAMPLE.credential], ['Document', SAMPLE.document], ['Student', SAMPLE.student], ['Program', SAMPLE.program]]
+                rows.forEach(([k, v], i) => {
+                    const y = h * (0.27 + i * 0.13)
+                    text(c, k, w * 0.06, y, h * 0.06, { color: '#5b6b82', weight: 600 })
+                    c.font = `700 ${Math.round(h * 0.064)}px ${p > 0 ? '"Consolas", monospace' : FONT}`
+                    c.fillStyle = '#0f1f38'
+                    c.textBaseline = 'middle'
+                    c.fillText(scramble(v, p, i + 1), w * 0.32, y)
+                })
+            } else {
+                c.font = `700 ${Math.round(h * 0.06)}px "Consolas", "Courier New", monospace`
+                c.fillStyle = '#7a4d0c'
+                c.textBaseline = 'middle'
+                const enc = SAMPLE.encrypted
+                c.fillText(enc.slice(0, 36), w * 0.06, h * 0.3)
+                c.fillText(enc.slice(36, 72), w * 0.06, h * 0.41)
+                c.fillText(`${enc.slice(72)}…`, w * 0.06, h * 0.52)
+                text(c, 'Unreadable without the Registrar’s secret key', w * 0.06, h * 0.66, h * 0.058, { color: '#5b6b82', weight: 600 })
+            }
+            if (st.locked) {
+                c.fillStyle = 'rgba(184,137,43,0.13)'
+                roundRect(c, w * 0.05, h * 0.76, w * 0.9, h * 0.15, 12)
+                c.fill()
+                text(c, '🔒  Locked with the Registrar’s key', w * 0.09, h * 0.835, h * 0.064, { color: '#7a4d0c', weight: 800 })
+            }
+        })
+        card.mesh.position.set(-0.3, 4.55, 0.7)
+        card.mesh.scale.setScalar(0.001)
+        g.add(card.mesh)
+        station.encrypt = { group: g, pedestal, shackle, key, card }
+    }
+
+    {
+        const g = new THREE.Group()
+        g.position.copy(at('chain'))
+        world.add(g)
+        const base = new THREE.Mesh(new RoundedBoxGeometry(11, 0.25, 3.2, 3, 0.1), std(0x1a2a44, { roughness: 0.3, metalness: 0.35 }))
+        base.position.y = 0.13
+        g.add(shadowed(base))
+        const railMat = new THREE.MeshBasicMaterial({ color: COLORS.sky, toneMapped: false, transparent: true, opacity: 0.7 })
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.03, 0.06), railMat)
+        rail.position.set(0, 0.27, 1.45)
+        g.add(rail)
+        const blockNumbers = ['11,914,522', '11,914,523', '11,914,524', '11,914,525', SAMPLE.block]
+        const blockX = (i) => -3.8 + i * 1.9
+        const blocks = blockNumbers.map((num, i) => {
+            const isNew = i === blockNumbers.length - 1
+            const blk = new THREE.Group()
+            const glowMat = new THREE.MeshStandardMaterial({ color: isNew ? 0x1d4ed8 : 0x123b78, roughness: 0.3, metalness: 0.55, emissive: isNew ? COLORS.sky : 0x0b2a5a, emissiveIntensity: isNew ? 0.2 : 0.35 })
+            const cube = new THREE.Mesh(new RoundedBoxGeometry(1.3, 1.3, 1.3, 4, 0.14), glowMat)
+            blk.add(cube)
+            const face = canvasPanel(1.1, 1.1, (c, w, h, st) => {
+                c.fillStyle = st.lit ? 'rgba(124,196,255,0.25)' : 'rgba(255,255,255,0.06)'
+                roundRect(c, 0, 0, w, h, w * 0.12)
+                c.fill()
+                text(c, 'BLOCK', w / 2, h * 0.22, h * 0.13, { color: '#bfe3ff', weight: 800, align: 'center' })
+                text(c, `#${num}`, w / 2, h * 0.42, h * 0.11, { color: '#fff', weight: 800, align: 'center' })
+                for (let k = 0; k < 3; k++) {
+                    c.fillStyle = isNew && st.lit ? (k === 0 ? '#7cc4ff' : '#e6b54a') : 'rgba(191,227,255,0.35)'
+                    c.fillRect(w * 0.18, h * (0.6 + k * 0.1), w * (0.64 - k * 0.1), h * 0.045)
+                }
+            })
+            face.mesh.position.z = 0.66
+            blk.add(face.mesh)
+            blk.position.set(blockX(i), 1.25, 0)
+            blk.userData = { glowMat, face, home: new THREE.Vector3(blockX(i), 1.25, 0) }
+            g.add(shadowed(blk))
+            return blk
+        })
+        const linkMat = std(0xcbd5e1, { metalness: 0.9, roughness: 0.25 })
+        const links = blocks.slice(1).map((_, i) => {
+            const link = new THREE.Group()
+            for (const dx of [-0.16, 0.16]) {
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.05, 10, 24), linkMat)
+                ring.position.x = dx
+                ring.rotation.y = dx > 0 ? Math.PI / 2 : 0
+                link.add(ring)
+            }
+            link.position.set(blockX(i) + 0.95, 1.25, 0)
+            g.add(shadowed(link))
+            return link
+        })
+        const packets = [COLORS.sky, COLORS.gold].map((color) => {
+            const m = new THREE.Mesh(new RoundedBoxGeometry(0.42, 0.42, 0.42, 2, 0.08), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: color, emissiveIntensity: 1.4 }))
+            m.visible = false
+            g.add(m)
+            return m
+        })
+        const info = canvasPanel(3.9, 2.05, (c, w, h, st) => {
+            cardBackground(c, w, h, { accent: st.permanent ? '#15803d' : '#123b78' })
+            cardTitle(c, w, h, st.permanent ? 'Recorded · permanent' : 'Recording on the blockchain…')
+            const rows = [
+                ['Network', 'Ethereum (Sepolia)'],
+                ['Block', `#${SAMPLE.block}`],
+                ['Transaction', SAMPLE.tx],
+                ['Signed by', `HCDC wallet ${SAMPLE.wallet}`],
+                ['Stored', 'Fingerprint + encrypted copy'],
+            ]
+            rows.forEach(([k, v], i) => {
+                if (i >= (st.rows || 0)) return
+                const y = h * (0.25 + i * 0.12)
+                text(c, k, w * 0.06, y, h * 0.056, { color: '#5b6b82', weight: 600 })
+                text(c, v, w * 0.33, y, h * 0.058, { color: '#0f1f38', weight: 700 })
+            })
+            if (st.permanent) text(c, 'Nobody can change or delete it, not even the school.', w * 0.06, h * 0.88, h * 0.055, { color: '#15803d', weight: 800 })
+        })
+        info.mesh.position.set(0, 4.25, 1.2)
+        info.mesh.scale.setScalar(0.001)
+        g.add(info.mesh)
+        station.chain = { group: g, blocks, links, packets, info, railMat }
     }
 
     {
@@ -1054,10 +1306,10 @@ export function createWorkflowScene(container) {
         const logCard = canvasPanel(2.6, 1.6, (c, w, h, s) => {
             cardBackground(c, w, h, { accent: '#123b78' })
             cardTitle(c, w, h, 'Request history')
-            const rows = ['Request submitted', 'Payment verified', 'Document prepared', 'Released at the window', 'Marked completed']
+            const rows = ['Request submitted', 'Payment verified', 'Credential generated', 'Recorded on the blockchain', 'Released at the window', 'Marked completed']
             rows.forEach((label, i) => {
                 if (i >= (s.rows || 0)) return
-                const y = h * (0.26 + i * 0.14)
+                const y = h * (0.24 + i * 0.12)
                 checkMark(c, w * 0.09, y, h * 0.04)
                 text(c, label, w * 0.17, y, h * 0.07, { color: '#0f1f38', weight: 700 })
             })
@@ -1069,16 +1321,91 @@ export function createWorkflowScene(container) {
         station.complete = { group: g, done, logCard }
     }
 
+    {
+        const g = new THREE.Group()
+        g.position.copy(at('verify'))
+        world.add(g)
+        const pedestal = makePedestal(1.5, COLORS.green)
+        g.add(pedestal)
+        const screen = canvasPanel(3.4, 2.4, (c, w, h, st) => {
+            c.fillStyle = '#f8fafc'
+            roundRect(c, 0, 0, w, h, w * 0.03)
+            c.fill()
+            c.fillStyle = '#e2e8f0'
+            c.fillRect(0, 0, w, h * 0.09)
+            text(c, `onlineregistrar.vercel.app/verify/${SAMPLE.credential}`, w * 0.04, h * 0.045, h * 0.04, { color: '#475569', weight: 600 })
+            const bad = !!st.tamper
+            const good = !bad && st.verified
+            c.fillStyle = bad ? '#fde8e8' : good ? '#dcfce7' : '#e2e8f0'
+            c.fillRect(0, h * 0.09, w, h * 0.16)
+            text(c, bad ? '✗  Tampered — do not accept' : good ? '✓  Verified credential' : 'Checking…', w * 0.05, h * 0.17, h * 0.07, { color: bad ? '#9f1239' : good ? '#15803d' : '#475569', weight: 900 })
+            const steps = bad
+                ? [
+                    ['Someone edited the student name in the database', 'bad'],
+                    [`New fingerprint ${SAMPLE.edited.slice(0, 18)}…`, 'bad'],
+                    ['Not found on the blockchain', 'bad'],
+                    ['Head of Registrar alerted', 'bad'],
+                ]
+                : [
+                    [`Found ${SAMPLE.credential} in Registrar records`, 'ok'],
+                    ['Registrar’s digital signature valid', 'ok'],
+                    [`Fingerprint ${SAMPLE.fingerprint.slice(0, 18)}…`, 'ok'],
+                    [`Found on the blockchain · block #${SAMPLE.block}`, 'ok'],
+                    ['Encrypted copy decrypted · matches the record', 'ok'],
+                ]
+            steps.forEach(([label, tone], i) => {
+                if (!bad && i >= (st.steps || 0)) return
+                const y = h * (0.34 + i * 0.12)
+                if (tone === 'ok') checkMark(c, w * 0.07, y, h * 0.035)
+                else {
+                    c.fillStyle = '#e11d48'
+                    c.beginPath()
+                    c.arc(w * 0.07, y, h * 0.035, 0, Math.PI * 2)
+                    c.fill()
+                    text(c, '✗', w * 0.07, y + 1, h * 0.045, { color: '#fff', weight: 900, align: 'center' })
+                }
+                text(c, label, w * 0.12, y, h * 0.052, { color: tone === 'ok' ? '#0f1f38' : '#9f1239', weight: 700 })
+            })
+        }, { pxPerUnit: 260 })
+        const monitor = new THREE.Group()
+        const frame = new THREE.Mesh(new RoundedBoxGeometry(3.56, 2.56, 0.1, 3, 0.05), std(0x1f2937, { roughness: 0.4 }))
+        monitor.add(frame)
+        screen.mesh.position.z = 0.056
+        monitor.add(screen.mesh)
+        monitor.position.set(0, 2.55, 0)
+        g.add(shadowed(monitor))
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 1.1, 16), std(0x6b7280, { metalness: 0.6 }))
+        pole.position.set(0, 0.85, -0.05)
+        g.add(shadowed(pole))
+        const employer = makePerson({ top: 0x475569, bottom: 0x1e293b, skin: COLORS.skin, hair: 0x3b2a1a })
+        employer.position.set(-3.4, 0, 2.4)
+        employer.rotation.y = 0.75
+        g.add(employer)
+        const tag = canvasPanel(2.2, 0.5, (c, w, h) => {
+            c.fillStyle = 'rgba(14,30,54,0.85)'
+            roundRect(c, 0, 0, w, h, h * 0.45)
+            c.fill()
+            text(c, 'Employer / another school', w / 2, h / 2 + 1, h * 0.3, { color: '#e2ecfa', weight: 700, align: 'center' })
+        })
+        tag.mesh.position.set(-3.4, 2.75, 2.4)
+        g.add(tag.mesh)
+        station.verify = { group: g, screen, pedestal, employer, tag }
+    }
+
     const badgeInfo = [
         ['request', 1, 'Student Request'],
         ['upload', 2, 'Requirements'],
         ['payment', 3, 'Payment & Receipt'],
         ['record', 4, 'Registrar Review'],
         ['process', 5, 'Processing'],
-        ['generate', 6, 'Document Ready'],
-        ['digital', 7, 'Student Notified'],
-        ['physical', 7, 'Pickup'],
-        ['complete', 8, 'Completed'],
+        ['generate', 6, 'Credential'],
+        ['hash', 7, 'Fingerprint'],
+        ['encrypt', 8, 'Encrypted'],
+        ['chain', 9, 'Blockchain'],
+        ['digital', 10, 'Notified'],
+        ['physical', 11, 'Claiming'],
+        ['complete', 12, 'Completed'],
+        ['verify', 13, 'Verified'],
     ]
     for (const [k, n, label] of badgeInfo) {
         const b = makeBadge(n, label)
@@ -1100,8 +1427,8 @@ export function createWorkflowScene(container) {
     let paused = false
     let pathFillTarget = 0
     let pathFillNow = 0
-    const BADGE_FOR_SHOT = { request: 'request', upload: 'upload', payment: 'payment', record: 'record', process: 'process', generate: 'generate', digital: 'digital', physical: 'physical', complete: 'complete' }
-    const SHOT_ORDER = ['intro', 'request', 'upload', 'payment', 'record', 'process', 'generate', 'digital', 'physical', 'complete', 'finale']
+    const BADGE_FOR_SHOT = Object.fromEntries(order.map((k) => [k, k]))
+    const SHOT_ORDER = ['intro', ...order, 'finale']
 
     const framing = (id) => {
         const f = CAMERA[id] || CAMERA.intro
@@ -1157,6 +1484,23 @@ export function createWorkflowScene(container) {
         const c = station.complete
         c.done.mesh.scale.setScalar(0.001)
         c.logCard.mesh.scale.setScalar(0.001)
+        const hs = station.hash
+        hs.inDoc.position.copy(hs.inDoc.userData.start)
+        hs.inDoc.scale.setScalar(1)
+        hs.out.mesh.scale.setScalar(0.001)
+        hs.out.redraw({})
+        const en = station.encrypt
+        en.card.mesh.scale.setScalar(0.001)
+        en.card.redraw({})
+        en.key.position.copy(en.key.userData.start)
+        en.key.visible = true
+        en.shackle.position.y = 1.55
+        const ch = station.chain
+        ch.info.mesh.scale.setScalar(0.001)
+        ch.info.redraw({})
+        ch.packets.forEach((m) => { m.visible = false })
+        const vf = station.verify
+        vf.screen.redraw({})
     }
 
     function settleBefore(id) {
@@ -1170,8 +1514,24 @@ export function createWorkflowScene(container) {
             gnr.cert.scale.setScalar(0.001)
             gnr.certPanel.redraw({})
         }
+        const ch = station.chain
+        const newBlock = ch.blocks[ch.blocks.length - 1]
+        const lastLink = ch.links[ch.links.length - 1]
+        const placed = idx > SHOT_ORDER.indexOf('chain')
+        newBlock.position.copy(newBlock.userData.home)
+        if (!placed) newBlock.position.y = 7
+        newBlock.visible = placed
+        lastLink.visible = placed
+        newBlock.userData.face.redraw({ lit: placed })
+        newBlock.userData.glowMat.emissiveIntensity = placed ? 0.55 : 0.2
+        const en = station.encrypt
+        if (idx > SHOT_ORDER.indexOf('encrypt')) {
+            en.shackle.position.y = 1.25
+            en.key.visible = false
+        }
         if (id === 'finale') {
             station.complete.done.mesh.scale.setScalar(1.15)
+            station.verify.screen.redraw({ steps: 5, verified: true })
         }
     }
 
@@ -1290,6 +1650,64 @@ export function createWorkflowScene(container) {
             scaleTo(gnr.genCard.mesh, span(t, 4.8, 5.6))
             gnr.genCard.redraw({ ready: t > 4.8 })
             gnr.pedestal.userData.ringMat.opacity = 0.5 + Math.sin(t * 5) * 0.3
+        } else if (shotId === 'hash') {
+            const hs = station.hash
+            const k = easeInOut(span(t, 1.0, 2.6))
+            hs.inDoc.position.lerpVectors(hs.inDoc.userData.start, hs.inDoc.userData.end, k)
+            hs.inDoc.position.y += Math.sin(k * Math.PI) * 0.8
+            hs.inDoc.rotation.y = (1 - k) * 0.9
+            hs.inDoc.scale.setScalar(Math.max(0.001, 1 - span(t, 2.4, 2.8)))
+            const spin = span(t, 2.6, 6.6)
+            hs.rings.forEach((r, i) => {
+                r.rotation.x = t * (1.4 + i * 0.9) * (0.3 + spin)
+                r.rotation.y = t * (0.9 + i * 0.6) * (0.3 + spin)
+            })
+            hs.core.rotation.y = t * 2
+            hs.core.scale.setScalar(1 + (spin > 0 && spin < 1 ? Math.sin(t * 12) * 0.12 : 0))
+            hs.slotMat.opacity = 0.4 + (spin > 0 && spin < 1 ? Math.abs(Math.sin(t * 10)) * 0.6 : 0)
+            scaleTo(hs.out.mesh, span(t, 3.0, 3.8))
+            hs.out.mesh.position.y = 4.6 + Math.sin(t * 1.5) * 0.05
+            hs.out.redraw({ chars: Math.round(span(t, 3.4, 6.6) * 66), alt: t > 8.0 })
+            if (t > 6.8 && t < 6.9) sparkle(at('hash').x, 2.75, at('hash').z, 0x93c5fd)
+            hs.pedestal.userData.ringMat.opacity = 0.5 + Math.sin(t * 5) * 0.3
+        } else if (shotId === 'encrypt') {
+            const en = station.encrypt
+            scaleTo(en.card.mesh, span(t, 1.2, 2.0))
+            en.card.mesh.position.y = 4.55 + Math.sin(t * 1.5) * 0.05
+            const p = Math.round(span(t, 3.0, 6.2) * 20) / 20
+            const kk = easeInOut(span(t, 5.4, 6.6))
+            en.key.position.lerpVectors(en.key.userData.start, en.key.userData.end, kk)
+            en.key.rotation.z = kk > 0.95 ? -Math.PI / 2 * span(t, 6.6, 7.0) : 0
+            en.shackle.position.y = 1.55 - 0.3 * easeOut(span(t, 6.8, 7.2))
+            en.card.redraw({ p, locked: t > 7.0 })
+            if (t > 7.0 && t < 7.1) sparkle(at('encrypt').x, 1.8, at('encrypt').z + 0.4, 0xffe2a0)
+            en.pedestal.userData.ringMat.opacity = 0.5 + Math.sin(t * 5) * 0.3
+        } else if (shotId === 'chain') {
+            const ch = station.chain
+            const newBlock = ch.blocks[ch.blocks.length - 1]
+            const lastLink = ch.links[ch.links.length - 1]
+            const fly = span(t, 1.2, 3.4)
+            ch.packets.forEach((m, i) => {
+                m.visible = fly > 0 && fly < 1
+                const e = easeInOut(Math.min(1, fly * (1 + i * 0.12)))
+                m.position.set(-8 + e * (newBlock.userData.home.x + 8), 3.5 + Math.sin(e * Math.PI) * 1.6 - i * 0.5, 1.6 - e * 1.6)
+                m.rotation.set(t * 2, t * 3, 0)
+            })
+            newBlock.visible = t > 2.6
+            const drop = easeOut(span(t, 3.4, 5.4))
+            newBlock.position.set(newBlock.userData.home.x, 7 - (7 - newBlock.userData.home.y) * drop, 0)
+            newBlock.rotation.y = (1 - drop) * Math.PI
+            lastLink.visible = t > 5.6
+            newBlock.userData.face.redraw({ lit: t > 5.6 })
+            newBlock.userData.glowMat.emissiveIntensity = t > 5.6 ? 0.55 + Math.sin(t * 4) * 0.15 : 0.2
+            if (t > 5.6 && t < 5.7) sparkle(at('chain').x + newBlock.userData.home.x, 1.4, at('chain').z, 0x93c5fd)
+            ch.blocks.slice(0, -1).forEach((b, i) => {
+                b.userData.glowMat.emissiveIntensity = 0.3 + (t > 5.6 ? Math.max(0, Math.sin(t * 3 - i * 0.7)) * 0.25 : 0)
+            })
+            scaleTo(ch.info.mesh, span(t, 5.8, 6.6))
+            ch.info.mesh.position.y = 4.25 + Math.sin(t * 1.5) * 0.05
+            ch.info.redraw({ rows: Math.floor(span(t, 6.2, 8.4) * 5.99), permanent: t > 8.6 })
+            ch.railMat.opacity = 0.5 + Math.sin(t * 4) * 0.3
         } else if (shotId === 'digital') {
             const d = station.digital
             d.phone.rotation.y = Math.sin(t * 0.6) * 0.12
@@ -1316,17 +1734,30 @@ export function createWorkflowScene(container) {
         } else if (shotId === 'complete') {
             const c = station.complete
             scaleTo(c.logCard.mesh, span(t, 0.9, 1.6))
-            c.logCard.redraw({ rows: Math.floor(span(t, 1.1, 4.0) * 5.99) })
+            c.logCard.redraw({ rows: Math.floor(span(t, 1.1, 4.4) * 6.99) })
             scaleTo(c.done.mesh, span(t, 5.0, 5.8), 1.15)
             c.done.mesh.position.y = 3.6 + Math.sin(t * 1.5) * 0.05
             if (t > 5.0 && t < 5.1) sparkle(at('complete').x, 3.6, at('complete').z + 0.8, 0x86efac)
+        } else if (shotId === 'verify') {
+            const vf = station.verify
+            vf.screen.redraw({
+                steps: Math.floor(span(t, 1.8, 5.4) * 5.99),
+                verified: t > 5.6,
+                tamper: t > 9.4,
+            })
+            if (t > 5.6 && t < 5.7) sparkle(at('verify').x, 2.6, at('verify').z + 0.4, 0x86efac)
+            if (t > 9.4 && t < 9.5) sparkle(at('verify').x, 2.6, at('verify').z + 0.4, 0xfda4af)
+            vf.pedestal.userData.ringMat.color.set(t > 9.4 ? 0xe11d48 : COLORS.green)
+            vf.pedestal.userData.ringMat.opacity = 0.5 + Math.sin(t * 5) * 0.3
+            vf.employer.userData.head.rotation.x = 0.1
+            vf.tag.mesh.quaternion.copy(camera.quaternion)
         } else if (shotId === 'finale') {
             station.complete.done.mesh.position.y = 3.6 + Math.sin(t * 1.5) * 0.05
         }
     }
 
     function idle(time) {
-        const people = [station.request.student, station.upload.student, station.payment.student, station.payment.cashier, station.record.employee, station.process.employee, station.digital.student, station.physical.student]
+        const people = [station.request.student, station.upload.student, station.payment.student, station.payment.cashier, station.record.employee, station.process.employee, station.digital.student, station.physical.student, station.verify.employer]
         people.forEach((p, i) => {
             const b = p.userData.body
             b.scale.y = 1 + Math.sin(time * 1.6 + i) * 0.012

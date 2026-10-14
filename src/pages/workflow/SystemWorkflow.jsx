@@ -334,9 +334,9 @@ function SystemWorkflow() {
                         <span className="wf-eyebrow">CertiChain · Capstone Presentation</span>
                         <h1>System Workflow</h1>
                         <p className="wf-start-sub">
-                            A narrated 3D walkthrough of how an academic document request moves through the online
-                            registrar system: request, credentials, record check, processing, verification, release and
-                            completion.
+                            A narrated 3D walkthrough of a document request in CertiChain: from the student's request and
+                            the registrar's review, to a credential that is fingerprinted, encrypted and recorded on the
+                            blockchain, then claimed, completed and verified by anyone.
                         </p>
 
                         <div className="wf-start-voice">
