@@ -26,7 +26,8 @@ export function useTheme() {
         applyTheme(next)
         try {
             localStorage.setItem(STORAGE_KEY, next)
-        } catch {
+        } catch (err) {
+            void err
         }
         setTheme(next)
     }

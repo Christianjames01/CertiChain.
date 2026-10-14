@@ -17,7 +17,8 @@ export function useDraftState(form, field, initialValue) {
     useEffect(() => {
         try {
             sessionStorage.setItem(storageKey(form, field), JSON.stringify(value))
-        } catch {
+        } catch (err) {
+            void err
         }
     }, [form, field, value])
 
@@ -30,6 +31,7 @@ export function clearDraft(form) {
         Object.keys(sessionStorage)
             .filter((key) => key.startsWith(prefix))
             .forEach((key) => sessionStorage.removeItem(key))
-    } catch {
+    } catch (err) {
+        void err
     }
 }

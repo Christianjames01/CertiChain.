@@ -8,7 +8,8 @@ async function decode(file) {
     if (typeof createImageBitmap === 'function') {
         try {
             return await createImageBitmap(file, { imageOrientation: 'from-image' })
-        } catch {
+        } catch (err) {
+            void err
         }
     }
     const url = URL.createObjectURL(file)

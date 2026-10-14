@@ -12,7 +12,7 @@ export function readSoundPref(name, fallback = false) {
 }
 
 export function writeSoundPref(name, on) {
-    try { localStorage.setItem(PREF_KEY(name), on ? '1' : '0') } catch {  }
+    try { localStorage.setItem(PREF_KEY(name), on ? '1' : '0') } catch (err) { void err }
 }
 
 let cachedVoice = null

@@ -17,7 +17,8 @@ export async function createEmployeeAccount(fields) {
             const body = await error.context.json()
             message = body?.error || message
             details = body?.details
-        } catch {
+        } catch (err) {
+            void err
         }
         const thrown = new Error(message)
         if (details) thrown.details = details

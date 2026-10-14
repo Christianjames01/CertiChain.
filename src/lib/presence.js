@@ -11,7 +11,8 @@ export function usePresenceHeartbeat(active) {
         const ping = async () => {
             try {
                 await supabase.rpc('heartbeat')
-            } catch {
+            } catch (err) {
+                void err
             }
         }
 

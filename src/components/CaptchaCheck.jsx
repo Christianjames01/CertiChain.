@@ -157,7 +157,7 @@ function CaptchaCheck({ onToken }) {
         return () => {
             cancelled = true
             clearTimeout(watchdog.current)
-            try { if (widgetRef.current !== null) window.turnstile?.remove(widgetRef.current) } catch {  }
+            try { if (widgetRef.current !== null) window.turnstile?.remove(widgetRef.current) } catch (err) { void err }
             widgetRef.current = null
             onTokenRef.current?.(null)
         }
