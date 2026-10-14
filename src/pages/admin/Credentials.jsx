@@ -45,6 +45,7 @@ function Credentials() {
     const [revokeReason, setRevokeReason] = useState('')
     const [revoking, setRevoking] = useState(false)
     const [anchoring, setAnchoring] = useState(false)
+    const showChain = role === 'superadmin'
 
     const load = async ({ silent = false } = {}) => {
         if (!silent) setLoading(true)
@@ -165,7 +166,7 @@ function Credentials() {
     }
 
     const anchorNow = async () => {
-        if (blockedForReadOnlyViewer(role)) return
+        if (!showChain) return
         setAnchoring(true)
         const { data, error: anchorError } = await supabase.functions.invoke('anchor-credentials', { body: {} })
         setAnchoring(false)
@@ -275,6 +276,7 @@ function Credentials() {
                     style={{ minWidth: 240 }}
                 />
 
+                {showChain && (
                 <button
                     type="button"
                     className="admin-secondary-button"
@@ -285,6 +287,7 @@ function Credentials() {
                 >
                     {anchoring ? 'Recording…' : `Record on blockchain now${pendingOnChain ? ` (${pendingOnChain})` : ''}`}
                 </button>
+                )}
             </div>
 
             <div className="admin-card">
@@ -300,7 +303,7 @@ function Credentials() {
                                     <th>Student</th>
                                     <th>Request #</th>
                                     <th>Status</th>
-                                    <th>Blockchain</th>
+                                    {showChain && <th>Blockchain</th>}
                                     <th>Generated</th>
                                     <th>Released</th>
                                     <th aria-label="Actions" />
@@ -332,6 +335,7 @@ function Credentials() {
                                                 </span>
                                             )}
                                         </td>
+                                        {showChain && (
                                         <td>
                                             <span className={`admin-status-pill status-${chainTone(c)}`} title={c.chain_error || ''}>
                                                 {chainLabel(c)}
@@ -357,6 +361,7 @@ function Credentials() {
                                                 </a>
                                             )}
                                         </td>
+                                        )}
                                         <td>{formatWhen(c.generated_at)}</td>
                                         <td>{formatWhen(c.released_at)}</td>
                                         <td style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -394,7 +399,7 @@ function Credentials() {
             {revokeTarget && (
                 <Modal
                     title="Revoke Credential"
-                    subtitle="This marks the credential invalid. Anyone checking it on the public verify page will see it was revoked, with this reason. The revocation is also recorded on the blockchain."
+                    subtitle="This marks the credential invalid. Anyone checking it on the public verify page will see it was revoked, with this reason."
                     icon={IconXCircle}
                     onClose={revoking ? undefined : closeRevokeModal}
                 >
