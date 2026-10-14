@@ -5,6 +5,7 @@ import { IconAlert, IconCalendar, IconCheck, IconFile, IconX, StarRating } from 
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { supabase } from '../../lib/supabase'
+import { startBlockchainRecording } from '../../lib/anchorCredentials'
 import { blockedForReadOnlyViewer } from '../../lib/viewOnlyGuard'
 import { useAutoReject } from '../../lib/autoReject'
 import { formatDisplayDateTime } from '../../lib/formatDate'
@@ -774,6 +775,8 @@ function AdminRequestDetails() {
                 }
                 throw new Error('Failed to create credential record: ' + credentialError.message)
             }
+
+            startBlockchainRecording()
 
             const { error: requestError } = await supabase
                 .from('document_requests')

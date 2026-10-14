@@ -408,6 +408,35 @@
     background: var(--amber);
 }
 
+.verify-signature.is-pending {
+    background: var(--paper);
+    color: var(--slate);
+}
+
+.verify-signature.is-pending span {
+    background: var(--slate);
+}
+
+.verify-chain-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.verify-chain-text small {
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.85;
+}
+
+.verify-chain-text a {
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+}
+
 .verify-missing {
     margin: 0 0 12px;
     font-size: 14.5px;
@@ -453,7 +482,7 @@
 
 .verify-trust {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
     margin: 28px 0 0;
     padding: 0;

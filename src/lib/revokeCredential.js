@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { startBlockchainRecording } from './anchorCredentials'
 import { logActivity } from './activityLog'
 import { notifyStudentByStudentId } from './notify'
 
@@ -18,6 +19,8 @@ export async function revokeCredential({ credentialId, credentialNumber, request
     if (error) {
         throw new Error('Failed to revoke credential: ' + error.message)
     }
+
+    startBlockchainRecording()
 
     await logActivity({
         employeeId,

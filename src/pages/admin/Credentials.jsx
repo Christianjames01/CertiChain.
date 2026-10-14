@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { startBlockchainRecording } from '../../lib/anchorCredentials'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import { SkeletonPage } from '../../components/Skeleton'
 import { adminPath } from '../../lib/portalPaths'
@@ -12,6 +13,19 @@ import { IconXCircle } from './icons'
 import './AdminPages.css'
 
 const LOAD_LIMIT = 500
+const EXPLORER_TX = 'https://amoy.polygonscan.com/tx/'
+
+function chainLabel(c) {
+    if (c.chain_status === 'recorded') return c.status === 'revoked' && !c.chain_revoked_at ? 'Recording revocation' : 'Recorded'
+    if (c.chain_status === 'failed') return (c.chain_attempts || 0) >= 10 ? 'Failed' : 'Retrying'
+    return 'Pending'
+}
+
+function chainTone(c) {
+    if (c.chain_status === 'recorded' && (c.status !== 'revoked' || c.chain_revoked_at)) return 'active'
+    if (c.chain_status === 'failed' && (c.chain_attempts || 0) >= 10) return 'rejected'
+    return 'pending'
+}
 
 function formatWhen(value) {
     if (!value) return '—'
@@ -30,6 +44,7 @@ function Credentials() {
     const [revokeTarget, setRevokeTarget] = useState(null)
     const [revokeReason, setRevokeReason] = useState('')
     const [revoking, setRevoking] = useState(false)
+    const [anchoring, setAnchoring] = useState(false)
 
     const load = async ({ silent = false } = {}) => {
         if (!silent) setLoading(true)
@@ -38,7 +53,7 @@ function Credentials() {
         try {
             const { data: credRows, error: credError } = await supabase
                 .from('credentials')
-                .select('credential_id, credential_number, status, student_id, request_id, document_type_id, generated_at, released_at, revoked_at, revoked_by, revocation_reason')
+                .select('*')
                 .order('generated_at', { ascending: false })
                 .limit(LOAD_LIMIT)
 
@@ -143,10 +158,44 @@ function Credentials() {
             return
         }
 
+        startBlockchainRecording()
         notifySuccess(`Credential "${revokeTarget.credential_number}" revoked.`)
         closeRevokeModal()
         load({ silent: true })
     }
+
+    const anchorNow = async () => {
+        if (blockedForReadOnlyViewer(role)) return
+        setAnchoring(true)
+        const { data, error: anchorError } = await supabase.functions.invoke('anchor-credentials', { body: {} })
+        setAnchoring(false)
+
+        if (anchorError) {
+            notifyError('Could not reach the blockchain service. Please try again in a moment.')
+            return
+        }
+        if (data?.configured === false) {
+            notifyWarning('Blockchain recording is not set up yet. Add the blockchain settings in Supabase first.')
+            return
+        }
+        if (data?.busy) {
+            notifyWarning(data.message || 'Recording is already running. Try again in a minute.')
+            return
+        }
+        const failure = data?.record?.error || data?.revoke?.error || data?.error
+        if (failure) {
+            notifyError('Blockchain recording failed: ' + failure)
+        } else {
+            const recorded = (data?.record?.recorded || 0) + (data?.record?.alreadyOnChain || 0)
+            const revokedCount = data?.revoke?.revoked || 0
+            notifySuccess(recorded || revokedCount
+                ? `Recorded ${recorded} credential${recorded === 1 ? '' : 's'}${revokedCount ? ` and ${revokedCount} revocation${revokedCount === 1 ? '' : 's'}` : ''} on the blockchain.`
+                : 'Everything is already recorded on the blockchain.')
+        }
+        load({ silent: true })
+    }
+
+    const pendingOnChain = rows.filter((r) => chainTone(r) === 'pending').length
 
     const documentOptions = useMemo(
         () => [...new Set(rows.map((r) => r.documentName))].sort(),
@@ -215,6 +264,17 @@ function Credentials() {
                     onChange={(e) => setQuery(e.target.value)}
                     style={{ minWidth: 240 }}
                 />
+
+                <button
+                    type="button"
+                    className="admin-secondary-button"
+                    style={{ marginLeft: 'auto' }}
+                    onClick={anchorNow}
+                    disabled={anchoring}
+                    title="Credentials are recorded automatically every minute. Use this to record them right away."
+                >
+                    {anchoring ? 'Recording…' : `Record on blockchain now${pendingOnChain ? ` (${pendingOnChain})` : ''}`}
+                </button>
             </div>
 
             <div className="admin-card">
@@ -230,6 +290,7 @@ function Credentials() {
                                     <th>Student</th>
                                     <th>Request #</th>
                                     <th>Status</th>
+                                    <th>Blockchain</th>
                                     <th>Generated</th>
                                     <th>Released</th>
                                     <th aria-label="Actions" />
@@ -259,6 +320,31 @@ function Credentials() {
                                                     )}
                                                     {c.revocation_reason}
                                                 </span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <span className={`admin-status-pill status-${chainTone(c)}`} title={c.chain_error || ''}>
+                                                {chainLabel(c)}
+                                            </span>
+                                            {c.chain_tx_hash && (
+                                                <a
+                                                    href={EXPLORER_TX + c.chain_tx_hash}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    style={{ display: 'block', fontSize: 12, marginTop: 2 }}
+                                                >
+                                                    View transaction ↗
+                                                </a>
+                                            )}
+                                            {c.chain_revoke_tx_hash && (
+                                                <a
+                                                    href={EXPLORER_TX + c.chain_revoke_tx_hash}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    style={{ display: 'block', fontSize: 12 }}
+                                                >
+                                                    View revocation ↗
+                                                </a>
                                             )}
                                         </td>
                                         <td>{formatWhen(c.generated_at)}</td>
@@ -298,7 +384,7 @@ function Credentials() {
             {revokeTarget && (
                 <Modal
                     title="Revoke Credential"
-                    subtitle="This marks the credential invalid. Anyone checking it on the public verify page will see it was revoked, with this reason."
+                    subtitle="This marks the credential invalid. Anyone checking it on the public verify page will see it was revoked, with this reason. The revocation is also recorded on the blockchain."
                     icon={IconXCircle}
                     onClose={revoking ? undefined : closeRevokeModal}
                 >

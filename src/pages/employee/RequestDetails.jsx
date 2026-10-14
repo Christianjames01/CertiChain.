@@ -4,6 +4,7 @@ import { IconAlert, IconCalendar, IconCheck, IconFile, IconX, StarRating } from 
 import { useParams, useNavigate } from 'react-router-dom'
 import Swal from 'sweetalert2'
 import { supabase } from '../../lib/supabase'
+import { startBlockchainRecording } from '../../lib/anchorCredentials'
 import { useAutoReject } from '../../lib/autoReject'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import { formatDisplayDateTime } from '../../lib/formatDate'
@@ -1140,6 +1141,8 @@ function EmployeeRequestDetails() {
                     credentialError.message
                 )
             }
+
+            startBlockchainRecording()
 
             const {
                 error: requestError

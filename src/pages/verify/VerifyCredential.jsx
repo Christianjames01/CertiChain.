@@ -20,7 +20,7 @@ function outcomeFor(result) {
             subtitle: 'This number doesn’t match any credential issued through CertiChain.',
         }
     }
-    if (result.signatureValid === false) {
+    if (result.signatureValid === false || result.blockchain?.mismatch) {
         return {
             tone: 'tampered',
             icon: <IconAlert />,
@@ -42,6 +42,50 @@ function outcomeFor(result) {
         title: 'Verified credential',
         subtitle: 'Issued by the Holy Cross of Davao College Registrar’s Office and unchanged since.',
     }
+}
+
+function BlockchainStatus({ chain }) {
+    if (!chain) return null
+
+    if (chain.mismatch) {
+        return (
+            <div className="verify-signature is-bad">
+                <span aria-hidden="true"><IconX /></span>
+                <div className="verify-chain-text">
+                    Blockchain record does not match — the record was changed after it was recorded.
+                    {chain.txUrl && <small><a href={chain.txUrl} target="_blank" rel="noreferrer">View the original blockchain record</a></small>}
+                </div>
+            </div>
+        )
+    }
+
+    if (chain.status === 'recorded' && chain.onChain !== false) {
+        return (
+            <div className="verify-signature">
+                <span aria-hidden="true"><IconCheck /></span>
+                <div className="verify-chain-text">
+                    Recorded on the {chain.network} blockchain{chain.recordedAt ? ` on ${formatDate(chain.recordedAt)}` : ''}.
+                    {(chain.revokedOnChain || chain.revokedAt) && <small>The revocation is also recorded on the blockchain.</small>}
+                    {chain.txUrl && (
+                        <small>
+                            <a href={chain.txUrl} target="_blank" rel="noreferrer">View the blockchain transaction</a>
+                            {chain.revokeTxUrl && <> · <a href={chain.revokeTxUrl} target="_blank" rel="noreferrer">View the revocation</a></>}
+                        </small>
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="verify-signature is-pending">
+            <span aria-hidden="true"><IconQuestion /></span>
+            <div className="verify-chain-text">
+                Being recorded on the {chain.network} blockchain.
+                <small>This usually takes a few minutes after the credential is issued. Check again later.</small>
+            </div>
+        </div>
+    )
 }
 
 function VerifyCredential() {
@@ -196,7 +240,7 @@ function VerifyCredential() {
                                 {result.status === 'revoked' && result.revocation_reason && (
                                     <p className="verify-reason"><strong>Reason:</strong> {result.revocation_reason}</p>
                                 )}
-                                {result.signatureValid === false && (
+                                {(result.signatureValid === false || result.blockchain?.mismatch) && (
                                     <p className="verify-reason">
                                         Please contact the Registrar’s Office before relying on this document.
                                     </p>
@@ -251,6 +295,8 @@ function VerifyCredential() {
                                         ? 'Digital signature does not match — the record was altered.'
                                         : 'Digital signature valid — the record matches what the Registrar issued.'}
                                 </div>
+
+                                <BlockchainStatus chain={result.blockchain} />
                             </div>
                         ) : (
                             <div className="verify-body">
@@ -297,6 +343,10 @@ function VerifyCredential() {
                     <li>
                         <strong>Tamper detection</strong>
                         <span>Any change to the record after issuance is flagged.</span>
+                    </li>
+                    <li>
+                        <strong>Blockchain record</strong>
+                        <span>A fingerprint of each credential is saved on the public Polygon blockchain.</span>
                     </li>
                     <li>
                         <strong>Free &amp; instant</strong>
