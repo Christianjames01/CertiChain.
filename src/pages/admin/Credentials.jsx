@@ -48,6 +48,7 @@ function Credentials() {
     const [revokeReason, setRevokeReason] = useState('')
     const [revoking, setRevoking] = useState(false)
     const showChain = role === 'superadmin'
+    const [loadedAt, setLoadedAt] = useState(0)
 
     const load = async ({ silent = false } = {}) => {
         if (!silent) setLoading(true)
@@ -91,6 +92,8 @@ function Credentials() {
             const profileByUserId = Object.fromEntries((profileRows || []).map((p) => [p.user_id, p]))
             const studentByStudentId = Object.fromEntries((studentRows || []).map((s) => [s.student_id, s]))
 
+            setLoadedAt(Date.now())
+            setLoadedAt(Date.now())
             setRows(
                 (credRows || []).map((c) => {
                     const student = studentByStudentId[c.student_id]
@@ -168,7 +171,7 @@ function Credentials() {
     }
 
     const delayedOnChain = rows.filter((r) => chainTone(r) !== 'active'
-        && Date.now() - new Date(r.revoked_at || r.generated_at).getTime() > 5 * 60 * 1000).length
+        && loadedAt - new Date(r.revoked_at || r.generated_at).getTime() > 5 * 60 * 1000).length
 
     const documentOptions = useMemo(
         () => [...new Set(rows.map((r) => r.documentName))].sort(),
