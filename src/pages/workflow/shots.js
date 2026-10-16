@@ -78,7 +78,7 @@ export const SHOTS = [
         id: 'chain',
         step: 9,
         title: 'Recorded on the Blockchain',
-        narration: 'Within a minute, the fingerprint and the encrypted copy are written to the CertiChain smart contract on the Ethereum blockchain, signed by the Registrar’s wallet. Once recorded, nobody can change or delete it, not even the school.',
+        narration: 'Within a minute, the fingerprint and the encrypted copy are written to the CertiChain canister on the Internet Computer blockchain, signed by the Registrar’s identity. Once recorded, nobody can change or delete it, not even the school.',
         minMs: 12000,
         cues: [[1.2, 'server'], [3.4, 'transfer'], [5.6, 'click'], [6.0, 'confirm'], [8.6, 'shimmer']],
     },

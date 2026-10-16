@@ -46,9 +46,9 @@ const SAMPLE = {
     fingerprint: '0x3107b80b4630c607fdaf0c39958ce51322b24270ac2ec840f4a7f072649967cb',
     edited: '0x9d41c2e07a5f3b18e6d0947c2a1fb85e33c07d6a19e4b2f8c5d1a07e6b39f412',
     encrypted: '0x01768d2c82ffe7face0944b424b89dc277e4fdd40145aebd50124dde42c1df0abfa9c51922b8b6bd85bcac20',
-    block: '11,914,526',
-    tx: '0x6b6d15ff…dbc1b19',
-    wallet: '0x86BE…12cd9',
+    block: '124',
+    wallet: 'registrar identity',
+    canister: 'CertiChain registry canister',
 }
 
 const HEX = '0123456789abcdef'
@@ -1074,7 +1074,7 @@ export function createWorkflowScene(container) {
         const rail = new THREE.Mesh(new THREE.BoxGeometry(10.6, 0.03, 0.06), railMat)
         rail.position.set(0, 0.27, 1.45)
         g.add(rail)
-        const blockNumbers = ['11,914,522', '11,914,523', '11,914,524', '11,914,525', SAMPLE.block]
+        const blockNumbers = ['120', '121', '122', '123', SAMPLE.block]
         const blockX = (i) => -3.8 + i * 1.9
         const blocks = blockNumbers.map((num, i) => {
             const isNew = i === blockNumbers.length - 1
@@ -1086,7 +1086,7 @@ export function createWorkflowScene(container) {
                 c.fillStyle = st.lit ? 'rgba(124,196,255,0.25)' : 'rgba(255,255,255,0.06)'
                 roundRect(c, 0, 0, w, h, w * 0.12)
                 c.fill()
-                text(c, 'BLOCK', w / 2, h * 0.22, h * 0.13, { color: '#bfe3ff', weight: 800, align: 'center' })
+                text(c, 'RECORD', w / 2, h * 0.22, h * 0.13, { color: '#bfe3ff', weight: 800, align: 'center' })
                 text(c, `#${num}`, w / 2, h * 0.42, h * 0.11, { color: '#fff', weight: 800, align: 'center' })
                 for (let k = 0; k < 3; k++) {
                     c.fillStyle = isNew && st.lit ? (k === 0 ? '#7cc4ff' : '#e6b54a') : 'rgba(191,227,255,0.35)'
@@ -1123,10 +1123,10 @@ export function createWorkflowScene(container) {
             cardBackground(c, w, h, { accent: st.permanent ? '#15803d' : '#123b78' })
             cardTitle(c, w, h, st.permanent ? 'Recorded · permanent' : 'Recording on the blockchain…')
             const rows = [
-                ['Network', 'Ethereum (Sepolia)'],
-                ['Block', `#${SAMPLE.block}`],
-                ['Transaction', SAMPLE.tx],
-                ['Signed by', `HCDC wallet ${SAMPLE.wallet}`],
+                ['Network', 'Internet Computer (ICP)'],
+                ['Stored in', SAMPLE.canister],
+                ['Record', `#${SAMPLE.block}`],
+                ['Signed by', `HCDC ${SAMPLE.wallet}`],
                 ['Stored', 'Fingerprint + encrypted copy'],
             ]
             rows.forEach(([k, v], i) => {
@@ -1350,7 +1350,7 @@ export function createWorkflowScene(container) {
                     [`Found ${SAMPLE.credential} in Registrar records`, 'ok'],
                     ['Registrar’s digital signature valid', 'ok'],
                     [`Fingerprint ${SAMPLE.fingerprint.slice(0, 18)}…`, 'ok'],
-                    [`Found on the blockchain · block #${SAMPLE.block}`, 'ok'],
+                    [`Found on the Internet Computer · record #${SAMPLE.block}`, 'ok'],
                     ['Encrypted copy decrypted · matches the record', 'ok'],
                 ]
             steps.forEach(([label, tone], i) => {

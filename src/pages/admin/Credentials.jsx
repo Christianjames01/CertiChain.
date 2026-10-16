@@ -14,6 +14,9 @@ import './AdminPages.css'
 
 const LOAD_LIMIT = 500
 const EXPLORER_TX = `${(import.meta.env.VITE_CHAIN_EXPLORER || 'https://sepolia.etherscan.io').replace(/\/+$/, '')}/tx/`
+const recordUrl = (ref) => (ref.startsWith('icp:')
+    ? `https://dashboard.internetcomputer.org/canister/${ref.slice(4).split('#')[0]}`
+    : EXPLORER_TX + ref)
 
 function chainLabel(c) {
     if (c.chain_status === 'recorded') return c.status === 'revoked' && !c.chain_revoked_at ? 'Recording revocation' : 'Recorded'
@@ -342,7 +345,7 @@ function Credentials() {
                                             </span>
                                             {c.chain_tx_hash && (
                                                 <a
-                                                    href={EXPLORER_TX + c.chain_tx_hash}
+                                                    href={recordUrl(c.chain_tx_hash)}
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     style={{ display: 'block', fontSize: 12, marginTop: 2 }}
@@ -352,7 +355,7 @@ function Credentials() {
                                             )}
                                             {c.chain_revoke_tx_hash && (
                                                 <a
-                                                    href={EXPLORER_TX + c.chain_revoke_tx_hash}
+                                                    href={recordUrl(c.chain_revoke_tx_hash)}
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     style={{ display: 'block', fontSize: 12 }}

@@ -119,6 +119,7 @@ function VerificationSteps({ result }) {
     const isDocument = result.kind === 'document'
     const hasSignature = result.signatureValid != null
     const copy = chain.encryptedCopy
+    const onIcp = chain.network === 'Internet Computer'
     const hasCopy = !!copy?.found
     const n = (step) => step - (!hasSignature && step >= 2 ? 1 : 0) + (hasCopy && step >= 5 ? 1 : 0)
     const copyTone = !hasCopy ? 'wait' : copy.decryptFailed ? 'bad' : copy.matches ? 'ok' : 'wait'
@@ -161,9 +162,9 @@ function VerificationSteps({ result }) {
                 <Step tone={lookupTone} number={n(4)} title="Looked up the fingerprint on the public blockchain">
                     <p>{lookupText}</p>
                     <p className="verify-step-links">
-                        {chain.txUrl && <a href={chain.txUrl} target="_blank" rel="noreferrer">Transaction ↗</a>}
-                        {chain.revokeTxUrl && <a href={chain.revokeTxUrl} target="_blank" rel="noreferrer">Revocation ↗</a>}
-                        {chain.contractUrl && <a href={chain.contractUrl} target="_blank" rel="noreferrer">CertiChain contract ↗</a>}
+                        {chain.txUrl && !onIcp && <a href={chain.txUrl} target="_blank" rel="noreferrer">Transaction ↗</a>}
+                        {chain.revokeTxUrl && !onIcp && <a href={chain.revokeTxUrl} target="_blank" rel="noreferrer">Revocation ↗</a>}
+                        {chain.contractUrl && <a href={chain.contractUrl} target="_blank" rel="noreferrer">{onIcp ? 'CertiChain canister on the Internet Computer ↗' : 'CertiChain contract ↗'}</a>}
                     </p>
                 </Step>
 
