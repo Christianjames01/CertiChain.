@@ -1121,7 +1121,7 @@ export function createWorkflowScene(container) {
         })
         const info = canvasPanel(3.9, 2.05, (c, w, h, st) => {
             cardBackground(c, w, h, { accent: st.permanent ? '#15803d' : '#123b78' })
-            cardTitle(c, w, h, st.permanent ? 'Recorded · permanent' : 'Recording on the blockchain…')
+            cardTitle(c, w, h, st.permanent ? 'Status: Recorded · permanent' : 'Status: Pending · being recorded…')
             const rows = [
                 ['Network', 'Internet Computer (ICP)'],
                 ['Stored in', SAMPLE.canister],

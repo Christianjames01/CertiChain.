@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FLOW, SHOTS, STEPS } from './shots'
+import { CHAIN_STATUSES, FLOW, REQUEST_STATUSES, SHOTS, STEPS } from './shots'
 import { createWorkflowScene } from './workflowScene'
 import { createWorkflowAudio } from './workflowAudio'
 import { availableVoices, createNarrator, isNaturalVoice, recordingsAvailable, whenVoicesReady } from './workflowNarration'
@@ -283,6 +283,47 @@ function SystemWorkflow() {
                         <button type="button" onClick={toggleFullscreen} title="Full screen (F)">⛶</button>
                     </div>
                 </header>
+            )}
+
+            {started && shot.request && shot.id !== 'finale' && (
+                <aside className="wf-status" aria-label="Live status">
+                    <div className="wf-status-block">
+                        <span className="wf-status-title">Request status</span>
+                        <ol>
+                            {REQUEST_STATUSES.map(([key, label], i) => {
+                                const current = REQUEST_STATUSES.findIndex(([k]) => k === shot.request)
+                                const state = i < current || (i === current && key === 'completed') ? 'done' : i === current ? 'active' : ''
+                                return (
+                                    <li key={key} className={state}>
+                                        <span className="wf-status-dot">{state === 'done' ? '✓' : ''}</span>
+                                        {label}
+                                    </li>
+                                )
+                            })}
+                        </ol>
+                        {shot.id === 'record' && <p className="wf-status-note is-warn">Something missing? → Requirements Needed, then back to review</p>}
+                    </div>
+                    <div className="wf-status-block">
+                        <span className="wf-status-title">Blockchain status</span>
+                        {shot.chain === 'none' ? (
+                            <p className="wf-status-note">Starts once the credential is generated</p>
+                        ) : (
+                            <ol>
+                                {CHAIN_STATUSES.map(([key, label], i) => {
+                                    const current = CHAIN_STATUSES.findIndex(([k]) => k === shot.chain)
+                                    const state = i < current || (i === current && key === 'verified') ? 'done' : i === current ? 'active' : ''
+                                    return (
+                                        <li key={key} className={state}>
+                                            <span className="wf-status-dot">{state === 'done' ? '✓' : ''}</span>
+                                            {label}
+                                            {key === 'recorded' && i <= current && <em>#124 on ICP</em>}
+                                        </li>
+                                    )
+                                })}
+                            </ol>
+                        )}
+                    </div>
+                </aside>
             )}
 
             {started && !ended && shot.id !== 'finale' && (
