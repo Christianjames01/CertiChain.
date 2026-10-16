@@ -109,7 +109,7 @@ function HeroVisual() {
             <div className="lpv-app">
                 <div className="lpv-bar">
                     <span /><span /><span />
-                    <div className="lpv-url">onlineregistrar.vercel.app/student/dashboard</div>
+                    <div className="lpv-url">zdn7u-5yaaa-aaaai-ayclq-cai.icp0.io/student/dashboard</div>
                 </div>
 
                 <div className="lpv-body">

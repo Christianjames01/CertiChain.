@@ -428,7 +428,7 @@ export function createHeroCertificate(container, { reducedMotion = false } = {})
         document.fonts?.load?.('700 40px Fraunces').catch(() => {}),
         document.fonts?.load?.('italic 700 40px Fraunces').catch(() => {}),
         loadImage(hcdcLogo),
-        QRCode.toCanvas(document.createElement('canvas'), 'https://onlineregistrar.vercel.app/verify/CERT-000124', { margin: 0, width: 460, color: { dark: '#0f1f38', light: '#ffffff' } }).catch(() => null),
+        QRCode.toCanvas(document.createElement('canvas'), 'https://zdn7u-5yaaa-aaaai-ayclq-cai.icp0.io/verify/CERT-000124', { margin: 0, width: 460, color: { dark: '#0f1f38', light: '#ffffff' } }).catch(() => null),
     ]).then(([, , logo, qr]) => {
         assets.logo = logo
         assets.qr = qr

@@ -1333,7 +1333,7 @@ export function createWorkflowScene(container) {
             c.fill()
             c.fillStyle = '#e2e8f0'
             c.fillRect(0, 0, w, h * 0.09)
-            text(c, `onlineregistrar.vercel.app/verify/${SAMPLE.credential}`, w * 0.04, h * 0.045, h * 0.04, { color: '#475569', weight: 600 })
+            text(c, `zdn7u-5yaaa-aaaai-ayclq-cai.icp0.io/verify/${SAMPLE.credential}`, w * 0.04, h * 0.045, h * 0.04, { color: '#475569', weight: 600 })
             const bad = !!st.tamper
             const good = !bad && st.verified
             c.fillStyle = bad ? '#fde8e8' : good ? '#dcfce7' : '#e2e8f0'

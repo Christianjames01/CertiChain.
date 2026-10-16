@@ -380,7 +380,7 @@ function SceneEnd({ t }) {
                 <img src={certichainLogo} alt="Holy Cross of Davao College" />
             </div>
             <div className="rl-end-url" style={{ opacity: seg(t, 16.6, 16.9), transform: `translateY(${(1 - outExpo(seg(t, 16.6, 17.1))) * 30}px)` }}>
-                onlineregistrar.vercel.app
+                zdn7u-5yaaa-aaaai-ayclq-cai.icp0.io
             </div>
         </div>
     )

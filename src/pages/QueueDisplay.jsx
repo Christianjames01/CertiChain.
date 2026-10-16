@@ -14,7 +14,7 @@ const QUEUE_BEFORE_DEMO_MS = 300000
 const DEMO_ENABLED = typeof window === 'undefined' || !new URLSearchParams(window.location.search).has('nodemo')
 const DEMO_AUDIO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('demoaudio')
 const TV_CTA = {
-    title: <>Request online at <em>onlineregistrar.vercel.app</em></>,
+    title: <>Request online at <em>zdn7u-5yaaa-aaaai-ayclq-cai.icp0.io</em></>,
     caption: 'Create a free CertiChain account on your phone and request your documents without queuing.',
 }
 

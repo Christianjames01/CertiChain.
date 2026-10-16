@@ -1,6 +1,6 @@
 import QRCode from 'qrcode'
 
-const PUBLIC_SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_URL || 'https://onlineregistrar.vercel.app').replace(/\/+$/, '')
+const PUBLIC_SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_URL || 'https://zdn7u-5yaaa-aaaai-ayclq-cai.icp0.io').replace(/\/+$/, '')
 
 export function verificationUrl(credentialNumber) {
     return `${PUBLIC_SITE_URL}/verify/${encodeURIComponent(credentialNumber)}`
