@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabase'
 import { logActivity } from '../../lib/activityLog'
 import { confirmModal, notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
 import { newSealCode, sealPrintedDocument } from '../../lib/documentSeal'
+import { readOtrWorkbook } from '../../lib/otrExcel'
 import sealImg from '../../assets/coe/seal.png'
 import hcdc75Img from '../../assets/coe/hcdc-75.png'
 import pacuImg from '../../assets/coe/pacu.png'
@@ -84,6 +85,11 @@ const formatUnits = (units) => {
     if (units === null || units === undefined || units === '') return ''
     const n = Number(units)
     return Number.isFinite(n) ? n.toFixed(1) : String(units)
+}
+
+const formatGrade = (grade) => {
+    const text = String(grade ?? '').trim()
+    return /^\d+$/.test(text) ? `${text}.0` : text
 }
 
 const formatLongDate = (iso) => {
@@ -195,6 +201,7 @@ function TranscriptOfRecords() {
     const [previewScale, setPreviewScale] = useState(1)
     const [employeeId, setEmployeeId] = useState(null)
     const [sealCode, setSealCode] = useState(() => newSealCode())
+    const [importing, setImporting] = useState(false)
     const previewWrapRef = useRef(null)
 
     useEffect(() => {
@@ -328,6 +335,61 @@ function TranscriptOfRecords() {
             notifyError('Could not load this student. Please try again.')
         } finally {
             setLoadingStudent(false)
+        }
+    }
+
+    const importExcel = async (e) => {
+        const file = e.target.files?.[0]
+        e.target.value = ''
+        if (!file) return
+        if (!/\.(xls|xlsx|xlsm)$/i.test(file.name)) {
+            notifyError('Choose the Registrar\'s OTR Excel file (.xls or .xlsx).')
+            return
+        }
+        if (file.size > 15 * 1024 * 1024) {
+            notifyError('That file is too large for an OTR (over 15 MB).')
+            return
+        }
+        const hasCourses = rows.some((r) => r.kind === 'course' && (r.code || r.title))
+        if (hasCourses) {
+            const replace = await confirmModal('The details and courses on this page will be replaced with the ones in the Excel file.', {
+                title: 'Replace with the Excel file?',
+                confirmButtonText: 'Yes, replace',
+                cancelButtonText: 'Cancel',
+            })
+            if (!replace) return
+        }
+        try {
+            setImporting(true)
+            const { details, rows: imported, courseCount } = await readOtrWorkbook(file)
+            if (!courseCount) {
+                notifyError('No courses were found in this file. Check that the grades are typed under "Term & Course No.".')
+                return
+            }
+            setRows(imported.map((r) => (r.kind === 'course'
+                ? newRow({ code: r.code, title: r.title, final: formatGrade(r.final), completion: formatGrade(r.completion), units: formatUnits(r.units) })
+                : newRow({ kind: r.kind, title: r.title }))))
+            const sex = /^f/i.test(details.sex || '') ? 'Female' : /^m/i.test(details.sex || '') ? 'Male' : ''
+            setForm((f) => ({
+                ...EMPTY_FORM,
+                preparedBy: details.preparedBy || f.preparedBy,
+                preparedDate: f.preparedDate,
+                prePrinted: f.prePrinted,
+                ...Object.fromEntries(Object.entries(details).filter(([k, v]) => k in EMPTY_FORM && k !== 'preparedBy' && v)),
+                sex,
+            }))
+            const match = students.find((s) => details.studentNumber && (s.student_number || '').trim() === details.studentNumber.trim())
+            setSelectedStudentId(match ? match.student_id : '')
+            if (details.birthDateText) {
+                notifyWarning(`The date of birth "${details.birthDateText}" could not be read. Please enter it again.`)
+            } else {
+                notifySuccess(`Loaded ${courseCount} course${courseCount === 1 ? '' : 's'} from ${file.name}.`)
+            }
+        } catch (err) {
+            console.error('OTR EXCEL IMPORT ERROR:', err)
+            notifyError(err?.message?.includes('OTR format') ? err.message : 'Could not read this Excel file. Make sure it is the Registrar\'s OTR file.')
+        } finally {
+            setImporting(false)
         }
     }
 
@@ -623,7 +685,7 @@ function TranscriptOfRecords() {
 
             <header className="employee-page-header">
                 <h1>Transcript of Records</h1>
-                <p>Pick a student to fill in their details and grades, add anything else, then print in the Registrar's Official Transcript of Records format.</p>
+                <p>Pick a student or upload the Registrar's OTR Excel file to fill in their details and grades, add anything else, then print in the Registrar's Official Transcript of Records format.</p>
             </header>
 
             <div className="otr-layout">
@@ -649,6 +711,25 @@ function TranscriptOfRecords() {
                         {filteredStudents.map((s) => <option key={s.student_id} value={s.student_id}>{s.label}</option>)}
                     </select>
                     {loadingStudent && <span className="otr-hint">Loading the student's record and grades…</span>}
+
+                    <label className="otr-label" htmlFor="otr-excel" style={{ marginTop: 14 }}>Or load the Registrar's OTR Excel file</label>
+                    <input
+                        id="otr-excel"
+                        type="file"
+                        accept=".xls,.xlsx,.xlsm,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        onChange={importExcel}
+                        disabled={importing}
+                        style={{ display: 'none' }}
+                    />
+                    <button
+                        type="button"
+                        className="employee-secondary-button"
+                        onClick={() => document.getElementById('otr-excel').click()}
+                        disabled={importing}
+                    >
+                        {importing ? 'Reading the Excel file…' : 'Upload OTR Excel (.xls / .xlsx)'}
+                    </button>
+                    <span className="otr-hint">The student's details, every term and course, the grades and the graduation text are placed straight into the transcript layout.</span>
 
                     <h2 style={{ fontSize: 16, margin: '20px 0 4px' }}>Details</h2>
                     <div className="otr-grid">
