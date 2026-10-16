@@ -112,6 +112,11 @@ shared (install) persistent actor class Registry() {
     { count; owner };
   };
 
+  public shared (msg) func claimOwnership() : async () {
+    if (not Principal.isController(msg.caller)) Runtime.trap("Only a controller of this canister can claim ownership.");
+    owner := msg.caller;
+  };
+
   public shared (msg) func transferOwnership(next : Principal) : async () {
     requireOwner(msg.caller);
     if (Principal.isAnonymous(next)) Runtime.trap("The new owner cannot be anonymous.");
