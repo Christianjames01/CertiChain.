@@ -253,8 +253,8 @@ function EmployeeDashboard() {
     })
 
     const attentionStats = [
-        { label: missedCount === 1 ? 'Missed Claim' : 'Missed Claims', value: missedCount, to: '/employee/claim-schedule', note: 'Students who did not show up' },
-        { label: rescheduleRequestCount === 1 ? 'Reschedule Request' : 'Reschedule Requests', value: rescheduleRequestCount, to: '/employee/claim-schedule', note: 'Students asking for a new date' },
+        { label: missedCount === 1 ? 'Missed Claim' : 'Missed Claims', value: missedCount, to: '/employee/claim-schedule?show=missed', note: 'Students who did not show up' },
+        { label: rescheduleRequestCount === 1 ? 'Reschedule Request' : 'Reschedule Requests', value: rescheduleRequestCount, to: '/employee/claim-schedule?show=reschedule', note: 'Students asking for a new date' },
     ].filter((s) => s.value > 0)
 
     const formatTime = (time) => {

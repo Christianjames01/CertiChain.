@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PageStats from '../../components/PageStats'
 import { IconCalendarCheck, IconCheckCircle, IconHourglass, IconSwap } from '../admin/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import RepresentativeBadge from '../../components/RepresentativeBadge'
 import { loadRepresentativesByRequestIds } from '../../lib/claimRepresentatives'
@@ -14,8 +14,17 @@ import { loadStudentsById } from '../../lib/studentNames'
 import './EmployeePages.css'
 import { friendlyError } from '../../lib/friendlyError'
 
+const SHOW_CHIPS = [
+    { key: 'all', label: 'All' },
+    { key: 'missed', label: 'Missed' },
+    { key: 'reschedule', label: 'Reschedule requests' },
+]
+
 function ClaimScheduleList() {
     const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams()
+    const show = SHOW_CHIPS.some((c) => c.key === searchParams.get('show')) ? searchParams.get('show') : 'all'
+    const readySectionRef = useRef(null)
 
     const [employee, setEmployee] = useState(null)
     const [needsScheduling, setNeedsScheduling] = useState([])
@@ -224,6 +233,21 @@ function ClaimScheduleList() {
 
     useLiveRefresh(['claim_schedules', 'document_requests'], loadData)
 
+    useEffect(() => {
+        if (loading || show === 'all') return
+        readySectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, [loading, show])
+
+    const shownRequests = needsScheduling.filter((r) => {
+        if (show === 'missed') return r.schedule?.status === 'missed'
+        if (show === 'reschedule') return Boolean(r.schedule?.reschedule_requested_at)
+        return true
+    })
+
+    const chooseShow = (key) => {
+        setSearchParams(key === 'all' ? {} : { show: key }, { replace: true })
+    }
+
     const markAsClaimed = async (appointment) => {
         const confirmed = await confirmModal(
             `Mark ${appointment.requestNumber} as claimed? This releases the credential to the student.`
@@ -386,12 +410,27 @@ function ClaimScheduleList() {
                 </div>
             )}
 
-            <h2 className="ui-section-title">Ready to Schedule <span className="ui-chip-count">{needsScheduling.length}</span></h2>
+            <h2 className="ui-section-title" ref={readySectionRef} style={{ scrollMarginTop: 80 }}>Ready to Schedule <span className="ui-chip-count">{shownRequests.length}</span></h2>
 
-            {!loading && needsScheduling.length === 0 ? (
-                <div className="employee-empty">No requests are currently ready for claim scheduling.</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+                {SHOW_CHIPS.map((chip) => (
+                    <button
+                        key={chip.key}
+                        type="button"
+                        className={`employee-filter-chip${show === chip.key ? ' active' : ''}`}
+                        onClick={() => chooseShow(chip.key)}
+                    >
+                        {chip.label}
+                    </button>
+                ))}
+            </div>
+
+            {!loading && shownRequests.length === 0 ? (
+                <div className="employee-empty">
+                    {show === 'missed' ? 'No missed claims right now.' : show === 'reschedule' ? 'No reschedule requests right now.' : 'No requests are currently ready for claim scheduling.'}
+                </div>
             ) : (
-                needsScheduling.map((request) => (
+                shownRequests.map((request) => (
                     <div className="employee-list-card" key={request.request_id}>
                         <div className="employee-list-card-header">
                             <div className="ui-card-title">
