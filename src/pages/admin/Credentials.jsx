@@ -47,7 +47,6 @@ function Credentials() {
     const [revokeTarget, setRevokeTarget] = useState(null)
     const [revokeReason, setRevokeReason] = useState('')
     const [revoking, setRevoking] = useState(false)
-    const [anchoring, setAnchoring] = useState(false)
     const showChain = role === 'superadmin'
 
     const load = async ({ silent = false } = {}) => {
@@ -168,48 +167,8 @@ function Credentials() {
         load({ silent: true })
     }
 
-    const anchorNow = async () => {
-        if (!showChain) return
-        setAnchoring(true)
-        const { data, error: anchorError } = await supabase.functions.invoke('anchor-credentials', { body: {} })
-        setAnchoring(false)
-
-        if (anchorError) {
-            let detail = ''
-            try {
-                const body = await anchorError.context?.json()
-                detail = body?.error || body?.message || ''
-            } catch (err) {
-                void err
-            }
-            const status = anchorError.context?.status
-            notifyError(detail
-                ? `Blockchain service error${status ? ` (${status})` : ''}: ${detail}`
-                : 'Could not reach the blockchain service. Please try again in a moment.')
-            return
-        }
-        if (data?.configured === false) {
-            notifyWarning('Blockchain recording is not set up yet. Add the blockchain settings in Supabase first.')
-            return
-        }
-        if (data?.busy) {
-            notifyWarning(data.message || 'Recording is already running. Try again in a minute.')
-            return
-        }
-        const failure = data?.record?.error || data?.revoke?.error || data?.documents?.error || data?.error
-        if (failure) {
-            notifyError('Blockchain recording failed: ' + failure)
-        } else {
-            const recorded = (data?.record?.recorded || 0) + (data?.record?.alreadyOnChain || 0) + (data?.documents?.recorded || 0) + (data?.documents?.alreadyOnChain || 0)
-            const revokedCount = data?.revoke?.revoked || 0
-            notifySuccess(recorded || revokedCount
-                ? `Recorded ${recorded} item${recorded === 1 ? '' : 's'}${revokedCount ? ` and ${revokedCount} revocation${revokedCount === 1 ? '' : 's'}` : ''} on the blockchain.`
-                : 'Everything is already recorded on the blockchain.')
-        }
-        load({ silent: true })
-    }
-
-    const pendingOnChain = rows.filter((r) => chainTone(r) === 'pending').length
+    const delayedOnChain = rows.filter((r) => chainTone(r) !== 'active'
+        && Date.now() - new Date(r.revoked_at || r.generated_at).getTime() > 5 * 60 * 1000).length
 
     const documentOptions = useMemo(
         () => [...new Set(rows.map((r) => r.documentName))].sort(),
@@ -278,20 +237,13 @@ function Credentials() {
                     onChange={(e) => setQuery(e.target.value)}
                     style={{ minWidth: 240 }}
                 />
-
-                {showChain && (
-                <button
-                    type="button"
-                    className="admin-secondary-button"
-                    style={{ marginLeft: 'auto' }}
-                    onClick={anchorNow}
-                    disabled={anchoring}
-                    title="Credentials are recorded automatically every minute. Use this to record them right away."
-                >
-                    {anchoring ? 'Recording…' : `Record on blockchain now${pendingOnChain ? ` (${pendingOnChain})` : ''}`}
-                </button>
-                )}
             </div>
+
+            {showChain && delayedOnChain > 0 && (
+                <div className="admin-notice tone-warning" style={{ marginBottom: 16 }}>
+                    {delayedOnChain} credential{delayedOnChain === 1 ? ' has' : 's have'} not been recorded on the blockchain for over 5 minutes. Recording runs automatically; if this stays, check the ICP settings in Supabase.
+                </div>
+            )}
 
             <div className="admin-card">
                 {visible.length === 0 ? (
