@@ -4,6 +4,8 @@ import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
+import Nat "mo:core/Nat";
+import Iter "mo:core/Iter";
 
 shared (install) persistent actor class Registry() {
   public type Entry = {
@@ -82,6 +84,24 @@ shared (install) persistent actor class Registry() {
 
   public query func lookupMany(hashes : [Text]) : async [?Entry] {
     Array.map<Text, ?Entry>(hashes, func (h : Text) : ?Entry { Map.get(entries, Text.compare, Text.toLower(h)) });
+  };
+
+  public type Summary = {
+    seq : Nat;
+    fingerprint : Text;
+    recordedAt : Int;
+    revokedAt : Int;
+    encryptedBytes : Nat;
+  };
+
+  public query func recent(limit : Nat) : async [Summary] {
+    let all = Iter.toArray<(Text, Entry)>(Map.entries(entries));
+    let newestFirst = Array.sort<(Text, Entry)>(all, func(a, b) { Nat.compare(b.1.seq, a.1.seq) });
+    let n = if (limit < newestFirst.size()) limit else newestFirst.size();
+    Array.tabulate<Summary>(n, func(i) {
+      let (h, e) = newestFirst[i];
+      { seq = e.seq; fingerprint = h; recordedAt = e.recordedAt; revokedAt = e.revokedAt; encryptedBytes = e.encryptedCopy.size() };
+    });
   };
 
   public query func getOwner() : async Principal {
