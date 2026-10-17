@@ -74,6 +74,9 @@ function Documents() {
     const [newRequirement, setNewRequirement] = useState({ requirement_name: '', description: '', is_required: true, accepted_file_types: '', max_file_size_mb: 5 })
 
     const [currentRole, setCurrentRole] = useState('')
+    const [limitTarget, setLimitTarget] = useState(null)
+    const [savingLimit, setSavingLimit] = useState(false)
+    const isHead = currentRole === 'registrar_head' || currentRole === 'admin'
 
     useLiveRefresh(['document_types', 'document_requirements'], (options) => loadDocuments(options))
 
@@ -134,6 +137,29 @@ function Documents() {
         setImageFile(null)
         setImageFilePreview('')
         setShowForm(true)
+    }
+
+    const saveLimit = async () => {
+        if (blockedForReadOnlyViewer(role)) return
+        const value = Number(limitTarget?.value)
+        if (!Number.isInteger(value) || value < 1 || value > 100) {
+            notifyWarning('Enter a number from 1 to 100.')
+            return
+        }
+        const { doc } = limitTarget
+        try {
+            setSavingLimit(true)
+            const { error: rpcError } = await supabase.rpc('set_document_max_quantity', { p_document_type_id: doc.document_type_id, p_max: value })
+            if (rpcError) throw new Error(rpcError.message)
+            await logAdmin('update_document_limit', doc.document_type_id, `Changed the maximum copies per request for "${doc.document_name}" from ${doc.max_quantity_per_request ?? 2} to ${value}.`)
+            setDocuments((list) => list.map((d) => (d.document_type_id === doc.document_type_id ? { ...d, max_quantity_per_request: value } : d)))
+            setLimitTarget(null)
+        } catch (err) {
+            console.error('SAVE DOCUMENT LIMIT ERROR:', err)
+            notifyError(err.message || 'Could not save the limit.')
+        } finally {
+            setSavingLimit(false)
+        }
     }
 
     const openEditForm = (doc) => {
@@ -561,25 +587,8 @@ function Documents() {
                         </div>
                     </div>
 
-                    {currentRole === 'registrar_head' && (
+                    {isHead && (
                         <div className="admin-info-grid" style={{ marginBottom: 16, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-                            <div className="form-group">
-                                <label className="form-label" htmlFor="doc-max-active-requests">Max Active Requests per Student</label>
-                                <input
-                                    id="doc-max-active-requests"
-                                    className="form-input"
-                                    type="text"
-                                    inputMode="numeric"
-                                    autoComplete="off"
-                                    value={form.max_active_requests}
-                                    onChange={(e) => setForm({ ...form, max_active_requests: digitsOnly(e.target.value) })}
-                                    disabled={saving}
-                                />
-                                <small style={{ display: 'block', marginTop: 6, fontSize: 12, color: 'var(--slate)' }}>
-                                    How many open (not yet completed/claimed) requests a student can have for this document at once.
-                                </small>
-                            </div>
-
                             <div className="form-group">
                                 <label className="form-label" htmlFor="doc-max-quantity">Max Quantity per Request</label>
                                 <input
@@ -767,18 +776,19 @@ function Documents() {
                             </div>
 
                             <div className="admin-info-field">
-                                <span>Max Active Requests</span>
-                                <strong>{doc.max_active_requests ?? 2} per student</strong>
-                            </div>
-
-                            <div className="admin-info-field">
                                 <span>Max Quantity per Request</span>
                                 <strong>{doc.max_quantity_per_request ?? 2}</strong>
                             </div>
                         </div>
 
                         <div className="admin-card-actions">
-                            <button className="admin-link-button" onClick={() => openEditForm(doc)}>Edit</button>
+                            {isHead ? (
+                                <button className="admin-link-button" onClick={() => openEditForm(doc)}>Edit</button>
+                            ) : (
+                                <button className="admin-link-button" onClick={() => setLimitTarget({ doc, value: String(doc.max_quantity_per_request ?? 2) })}>
+                                    Change max copies
+                                </button>
+                            )}
                             <button className={`admin-link-button${doc.is_available ? '' : ' is-success'}`} onClick={() => toggleAvailability(doc)}>
                                 {doc.is_available ? 'Mark unavailable' : 'Mark available'}
                             </button>
@@ -798,6 +808,40 @@ function Documents() {
                         </div>
                     </div>
                 ))
+            )}
+
+            {limitTarget && (
+                <Modal
+                    title="Max Quantity per Request"
+                    subtitle={limitTarget.doc.document_name}
+                    icon={IconDocument}
+                    maxWidth={420}
+                    onClose={() => { if (!savingLimit) setLimitTarget(null) }}
+                >
+                    <div className="form-group">
+                        <label className="form-label" htmlFor="doc-limit">Copies a student can request at once</label>
+                        <input
+                            id="doc-limit"
+                            className="form-input"
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="off"
+                            value={limitTarget.value}
+                            onChange={(e) => setLimitTarget({ ...limitTarget, value: digitsOnly(e.target.value) })}
+                            disabled={savingLimit}
+                            autoFocus
+                        />
+                        <small style={{ display: 'block', marginTop: 6, fontSize: 12, color: 'var(--slate)' }}>
+                            How many copies of this document a student can request in a single submission (1 to 100).
+                        </small>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+                        <button type="button" className="admin-secondary-button" onClick={() => setLimitTarget(null)} disabled={savingLimit}>Cancel</button>
+                        <button type="button" className="admin-primary-button" onClick={saveLimit} disabled={savingLimit}>
+                            {savingLimit ? 'Saving…' : 'Save'}
+                        </button>
+                    </div>
+                </Modal>
             )}
 
             {previewingDoc && (
