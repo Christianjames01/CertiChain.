@@ -13,6 +13,7 @@ import { IconLock } from '../../components/UiIcons'
 import { ProfileHero, ProfileSection, ProfileFields, SecurityRow, IconShield, IconBriefcase, IconKey } from '../../components/ProfileParts'
 import { digitsOnly, isValidPhMobile } from '../../lib/phoneInput'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
+import PasswordInput from '../../components/PasswordInput'
 
 function Profile() {
     const [profile, setProfile] = useState(null)
@@ -413,9 +414,8 @@ function Profile() {
                     <div className="app-modal-form">
                         <div className="form-group">
                             <label className="form-label">Current Password</label>
-                            <input
+                            <PasswordInput
                                 className="form-input"
-                                type="password"
                                 value={currentPassword}
                                 onChange={(e) => setCurrentPassword(e.target.value)}
                                 disabled={passwordSaving}
@@ -424,9 +424,8 @@ function Profile() {
 
                         <div className="form-group">
                             <label className="form-label">New Password</label>
-                            <input
+                            <PasswordInput
                                 className="form-input"
-                                type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 disabled={passwordSaving}
@@ -436,9 +435,8 @@ function Profile() {
 
                         <div className="form-group">
                             <label className="form-label">Confirm New Password</label>
-                            <input
+                            <PasswordInput
                                 className="form-input"
-                                type="password"
                                 value={confirmNewPassword}
                                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                                 disabled={passwordSaving}

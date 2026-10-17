@@ -18,6 +18,7 @@ import { blockedForReadOnlyViewer } from '../../lib/viewOnlyGuard'
 import { friendlyError } from '../../lib/friendlyError'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import { digitsOnly, isValidPhMobile } from '../../lib/phoneInput'
+import PasswordInput from '../../components/PasswordInput'
 
 const OPEN_STATUSES = ['pending', 'payment_pending', 'receipt_uploaded', 'receipt_verified', 'processing', 'lacking_requirements', 'ready_for_claiming']
 
@@ -775,7 +776,7 @@ function Employees() {
 
                                 <div className="form-group is-wide">
                                     <label className="form-label" htmlFor="emp-password">Temporary Password</label>
-                                    <input id="emp-password" className="form-input" type="password" autoComplete="new-password" value={form.password} onChange={(e) => updateForm('password', e.target.value)} disabled={creating} />
+                                    <PasswordInput id="emp-password" className="form-input" autoComplete="new-password" value={form.password} onChange={(e) => updateForm('password', e.target.value)} disabled={creating} />
                                     <PasswordRequirements password={form.password} />
                                     <small className="app-modal-help">
                                         Give this to the employee. They can change it from their Profile after logging in.

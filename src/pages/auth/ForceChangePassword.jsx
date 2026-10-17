@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { dashboardPathForRole } from '../../lib/roleRedirect'
 import AuthLayout from './AuthLayout'
+import PasswordInput from '../../components/PasswordInput'
 
 function ForceChangePassword() {
     const [newPassword, setNewPassword] = useState('')
@@ -71,9 +72,8 @@ function ForceChangePassword() {
 
                 <div className="form-group">
                     <label className="form-label" htmlFor="new-password">New Password</label>
-                    <input
+                    <PasswordInput
                         id="new-password"
-                        type="password"
                         className="form-input"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
@@ -85,9 +85,8 @@ function ForceChangePassword() {
 
                 <div className="form-group">
                     <label className="form-label" htmlFor="confirm-password">Confirm New Password</label>
-                    <input
+                    <PasswordInput
                         id="confirm-password"
-                        type="password"
                         className="form-input"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}

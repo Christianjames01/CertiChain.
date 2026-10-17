@@ -6,6 +6,7 @@ import AuthLayout from './AuthLayout'
 import PasswordRequirements from '../../components/PasswordRequirements'
 import { passwordMeetsRequirements, passwordRequirementMessage } from '../../lib/passwordStrength'
 import { captchaEnabled, getCaptchaToken, preloadCaptcha } from '../../lib/captcha'
+import PasswordInput from '../../components/PasswordInput'
 
 preloadCaptcha()
 
@@ -192,9 +193,8 @@ function EmployeeRegister() {
 
                 <div className="form-group">
                     <label className="form-label" htmlFor="emp-password">Password</label>
-                    <input
+                    <PasswordInput
                         id="emp-password"
-                        type="password"
                         className="form-input"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
