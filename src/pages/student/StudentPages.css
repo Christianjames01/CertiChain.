@@ -1178,10 +1178,16 @@
 
 .visually-hidden {
     position: absolute;
+    top: 0;
+    left: 0;
     width: 1px;
     height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
     overflow: hidden;
     clip: rect(0 0 0 0);
+    clip-path: inset(50%);
     white-space: nowrap;
 }
 
@@ -1197,6 +1203,8 @@
 }
 
 .ss-file {
+    position: relative;
+    max-width: 100%;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1235,6 +1243,7 @@
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .ss-file-text strong,
@@ -1276,6 +1285,12 @@
 }
 
 @media (max-width: 720px) {
+    .student-layout input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    .student-layout select,
+    .student-layout textarea {
+        font-size: 16px;
+    }
+    .student-card { min-width: 0; overflow-wrap: anywhere; }
     .ss-file { align-items: flex-start; }
     .ss-file.is-chosen { flex-wrap: wrap; }
     .ss-file-actions { width: 100%; }
