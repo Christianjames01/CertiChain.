@@ -7,17 +7,6 @@ const CHORDS = [
     { root: 98, notes: [196, 246.94, 293.66] },
 ]
 
-const section = (t) => {
-    if (t < 6) return 'intro'
-    if (t < 10) return 'lift'
-    if (t < 25.4) return 'groove'
-    if (t < 27.4) return 'build'
-    if (t < 38) return 'drop'
-    if (t < 45) return 'break'
-    if (t < 54) return 'groove'
-    return 'outro'
-}
-
 export function createReelSound() {
     const Ctx = window.AudioContext || window.webkitAudioContext
     let ctx = null
@@ -72,12 +61,6 @@ export function createReelSound() {
         s.stop(at + dur + 0.05)
     }
 
-    const kick = (at, big = false) => tone(musicBus, at, big ? 170 : 150, { peak: big ? 1 : 0.85, attack: 0.003, release: big ? 0.45 : 0.32, to: 40 })
-    const hat = (at, level = 0.06) => hiss(musicBus, at, 0.05, { peak: level, type: 'highpass', from: 8000, to: 9000, q: 0.5, attack: 0.001 })
-    const clap = (at) => hiss(musicBus, at, 0.18, { peak: 0.22, type: 'bandpass', from: 1500, to: 1200, q: 1.2, attack: 0.002 })
-    const bass = (at, f, big = false) => tone(musicBus, at, f, { type: 'sawtooth', peak: big ? 0.22 : 0.15, attack: 0.01, release: BEAT * 0.9, filter: { from: big ? 1400 : 900, to: 160 } })
-    const sub = (at, f) => tone(musicBus, at, f / 2, { peak: 0.28, attack: 0.02, release: BEAT * 1.8 })
-    const pluck = (at, f, level = 0.07) => tone(musicBus, at, f * 2, { type: 'triangle', peak: level, attack: 0.004, release: 0.28, filter: { from: 4000, to: 900 } })
     const pad = (at, chord, dur, level = 0.05) => {
         for (const f of chord.notes) {
             for (const det of [-4, 4]) {
@@ -107,47 +90,9 @@ export function createReelSound() {
             const barStart = b * bar
             if (barStart + bar < from) continue
             const chord = CHORDS[b % 4]
-            const s = section(barStart)
-            if (barStart >= from - bar) pad(when(Math.max(barStart, from)), chord, bar - Math.max(0, from - barStart), s === 'drop' ? 0.035 : s === 'outro' || s === 'intro' || s === 'break' ? 0.06 : 0.04)
-            for (let i = 0; i < 8; i++) {
-                const t = barStart + i * (BEAT / 2)
-                if (t < from || t >= DURATION) continue
-                const sec = section(t)
-                const at = when(t)
-                const onBeat = i % 2 === 0
-                const beatNo = i / 2
-                if (sec === 'intro') {
-                    if (t > 0.4) pluck(at, chord.notes[i % 3], 0.045)
-                } else if (sec === 'lift') {
-                    if (onBeat) kick(at)
-                    pluck(at, chord.notes[i % 3], 0.05)
-                    if (!onBeat) hat(at, 0.04)
-                } else if (sec === 'groove') {
-                    if (onBeat) kick(at)
-                    if (!onBeat) hat(at)
-                    if (onBeat && (beatNo === 1 || beatNo === 3)) clap(at)
-                    if (onBeat) bass(at, chord.root)
-                    pluck(at, chord.notes[(i * 2) % 3], 0.05)
-                } else if (sec === 'build') {
-                    hat(at, 0.05)
-                    clap(at)
-                    if (onBeat) kick(at)
-                } else if (sec === 'drop') {
-                    if (onBeat) kick(at, true)
-                    hat(at, onBeat ? 0.03 : 0.07)
-                    if (onBeat && (beatNo === 1 || beatNo === 3)) clap(at)
-                    bass(at, chord.root, true)
-                    if (onBeat && beatNo === 0) sub(at, chord.root)
-                    pluck(at, chord.notes[(i * 3) % 3] * (i % 4 === 3 ? 2 : 1), 0.06)
-                } else if (sec === 'break') {
-                    if (i === 0) kick(at)
-                    pluck(at, chord.notes[i % 3], 0.04)
-                } else if (sec === 'outro') {
-                    if (t < 55 && onBeat) kick(at)
-                }
-            }
+            const begin = Math.max(barStart, from)
+            pad(when(begin), chord, bar - (begin - barStart), 0.045)
         }
-        if (from < 27.4) hiss(musicBus, when(25.4), 2.0, { peak: 0.2, type: 'bandpass', from: 300, to: 9000, q: 1.4, attack: 1.8 })
     }
 
     const S = {

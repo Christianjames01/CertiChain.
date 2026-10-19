@@ -1,17 +1,13 @@
 import certichainLogo from '../../../assets/certichain-logo.png'
 import hcdcLogo from '../../../assets/hcdc-logo.png'
-import { BEAT, CUTS, SCENES } from './timeline'
+import { SCENES } from './timeline'
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x))
 const seg = (t, a, b) => clamp((t - a) / (b - a))
 const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x))
 const outCubic = (x) => 1 - Math.pow(1 - x, 3)
 const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
-const outBack = (x) => {
-    const c1 = 1.7
-    const c3 = c1 + 1
-    return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2)
-}
+const outBack = (x) => 1 - Math.pow(1 - clamp(x), 3)
 const lerp = (a, b, k) => a + (b - a) * k
 const rand = (i) => {
     const x = Math.sin(i * 127.1 + 311.7) * 43758.5453
@@ -63,7 +59,7 @@ function Kinetic({ text, t, start, step = 0.035, className = '', style }) {
 function Stamp({ text, t, at, tone = 'blue', x, y, size = 64, rot = -6 }) {
     const k = seg(t, at, at + 0.28)
     if (t < at) return null
-    const s = lerp(2.4, 1, outExpo(k))
+    const s = lerp(1.12, 1, outCubic(k))
     return (
         <div className={`wr-stamp is-${tone}`} style={{ left: x, top: y, fontSize: size, opacity: clamp(k * 3), transform: `translate(-50%, -50%) rotate(${rot}deg) scale(${s})` }}>
             {text}
@@ -107,14 +103,13 @@ function Cursor({ x, y, press = 0 }) {
 function Background({ t }) {
     const scene = SCENES.find((s) => t >= s.start && t < s.end)
     const dark = scene?.id !== 'outro' || t < 54.2
-    const pulse = Math.pow(1 - ((t % BEAT) / BEAT), 4) * (t > 6 && t < 54 ? 1 : 0.2)
     const drop = t >= 27.4 && t < 38
     return (
         <div className={`wr-bg${dark ? '' : ' is-light'}`}>
-            <span className="wr-blob is-blue" style={{ transform: `translate(${Math.sin(t * 0.31) * 260}px, ${Math.cos(t * 0.27) * 160}px) scale(${1 + pulse * 0.05})` }} />
+            <span className="wr-blob is-blue" style={{ transform: `translate(${Math.sin(t * 0.31) * 260}px, ${Math.cos(t * 0.27) * 160}px)` }} />
             <span className="wr-blob is-red" style={{ transform: `translate(${Math.cos(t * 0.23) * 300}px, ${Math.sin(t * 0.35) * 180}px)`, opacity: drop ? 0.25 : 0.45 }} />
             <span className="wr-blob is-gold" style={{ transform: `translate(${Math.sin(t * 0.41 + 2) * 220}px, ${Math.cos(t * 0.33 + 1) * 200}px)`, opacity: drop ? 0.7 : 0.35 }} />
-            <div className="wr-grid" style={{ backgroundPosition: `${(t * 18) % 96}px ${(t * 40) % 96}px`, opacity: 0.22 + pulse * 0.12 }} />
+            <div className="wr-grid" style={{ backgroundPosition: `${(t * 18) % 96}px ${(t * 40) % 96}px`, opacity: 0.22 }} />
             <div className="wr-noise" />
         </div>
     )
@@ -129,9 +124,8 @@ function SceneHook({ t }) {
             <div className="wr-queue" style={{ transform: `translateX(${-l * 70}px)` }}>
                 {Array.from({ length: people }, (_, i) => {
                     const k = outBack(seg(l, 0.1 + i * 0.03, 0.6 + i * 0.03))
-                    const bob = Math.sin(l * 3 + i) * 4
                     return (
-                        <div key={i} className="wr-person" style={{ left: 120 + i * 92, opacity: clamp(k), transform: `translateY(${(1 - k) * 80 + bob}px)` }}>
+                        <div key={i} className="wr-person" style={{ left: 120 + i * 92, opacity: clamp(k), transform: `translateY(${(1 - k) * 80}px)` }}>
                             <span className="wr-person-head" style={{ background: i % 7 === 3 ? '#E6B54A' : i % 5 === 1 ? '#C8102E' : '#8DBBFF' }} />
                             <span className="wr-person-body" />
                         </div>
@@ -195,7 +189,7 @@ function SceneStudent({ t }) {
     return (
         <div className="wr-scene" style={{ opacity: 1 - out }}>
             <div className="wr-chapter" style={{ opacity: seg(l, 0.2, 0.6) }}><b>01</b> The student</div>
-            <div className="wr-phone" style={{ transform: `translate(${lerp(-500, 0, enter)}px, ${Math.sin(l * 1.2) * 6}px) rotate(${lerp(-12, -3, enter)}deg)` }}>
+            <div className="wr-phone" style={{ transform: `translate(${lerp(-500, 0, enter)}px, 0px) rotate(${lerp(-12, -3, enter)}deg)` }}>
                 <div className="wr-phone-notch" />
                 <div className="wr-phone-screen">
                     <div className="wr-phone-top">
@@ -337,18 +331,15 @@ function SceneRegistrar({ t }) {
 function SceneChain({ t }) {
     const l = t - 27.4
     const out = seg(t, 37.7, 38)
-    const flash = 1 - seg(l, 0, 0.35)
     const card = outExpo(seg(l, 0.1, 0.9))
     const hashP = seg(l, 1.6, 3.6)
     const lockP = outBack(seg(l, 4.2, 4.7))
     const chainIn = outExpo(seg(l, 5.4, 6.4))
     const packet = inOut(seg(l, 6.4, 7.2))
     const recorded = l > 7.2
-    const shake = recorded ? Math.max(0, 1 - (l - 7.2) / 0.5) * 14 : 0
     const blocks = ['#121', '#122', '#123', '#124']
     return (
-        <div className="wr-scene" style={{ opacity: 1 - out, transform: `translate(${Math.sin(l * 80) * shake}px, ${Math.cos(l * 70) * shake}px)` }}>
-            <div className="wr-flash" style={{ opacity: flash * 0.7 }} />
+        <div className="wr-scene" style={{ opacity: 1 - out }}>
             <div className="wr-chapter" style={{ opacity: seg(l, 0.3, 0.7) }}><b>03</b> Sealed on the blockchain</div>
 
             <div className="wr-cred" style={{ transform: `translate(${lerp(-300, 0, card)}px, ${lerp(80, 0, card)}px) rotate(${lerp(-10, -2, card)}deg) scale(${lerp(0.8, 1, card)})`, opacity: card }}>
@@ -489,7 +480,7 @@ function SceneVerify({ t }) {
                         </div>
                     )}
                     {bad && (
-                        <div className="wr-verify-result is-bad" style={{ opacity: seg(l, 6.8, 7.1), transform: `translateX(${Math.sin(seg(l, 6.8, 7.3) * Math.PI * 6) * 14 * (1 - seg(l, 6.8, 7.3))}px)` }}>
+                        <div className="wr-verify-result is-bad" style={{ opacity: seg(l, 6.8, 7.1), transform: `translateY(${(1 - outCubic(seg(l, 6.8, 7.3))) * 30}px)` }}>
                             <div className="wr-verify-banner"><span>?</span><div><b>No matching certificate</b><small>This file was changed after it was issued. Do not accept it.</small></div></div>
                             <dl>
                                 <div><dt>Sealed fingerprint</dt><dd className="wr-mono">{FINGERPRINT.slice(0, 26)}…</dd></div>
@@ -540,10 +531,8 @@ function SceneOutro({ t }) {
 }
 
 export function Frame({ t }) {
-    const hit = CUTS.reduce((m, c) => Math.max(m, t >= c && t < c + 0.18 ? 1 - (t - c) / 0.18 : 0), 0)
-    const zoom = 1 + Math.pow(1 - ((t % BEAT) / BEAT), 6) * 0.006 * (t > 10 && t < 54 ? 1 : 0)
     return (
-        <div className="wr-frame" style={{ transform: `scale(${zoom})` }}>
+        <div className="wr-frame">
             <Background t={t} />
             {t < 6 && <SceneHook t={t} />}
             {t >= 6 && t < 10 && <SceneBrand t={t} />}
@@ -553,7 +542,6 @@ export function Frame({ t }) {
             {t >= 38 && t < 45 && <SceneDelivery t={t} />}
             {t >= 45 && t < 54 && <SceneVerify t={t} />}
             {t >= 54 && <SceneOutro t={t} />}
-            <div className="wr-cutflash" style={{ opacity: hit * 0.5 }} />
             <div className="wr-vignette" />
         </div>
     )
