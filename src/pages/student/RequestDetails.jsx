@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { notify, notifyError, notifySuccess } from '../../lib/notify'
 import { SkeletonPage } from '../../components/Skeleton'
 import CredentialQr from '../../components/CredentialQr'
+import DigitalCopyButton from '../../components/DigitalCopyButton'
 import RepresentativeStudentCard from '../../components/RepresentativeStudentCard'
 import '../auth/Auth.css'
 import './StudentPages.css'
@@ -736,6 +737,11 @@ function RequestDetails() {
                             credentialNumber={credential.credential_number}
                             status={credential.status}
                             revocationReason={credential.revocation_reason}
+                        />
+                        <DigitalCopyButton
+                            credentialId={credential.credential_id}
+                            credentialNumber={credential.credential_number}
+                            status={credential.status}
                         />
                     </div>
                 )}

@@ -59,6 +59,7 @@ function VerifyDocument({ result, fileCheck }) {
             <>
                 <dl className="verify-fields">
                     <Field label="Document number" value={result.credential_number} mono />
+                    <Field label="Digital copy of credential" value={result.linked_credential || d.credential_number} mono />
                     <Field label="Issued to" value={result.student_name} />
                     <Field label="Issued on" value={formatDay(d.issued_on)} />
                     <Field label="Issued by" value={d.issuer} wide />
