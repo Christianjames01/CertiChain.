@@ -1,10 +1,12 @@
 import Map "mo:core/Map";
+import List "mo:core/List";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
 import Array "mo:core/Array";
 import Nat "mo:core/Nat";
+import Int "mo:core/Int";
 import Iter "mo:core/Iter";
 
 shared (install) persistent actor class Registry() {
@@ -23,9 +25,29 @@ shared (install) persistent actor class Registry() {
     at : Int;
   };
 
+  public type Summary = {
+    seq : Nat;
+    fingerprint : Text;
+    recordedAt : Int;
+    revokedAt : Int;
+    encryptedBytes : Nat;
+  };
+
+  public type LogEntry = {
+    id : Nat;
+    action : Text;
+    recordNo : Nat;
+    fingerprint : Text;
+    time : Text;
+    at : Int;
+    by : Principal;
+    note : Text;
+  };
+
   var owner : Principal = install.caller;
   let entries = Map.empty<Text, Entry>();
   var count : Nat = 0;
+  let activity = List.empty<LogEntry>();
 
   func requireOwner(caller : Principal) {
     if (caller != owner) Runtime.trap("Only the CertiChain registrar can write to this registry.");
@@ -33,6 +55,58 @@ shared (install) persistent actor class Registry() {
 
   func validFingerprint(h : Text) : Bool {
     h.size() == 66 and Text.startsWith(h, #text "0x");
+  };
+
+  func two(n : Int) : Text {
+    if (n < 10) "0" # Int.toText(n) else Int.toText(n);
+  };
+
+  func phTime(ns : Int) : Text {
+    let secs = ns / 1_000_000_000 + 8 * 3600;
+    let days = secs / 86400;
+    let rest = secs % 86400;
+    let z = days + 719468;
+    let era = z / 146097;
+    let doe = z - era * 146097;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if (mp < 10) mp + 3 else mp - 9;
+    let y = yoe + era * 400 + (if (m <= 2) 1 else 0);
+    Int.toText(y) # "-" # two(m) # "-" # two(d) # " " # two(rest / 3600) # ":" # two((rest % 3600) / 60) # ":" # two(rest % 60) # " PHT";
+  };
+
+  func log(action : Text, recordNo : Nat, fingerprint : Text, at : Int, by : Principal, note : Text) {
+    List.add(activity, {
+      id = List.size(activity) + 1;
+      action;
+      recordNo;
+      fingerprint;
+      time = phTime(at);
+      at;
+      by;
+      note;
+    });
+  };
+
+  system func postupgrade() {
+    if (List.size(activity) == 0 and count > 0) {
+      let events = List.empty<(Int, Text, Nat, Text)>();
+      for ((h, e) in Map.entries(entries)) {
+        List.add(events, (e.recordedAt, "RECORDED", e.seq, h));
+        if (e.revokedAt > 0) List.add(events, (e.revokedAt, "REVOKED", e.seq, h));
+      };
+      let sorted = Array.sort<(Int, Text, Nat, Text)>(List.toArray(events), func(a, b) {
+        switch (Int.compare(a.0, b.0)) {
+          case (#equal) Nat.compare(a.2, b.2);
+          case (other) other;
+        };
+      });
+      for ((at, action, no, h) in sorted.values()) {
+        log(action, no, h, at, owner, "Restored into the activity log from the stored record");
+      };
+    };
   };
 
   public shared (msg) func recordSealed(hashes : [Text], encryptedCopies : [Blob]) : async RecordResult {
@@ -51,6 +125,7 @@ shared (install) persistent actor class Registry() {
         case null {
           count += 1;
           Map.add(entries, Text.compare, h, { recordedAt = now; revokedAt = 0; encryptedCopy = encryptedCopies[i]; seq = count });
+          log("RECORDED", count, h, now, msg.caller, "Fingerprint and AES-256 encrypted copy (" # Nat.toText(encryptedCopies[i].size()) # " bytes) stored");
           recorded += 1;
         };
       };
@@ -69,6 +144,7 @@ shared (install) persistent actor class Registry() {
         case (?e) {
           if (e.revokedAt == 0) {
             Map.add(entries, Text.compare, h, { e with revokedAt = now });
+            log("REVOKED", e.seq, h, now, msg.caller, "Credential revoked by the Registrar");
             revoked += 1;
           };
         };
@@ -86,14 +162,6 @@ shared (install) persistent actor class Registry() {
     Array.map<Text, ?Entry>(hashes, func (h : Text) : ?Entry { Map.get(entries, Text.compare, Text.toLower(h)) });
   };
 
-  public type Summary = {
-    seq : Nat;
-    fingerprint : Text;
-    recordedAt : Int;
-    revokedAt : Int;
-    encryptedBytes : Nat;
-  };
-
   public query func recent(limit : Nat) : async [Summary] {
     let all = Iter.toArray<(Text, Entry)>(Map.entries(entries));
     let newestFirst = Array.sort<(Text, Entry)>(all, func(a, b) { Nat.compare(b.1.seq, a.1.seq) });
@@ -104,22 +172,48 @@ shared (install) persistent actor class Registry() {
     });
   };
 
+  public query func logCount() : async Nat {
+    List.size(activity);
+  };
+
+  public query func logs(fromId : Nat, limit : Nat) : async [LogEntry] {
+    let total = List.size(activity);
+    let start = if (fromId == 0) 0 else fromId - 1;
+    if (start >= total) return [];
+    let n = if (limit < total - start) limit else total - start;
+    Array.tabulate<LogEntry>(n, func(i) { List.at(activity, start + i) });
+  };
+
+  public query func latestLogs(limit : Nat) : async [LogEntry] {
+    let total = List.size(activity);
+    let n = if (limit < total) limit else total;
+    Array.tabulate<LogEntry>(n, func(i) { List.at(activity, total - 1 - i) });
+  };
+
+  public query func historyOf(fingerprint : Text) : async [LogEntry] {
+    let h = Text.toLower(fingerprint);
+    List.toArray(List.filter<LogEntry>(activity, func(e) { e.fingerprint == h }));
+  };
+
   public query func getOwner() : async Principal {
     owner;
   };
 
-  public query func stats() : async { count : Nat; owner : Principal } {
-    { count; owner };
+  public query func stats() : async { count : Nat; owner : Principal; logEntries : Nat } {
+    { count; owner; logEntries = List.size(activity) };
   };
 
   public shared (msg) func claimOwnership() : async () {
     if (not Principal.isController(msg.caller)) Runtime.trap("Only a controller of this canister can claim ownership.");
+    let before = owner;
     owner := msg.caller;
+    log("OWNER_CHANGED", 0, "", Time.now(), msg.caller, "Ownership claimed by a controller (previous owner " # Principal.toText(before) # ")");
   };
 
   public shared (msg) func transferOwnership(next : Principal) : async () {
     requireOwner(msg.caller);
     if (Principal.isAnonymous(next)) Runtime.trap("The new owner cannot be anonymous.");
     owner := next;
+    log("OWNER_CHANGED", 0, "", Time.now(), msg.caller, "Ownership transferred to " # Principal.toText(next));
   };
 };

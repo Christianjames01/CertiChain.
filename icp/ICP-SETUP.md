@@ -60,3 +60,20 @@ set chain_status = 'pending', chain_tx_hash = null, chain_block = null, chain_re
 ## Topping up cycles
 NNS app → Canisters → your canister → **Add cycles**. `icp-install.cjs` shows the current balance
 and the daily burn. A canister that runs out of cycles is frozen (records are kept) until topped up.
+
+## Activity log (digital record)
+Every write to the registry is also appended to a permanent activity log kept in the canister's
+stable storage (enhanced orthogonal persistence), so it survives upgrades and can never be edited.
+Entries: `RECORDED`, `REVOKED`, `OWNER_CHANGED`, each with its number, record number, fingerprint,
+Philippine time, the signing principal and a note. Records made before the log existed are restored
+into it once, on the first upgrade.
+
+Open the Candid UI: `https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=trzz4-6aaaa-aaaan-q6vhq-cai`
+
+| Method | Use |
+|---|---|
+| `logCount()` | Number of log entries |
+| `logs(fromId, limit)` | Oldest first, e.g. `logs(1, 50)` |
+| `latestLogs(limit)` | Newest first, e.g. `latestLogs(20)` |
+| `historyOf(fingerprint)` | Full history of one credential |
+| `stats()` | Records, owner and log size |
