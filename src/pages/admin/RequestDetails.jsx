@@ -19,6 +19,7 @@ import HighlightedText from '../../components/HighlightedText'
 import Modal from '../../components/Modal'
 import './AdminPages.css'
 import StaffCredentialCard from '../../components/StaffCredentialCard'
+import DigitalCopyChoice from '../../components/DigitalCopyChoice'
 import RequestNotes from '../../components/RequestNotes'
 import RequestHandoffs from '../../components/RequestHandoffs'
 import RepresentativeStaffCard from '../../components/RepresentativeStaffCard'
@@ -106,6 +107,7 @@ function AdminRequestDetails() {
     const [newStatus, setNewStatus] = useState('')
     const [overrideReason, setOverrideReason] = useState('')
     const [credentialNumberInput, setCredentialNumberInput] = useState('')
+    const [sendDigitalCopy, setSendDigitalCopy] = useState(false)
 
     const [rejectionReason, setRejectionReason] = useState('')
     const [showReject, setShowReject] = useState(false)
@@ -748,7 +750,7 @@ function AdminRequestDetails() {
             return
         }
 
-        const confirmed = await confirmModal('Have you verified the student record and prepared the requested academic document?')
+        const confirmed = await confirmModal(`Have you verified the student record and prepared the requested academic document? ${sendDigitalCopy ? 'The sealed digital copy (PDF) will be emailed to the student.' : 'The digital copy will NOT be emailed (you can send it later).'}`)
         if (!confirmed) return
 
         try {
@@ -764,6 +766,7 @@ function AdminRequestDetails() {
                     document_type_id: request.document_type_id,
                     credential_number: credentialNumber,
                     status: 'generated',
+                    ...(sendDigitalCopy ? { digital_email_status: 'pending' } : {}),
                     generated_by: actor.employeeId,
                     generated_at: new Date().toISOString(),
                 })
@@ -1568,6 +1571,8 @@ function AdminRequestDetails() {
                         Enter the number to use for this credential -- it won't be generated automatically.
                         Must be unique.
                     </p>
+
+                    <DigitalCopyChoice checked={sendDigitalCopy} onChange={setSendDigitalCopy} disabled={processing} />
 
                     <button
                         onClick={generateDigitalCredential}

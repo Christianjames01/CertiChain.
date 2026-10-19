@@ -17,6 +17,7 @@ import Modal from '../../components/Modal'
 import './EmployeePages.css'
 import RequestNotes from '../../components/RequestNotes'
 import StaffCredentialCard from '../../components/StaffCredentialCard'
+import DigitalCopyChoice from '../../components/DigitalCopyChoice'
 import RequestHandoffs from '../../components/RequestHandoffs'
 import RepresentativeStaffCard from '../../components/RepresentativeStaffCard'
 import { ReceiptFileIcon, CheckIcon, XIcon } from '../../components/ReceiptIcons'
@@ -65,6 +66,7 @@ function EmployeeRequestDetails() {
 
     const [loading, setLoading] = useState(true)
     const [processing, setProcessing] = useState(false)
+    const [sendDigitalCopy, setSendDigitalCopy] = useState(false)
     const [requirementProcessing, setRequirementProcessing] = useState(false)
 
     const [rejectionReason, setRejectionReason] = useState('')
@@ -1102,7 +1104,7 @@ function EmployeeRequestDetails() {
         }
 
         const confirmed = await confirmModal(
-            'Have you verified the student record and prepared the requested academic document?'
+            `Have you verified the student record and prepared the requested academic document? ${sendDigitalCopy ? 'The sealed digital copy (PDF) will be emailed to the student.' : 'The digital copy will NOT be emailed (you can send it later).'}`
         )
 
         if (!confirmed) {
@@ -1128,6 +1130,7 @@ function EmployeeRequestDetails() {
                     document_type_id:
                         request.document_type_id,
                     status: 'generated',
+                    ...(sendDigitalCopy ? { digital_email_status: 'pending' } : {}),
                     generated_by:
                         employee.employee_id,
                     generated_at:
@@ -1783,6 +1786,8 @@ function EmployeeRequestDetails() {
                             {request.processed_at && (
                                 <p><strong>Processing Started:</strong> {formatDisplayDateTime(request.processed_at)}</p>
                             )}
+
+                            <DigitalCopyChoice checked={sendDigitalCopy} onChange={setSendDigitalCopy} disabled={processing} />
 
                             <button onClick={generateDigitalCredential} disabled={processing} className="employee-primary-button" style={{ marginTop: 12 }}>
                                 {processing ? 'Generating Credential...' : <><IconFile className="is-leading" />Generate Digital Credential</>}
