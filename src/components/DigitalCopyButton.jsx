@@ -1,18 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { notifyError } from '../lib/notify'
-
-export async function downloadDigitalCopy(path, credentialNumber) {
-    const { data, error } = await supabase.storage
-        .from('digital-credentials')
-        .createSignedUrl(path, 120, { download: `${credentialNumber || 'credential'}.pdf` })
-    if (error || !data?.signedUrl) {
-        console.error('DIGITAL COPY DOWNLOAD ERROR:', error)
-        notifyError('The digital copy could not be downloaded. Please try again.')
-        return
-    }
-    window.location.assign(data.signedUrl)
-}
+import { downloadDigitalCopy } from '../lib/digitalCopy'
 
 function DigitalCopyButton({ credentialId, credentialNumber, status, className = 'student-primary-button' }) {
     const [copy, setCopy] = useState(null)

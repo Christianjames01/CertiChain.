@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { shortFingerprint } from '../../lib/fileFingerprint'
 import { useLiveRefresh } from '../../lib/useLiveRefresh'
-import { downloadDigitalCopy } from '../../components/DigitalCopyButton'
+import { downloadDigitalCopy } from '../../lib/digitalCopy'
 import './AdminPages.css'
 
 const formatWhen = (value) => (value ? new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) : '—')
