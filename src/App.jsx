@@ -87,6 +87,7 @@ const AdminNotifications = lazy(() => import('./pages/admin/Notifications'))
 const AdminActivityLogs = lazy(() => import('./pages/admin/ActivityLogs'))
 const AdminIssuedCertificates = lazy(() => import('./pages/admin/IssuedCertificates'))
 const AdminDigitalCertificates = lazy(() => import('./pages/admin/DigitalCertificates'))
+const AdminBlockchainRecords = lazy(() => import('./pages/admin/BlockchainRecords'))
 const AdminRequestHandling = lazy(() => import('./pages/admin/RequestHandling'))
 const Reports = lazy(() => import('./pages/admin/Reports'))
 const AdminProfile = lazy(() => import('./pages/admin/Profile'))
@@ -124,6 +125,7 @@ const PORTAL_PAGES = [
     ['/activity-logs', <AdminActivityLogs />],
     ['/issued-certificates', <AdminIssuedCertificates />],
     ['/digital-certificates', <AdminDigitalCertificates />],
+    ['/blockchain-records', <AdminBlockchainRecords />],
     ['/reports', <Reports />],
     ['/guide', <AdminUserGuide />],
     ['/profile', <AdminProfile />],

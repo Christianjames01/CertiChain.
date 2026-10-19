@@ -48,6 +48,7 @@ shared (install) persistent actor class Registry() {
   let entries = Map.empty<Text, Entry>();
   var count : Nat = 0;
   let activity = List.empty<LogEntry>();
+  let labels = Map.empty<Text, Text>();
 
   func requireOwner(caller : Principal) {
     if (caller != owner) Runtime.trap("Only the CertiChain registrar can write to this registry.");
@@ -111,8 +112,44 @@ shared (install) persistent actor class Registry() {
     List.size(activity);
   };
 
+  func putLabel(h : Text, value : Text) : Bool {
+    let t = Text.trim(value, #char ' ');
+    if (t.size() == 0 or t.size() > 240) return false;
+    switch (Map.get(labels, Text.compare, h), Map.get(entries, Text.compare, h)) {
+      case (null, ?_) { Map.add(labels, Text.compare, h, t); true };
+      case _ false;
+    };
+  };
+
+  func labelOrBlank(h : Text) : Text {
+    switch (Map.get(labels, Text.compare, h)) { case (?t) t; case null "" };
+  };
+
+  public shared (msg) func recordLabeled(hashes : [Text], encryptedCopies : [Blob], texts : [Text]) : async RecordResult {
+    requireOwner(msg.caller);
+    if (hashes.size() != texts.size()) Runtime.trap("Each fingerprint needs exactly one label.");
+    let result = recordInternal(msg.caller, hashes, encryptedCopies, texts);
+    result;
+  };
+
+  public shared (msg) func setLabels(hashes : [Text], texts : [Text]) : async Nat {
+    requireOwner(msg.caller);
+    if (hashes.size() != texts.size()) Runtime.trap("Each fingerprint needs exactly one label.");
+    var n = 0;
+    var i = 0;
+    while (i < hashes.size()) {
+      if (putLabel(Text.toLower(hashes[i]), texts[i])) n += 1;
+      i += 1;
+    };
+    n;
+  };
+
   public shared (msg) func recordSealed(hashes : [Text], encryptedCopies : [Blob]) : async RecordResult {
     requireOwner(msg.caller);
+    recordInternal(msg.caller, hashes, encryptedCopies, []);
+  };
+
+  func recordInternal(caller : Principal, hashes : [Text], encryptedCopies : [Blob], texts : [Text]) : RecordResult {
     if (hashes.size() != encryptedCopies.size()) Runtime.trap("Each fingerprint needs exactly one encrypted copy.");
     let now = Time.now();
     let first = count + 1;
@@ -127,10 +164,12 @@ shared (install) persistent actor class Registry() {
         case null {
           count += 1;
           Map.add(entries, Text.compare, h, { recordedAt = now; revokedAt = 0; encryptedCopy = encryptedCopies[i]; seq = count });
-          log("RECORDED", count, h, now, msg.caller, "Fingerprint and AES-256 encrypted copy (" # Nat.toText(encryptedCopies[i].size()) # " bytes) stored");
+          let tag = if (i < texts.size() and putLabel(h, texts[i])) labelOrBlank(h) # " · " else "";
+          log("RECORDED", count, h, now, caller, tag # "Fingerprint and AES-256 encrypted copy (" # Nat.toText(encryptedCopies[i].size()) # " bytes) stored");
           recorded += 1;
         };
       };
+      if (i < texts.size()) ignore putLabel(h, texts[i]);
       i += 1;
     };
     { recorded; skipped; firstSeq = first; lastSeq = count; at = now };
@@ -195,6 +234,68 @@ shared (install) persistent actor class Registry() {
   public query func historyOf(fingerprint : Text) : async [LogEntry] {
     let h = Text.toLower(fingerprint);
     List.toArray(List.filter<LogEntry>(activity, func(e) { e.fingerprint == h }));
+  };
+
+  public type RecordView = {
+    recordNo : Nat;
+    document : Text;
+    status : Text;
+    recorded : Text;
+    revoked : Text;
+    fingerprint : Text;
+    encryptedCopyBytes : Nat;
+  };
+
+  public type LogView = {
+    id : Nat;
+    action : Text;
+    recordNo : Nat;
+    document : Text;
+    time : Text;
+    by : Principal;
+    fingerprint : Text;
+  };
+
+  func viewOf(h : Text, e : Entry) : RecordView {
+    {
+      recordNo = e.seq;
+      document = labelOrBlank(h);
+      status = if (e.revokedAt > 0) "REVOKED" else "VALID";
+      recorded = phTime(e.recordedAt);
+      revoked = if (e.revokedAt > 0) phTime(e.revokedAt) else "";
+      fingerprint = h;
+      encryptedCopyBytes = e.encryptedCopy.size();
+    };
+  };
+
+  func logView(e : LogEntry) : LogView {
+    { id = e.id; action = e.action; recordNo = e.recordNo; document = labelOrBlank(e.fingerprint); time = e.time; by = e.by; fingerprint = e.fingerprint };
+  };
+
+  public query func records(fromNo : Nat, limit : Nat) : async [RecordView] {
+    let all = Iter.toArray<(Text, Entry)>(Map.entries(entries));
+    let bySeq = Array.sort<(Text, Entry)>(all, func(a, b) { Nat.compare(a.1.seq, b.1.seq) });
+    let picked = Array.filter<(Text, Entry)>(bySeq, func(x) { x.1.seq >= fromNo });
+    let n = if (limit < picked.size()) limit else picked.size();
+    Array.tabulate<RecordView>(n, func(i) { viewOf(picked[i].0, picked[i].1) });
+  };
+
+  public query func readableLogs(fromId : Nat, limit : Nat) : async [LogView] {
+    let total = List.size(activity);
+    let start = if (fromId == 0) 0 else fromId - 1;
+    if (start >= total) return [];
+    let n = if (limit < total - start) limit else total - start;
+    Array.tabulate<LogView>(n, func(i) { logView(List.at(activity, start + i)) });
+  };
+
+  public query func latestReadableLogs(limit : Nat) : async [LogView] {
+    let total = List.size(activity);
+    let n = if (limit < total) limit else total;
+    Array.tabulate<LogView>(n, func(i) { logView(List.at(activity, total - 1 - i)) });
+  };
+
+  public query func labelOf(fingerprint : Text) : async Text {
+    labelOrBlank(Text.toLower(fingerprint));
   };
 
   public query func getOwner() : async Principal {

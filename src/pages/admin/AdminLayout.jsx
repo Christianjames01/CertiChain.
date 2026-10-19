@@ -24,6 +24,7 @@ const NAV_ITEMS = [
     { to: '/credentials', label: 'Credentials', icon: <IconShieldCheck />, stage: 'done' },
     { to: '/issued-certificates', label: 'Issued Certificates', icon: <IconClipboardCheck />, stage: 'done' },
     { to: '/digital-certificates', label: 'Digital Certificates', icon: <IconShieldCheck />, stage: 'done' },
+    { to: '/blockchain-records', label: 'Blockchain Records', icon: <IconLayers />, stage: 'done' },
     { to: '/reports', label: 'Reports', icon: <IconBarChart />, stage: 'done' },
     { to: '/activity-logs', label: 'Activity Logs', icon: <IconHistory />, stage: 'done' },
     { to: '/employees', label: 'Employees', icon: <IconUsers />, stage: 'manage' },
