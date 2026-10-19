@@ -50,7 +50,6 @@ const EMPTY_FORM = {
     preview_image_url: null,
     max_active_requests: 2,
     max_quantity_per_request: 2,
-    email_digital_copy: true,
 }
 
 function Documents() {
@@ -78,7 +77,6 @@ function Documents() {
     const [limitTarget, setLimitTarget] = useState(null)
     const [savingLimit, setSavingLimit] = useState(false)
     const isHead = currentRole === 'registrar_head' || currentRole === 'admin'
-    const hasEmailFlag = documents.some((d) => 'email_digital_copy' in d)
 
     useLiveRefresh(['document_types', 'document_requirements'], (options) => loadDocuments(options))
 
@@ -153,13 +151,8 @@ function Documents() {
             setSavingLimit(true)
             const { error: rpcError } = await supabase.rpc('set_document_max_quantity', { p_document_type_id: doc.document_type_id, p_max: value })
             if (rpcError) throw new Error(rpcError.message)
-            if (hasEmailFlag && limitTarget.email !== (doc.email_digital_copy !== false)) {
-                const { error: emailError } = await supabase.rpc('set_document_email_digital_copy', { p_document_type_id: doc.document_type_id, p_enabled: limitTarget.email })
-                if (emailError) throw new Error(emailError.message)
-                await logAdmin('update_document_email', doc.document_type_id, `${limitTarget.email ? 'Turned on' : 'Turned off'} emailing the digital copy for "${doc.document_name}".`)
-            }
             await logAdmin('update_document_limit', doc.document_type_id, `Changed the maximum copies per request for "${doc.document_name}" from ${doc.max_quantity_per_request ?? 2} to ${value}.`)
-            setDocuments((list) => list.map((d) => (d.document_type_id === doc.document_type_id ? { ...d, max_quantity_per_request: value, ...(hasEmailFlag ? { email_digital_copy: limitTarget.email } : {}) } : d)))
+            setDocuments((list) => list.map((d) => (d.document_type_id === doc.document_type_id ? { ...d, max_quantity_per_request: value } : d)))
             setLimitTarget(null)
         } catch (err) {
             console.error('SAVE DOCUMENT LIMIT ERROR:', err)
@@ -181,7 +174,6 @@ function Documents() {
             processing_days_max: doc.processing_days_max ?? '',
             is_available: doc.is_available,
             requires_purpose: doc.requires_purpose,
-            email_digital_copy: doc.email_digital_copy !== false,
             preview_image_url: doc.preview_image_url || null,
             max_active_requests: doc.max_active_requests ?? 2,
             max_quantity_per_request: doc.max_quantity_per_request ?? 2,
@@ -277,7 +269,6 @@ function Documents() {
                 processing_days_max: form.processing_days_max === '' ? null : Number(form.processing_days_max),
                 is_available: form.is_available,
                 requires_purpose: form.requires_purpose,
-                ...(hasEmailFlag ? { email_digital_copy: form.email_digital_copy } : {}),
                 preview_image_url: previewImageUrl,
                 max_active_requests: form.max_active_requests === '' ? 2 : Math.max(1, Number(form.max_active_requests)),
                 max_quantity_per_request: form.max_quantity_per_request === '' ? 2 : Math.max(1, Number(form.max_quantity_per_request)),
@@ -663,13 +654,6 @@ function Documents() {
                         Require students to state a purpose for this document
                     </label>
 
-                    {hasEmailFlag && (
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5, marginTop: -4, marginBottom: 16 }}>
-                            <input type="checkbox" checked={form.email_digital_copy} onChange={(e) => setForm({ ...form, email_digital_copy: e.target.checked })} />
-                            Email the digital copy (PDF) to the student when the credential is generated
-                        </label>
-                    )}
-
                     <div className="app-modal-actions">
                         <button className="admin-primary-button" onClick={saveDocument} disabled={saving}>
                             {uploadingImage ? 'Uploading image...' : saving ? 'Saving...' : 'Save'}
@@ -795,21 +779,14 @@ function Documents() {
                                 <span>Max Quantity per Request</span>
                                 <strong>{doc.max_quantity_per_request ?? 2}</strong>
                             </div>
-
-                            {'email_digital_copy' in doc && (
-                                <div className="admin-info-field">
-                                    <span>Digital copy by email</span>
-                                    <strong>{doc.email_digital_copy === false ? 'Off' : 'On'}</strong>
-                                </div>
-                            )}
                         </div>
 
                         <div className="admin-card-actions">
                             {isHead ? (
                                 <button className="admin-link-button" onClick={() => openEditForm(doc)}>Edit</button>
                             ) : (
-                                <button className="admin-link-button" onClick={() => setLimitTarget({ doc, value: String(doc.max_quantity_per_request ?? 2), email: doc.email_digital_copy !== false })}>
-                                    Document settings
+                                <button className="admin-link-button" onClick={() => setLimitTarget({ doc, value: String(doc.max_quantity_per_request ?? 2) })}>
+                                    Change max copies
                                 </button>
                             )}
                             <button className={`admin-link-button${doc.is_available ? '' : ' is-success'}`} onClick={() => toggleAvailability(doc)}>
@@ -835,7 +812,7 @@ function Documents() {
 
             {limitTarget && (
                 <Modal
-                    title="Document settings"
+                    title="Max Quantity per Request"
                     subtitle={limitTarget.doc.document_name}
                     icon={IconDocument}
                     maxWidth={420}
@@ -858,12 +835,6 @@ function Documents() {
                             How many copies of this document a student can request in a single submission (1 to 100).
                         </small>
                     </div>
-                    {hasEmailFlag && (
-                        <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13.5, marginTop: 14 }}>
-                            <input type="checkbox" checked={limitTarget.email} onChange={(e) => setLimitTarget({ ...limitTarget, email: e.target.checked })} disabled={savingLimit} style={{ marginTop: 3 }} />
-                            <span>Email the digital copy (PDF) to the student automatically when the credential is generated</span>
-                        </label>
-                    )}
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
                         <button type="button" className="admin-secondary-button" onClick={() => setLimitTarget(null)} disabled={savingLimit}>Cancel</button>
                         <button type="button" className="admin-primary-button" onClick={saveLimit} disabled={savingLimit}>

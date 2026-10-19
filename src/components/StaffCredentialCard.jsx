@@ -5,17 +5,18 @@ import { revokeCredential } from '../lib/revokeCredential'
 import { startBlockchainRecording } from '../lib/anchorCredentials'
 import { confirmWithPassword } from '../lib/confirmPassword'
 import { blockedForReadOnlyViewer } from '../lib/viewOnlyGuard'
-import { notifyError, notifySuccess, notifyWarning } from '../lib/notify'
+import { confirmModal, notifyError, notifySuccess, notifyWarning } from '../lib/notify'
 import { useLiveRefresh } from '../lib/useLiveRefresh'
 import Modal from './Modal'
 import './StaffCredentialCard.css'
 
 const EMAIL_LABEL = {
+    unsent: ['Not sent yet', 'muted'],
     pending: ['Sending to the student…', 'pending'],
     sent: ['Emailed to the student', 'good'],
     failed: ['Email not sent yet — retrying', 'warn'],
-    disabled: ['Not emailed (turned off for this document)', 'muted'],
-    skipped: ['Issued before email delivery existed', 'muted'],
+    disabled: ['Not sent yet', 'muted'],
+    skipped: ['Not sent yet', 'muted'],
 }
 
 const when = (value) => (value ? new Date(value).toLocaleString('en-PH', { dateStyle: 'medium', timeStyle: 'short' }) : '')
@@ -50,6 +51,14 @@ function StaffCredentialCard({ requestId, requestNumber, role, cardClassName = '
 
     const resend = async () => {
         if (blockedForReadOnlyViewer(role)) return
+        const again = credential.digital_email_status === 'sent'
+        const ok = await confirmModal(
+            again
+                ? 'The student already received this PDF. Send it to their email again?'
+                : 'Email the sealed digital copy (PDF) of this credential to the student now?',
+            { title: again ? 'Send again?' : 'Send the digital copy?', confirmButtonText: 'Send', cancelButtonText: 'Cancel' },
+        )
+        if (!ok) return
         setBusy('resend')
         const { error } = await supabase.rpc('resend_digital_copy', { p_credential_id: credential.credential_id })
         setBusy('')
@@ -137,8 +146,8 @@ function StaffCredentialCard({ requestId, requestNumber, role, cardClassName = '
                     </button>
                 )}
                 {!revoked && credential.digital_file_path && (
-                    <button type="button" className="scc-btn" onClick={resend} disabled={busy === 'resend'}>
-                        {busy === 'resend' ? 'Queuing…' : credential.digital_email_status === 'sent' ? 'Resend email' : 'Send to student now'}
+                    <button type="button" className={credential.digital_email_status === 'sent' ? 'scc-btn' : 'scc-btn is-primary'} onClick={resend} disabled={busy === 'resend' || credential.digital_email_status === 'pending'}>
+                        {busy === 'resend' ? 'Sending…' : credential.digital_email_status === 'sent' ? 'Send again' : credential.digital_email_status === 'pending' ? 'Sending…' : 'Send PDF to student'}
                     </button>
                 )}
                 {!revoked && role !== 'superadmin' && (
