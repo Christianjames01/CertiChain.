@@ -90,7 +90,8 @@ shared (install) persistent actor class Registry() {
     });
   };
 
-  system func postupgrade() {
+  public shared (msg) func restoreLog() : async Nat {
+    requireOwner(msg.caller);
     if (List.size(activity) == 0 and count > 0) {
       let events = List.empty<(Int, Text, Nat, Text)>();
       for ((h, e) in Map.entries(entries)) {
@@ -107,6 +108,7 @@ shared (install) persistent actor class Registry() {
         log(action, no, h, at, owner, "Restored into the activity log from the stored record");
       };
     };
+    List.size(activity);
   };
 
   public shared (msg) func recordSealed(hashes : [Text], encryptedCopies : [Blob]) : async RecordResult {

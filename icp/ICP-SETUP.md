@@ -66,7 +66,7 @@ Every write to the registry is also appended to a permanent activity log kept in
 stable storage (enhanced orthogonal persistence), so it survives upgrades and can never be edited.
 Entries: `RECORDED`, `REVOKED`, `OWNER_CHANGED`, each with its number, record number, fingerprint,
 Philippine time, the signing principal and a note. Records made before the log existed are restored
-into it once, on the first upgrade.
+into it once, right after the first upgrade (`restoreLog`, run by `icp-install.cjs`).
 
 Open the Candid UI: `https://a4gq6-oaaaa-aaaab-qaa4q-cai.raw.icp0.io/?id=trzz4-6aaaa-aaaan-q6vhq-cai`
 
