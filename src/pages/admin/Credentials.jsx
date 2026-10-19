@@ -6,7 +6,7 @@ import { useLiveRefresh } from '../../lib/useLiveRefresh'
 import { SkeletonPage } from '../../components/Skeleton'
 import { adminPath } from '../../lib/portalPaths'
 import { blockedForReadOnlyViewer } from '../../lib/viewOnlyGuard'
-import { notifyError, notifySuccess, notifyWarning } from '../../lib/notify'
+import { notifyError, notifySuccess, notifyWarning, notifyStudentByStudentId } from '../../lib/notify'
 import { confirmWithPassword } from '../../lib/confirmPassword'
 import Modal from '../../components/Modal'
 import { IconXCircle } from './icons'
@@ -165,7 +165,14 @@ function Credentials() {
         }
 
         startBlockchainRecording()
-        notifySuccess(`Credential "${revokeTarget.credential_number}" revoked.`)
+        await notifyStudentByStudentId({
+            studentId: revokeTarget.student_id,
+            title: 'Credential revoked',
+            message: `Your digital credential ${revokeTarget.credential_number}${revokeTarget.requestNumber ? ` for request ${revokeTarget.requestNumber}` : ''} has been revoked: ${revokeReason.trim()}. Its digital copy now shows as revoked when verified. Contact the Registrar's Office for details.`,
+            notificationType: 'request_update',
+            relatedRequestId: revokeTarget.request_id || null,
+        })
+        notifySuccess(`Credential "${revokeTarget.credential_number}" revoked. The student was notified.`)
         closeRevokeModal()
         load({ silent: true })
     }

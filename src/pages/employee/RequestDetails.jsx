@@ -16,6 +16,7 @@ import HighlightedText from '../../components/HighlightedText'
 import Modal from '../../components/Modal'
 import './EmployeePages.css'
 import RequestNotes from '../../components/RequestNotes'
+import StaffCredentialCard from '../../components/StaffCredentialCard'
 import RequestHandoffs from '../../components/RequestHandoffs'
 import RepresentativeStaffCard from '../../components/RepresentativeStaffCard'
 import { ReceiptFileIcon, CheckIcon, XIcon } from '../../components/ReceiptIcons'
@@ -1487,6 +1488,8 @@ function EmployeeRequestDetails() {
                 canPass={Boolean(myEmployeeId) && request.assigned_employee_id === myEmployeeId}
                 onPassed={() => navigate('/employee/dashboard')}
             />
+
+            <StaffCredentialCard requestId={request.request_id} requestNumber={request.request_number} />
 
             <RequestNotes request={request} cardClassName="employee-card" />
 

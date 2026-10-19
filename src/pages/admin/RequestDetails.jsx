@@ -18,6 +18,7 @@ import DocumentPreviewModal from '../../components/DocumentPreviewModal'
 import HighlightedText from '../../components/HighlightedText'
 import Modal from '../../components/Modal'
 import './AdminPages.css'
+import StaffCredentialCard from '../../components/StaffCredentialCard'
 import RequestNotes from '../../components/RequestNotes'
 import RequestHandoffs from '../../components/RequestHandoffs'
 import RepresentativeStaffCard from '../../components/RepresentativeStaffCard'
@@ -1292,6 +1293,8 @@ function AdminRequestDetails() {
                 canPass={role === 'superadmin' ? false : 'head'}
                 onPassed={() => loadRequest({ silent: true })}
             />
+
+            <StaffCredentialCard requestId={request.request_id} requestNumber={request.request_number} role={role} cardClassName="admin-card" />
 
             <RequestNotes request={request} cardClassName="admin-card" canDeleteAny />
 
