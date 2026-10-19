@@ -1,416 +1,198 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CHAIN_STATUSES, FLOW, REQUEST_STATUSES, SHOTS, STEPS } from './shots'
-import { createWorkflowScene } from './workflowScene'
-import { createWorkflowAudio } from './workflowAudio'
-import { availableVoices, createNarrator, isNaturalVoice, recordingsAvailable, whenVoicesReady } from './workflowNarration'
-import certichainLogo from '../../assets/certichain-logo.png'
+import { Frame, Mark } from './reel/Scenes'
+import { DURATION, SCENES } from './reel/timeline'
+import { createReelSound } from './reel/reelSound'
+import { createReelVoice } from './reel/reelVoice'
 import './SystemWorkflow.css'
 
-const NO_3D_MESSAGE = '3D graphics are not available in this browser. Try the latest Chrome or Edge with hardware acceleration turned on.'
+const W = 1920
+const H = 1080
 
-function webglAvailable() {
-    try {
-        const canvas = document.createElement('canvas')
-        return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'))
-    } catch {
-        return false
-    }
-}
-
-const NARRATION_DELAY_MS = 1300
-const TICK_MS = 50
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
 
 function SystemWorkflow() {
-    const stageRef = useRef(null)
-    const sceneRef = useRef(null)
-    const audioRef = useRef(null)
-    const narratorRef = useRef(null)
-    const timelineRef = useRef(null)
-
-    const [started, setStarted] = useState(false)
-    const [shotIndex, setShotIndex] = useState(0)
+    const [t, setT] = useState(0)
     const [playing, setPlaying] = useState(false)
-    const [ended, setEnded] = useState(false)
+    const [started, setStarted] = useState(false)
+    const [scale, setScale] = useState(1)
     const [voiceOn, setVoiceOn] = useState(true)
     const [musicOn, setMusicOn] = useState(true)
     const [sfxOn, setSfxOn] = useState(true)
-    const [voices, setVoices] = useState([])
-    const [voiceName, setVoiceName] = useState('')
-    const [hasRecording, setHasRecording] = useState(false)
-    const [sceneError, setSceneError] = useState(() => (webglAvailable() ? '' : NO_3D_MESSAGE))
-    const [chromeHidden, setChromeHidden] = useState(false)
+    const [chrome, setChrome] = useState(true)
+    const [usesFile, setUsesFile] = useState(false)
 
-    const seq = useRef({ elapsed: 0, cuesFired: 0, narrationStarted: false, narrationDone: false, shot: 0 })
-    const playingRef = useRef(false)
-    const voiceOnRef = useRef(true)
-    useEffect(() => { playingRef.current = playing }, [playing])
-    useEffect(() => { voiceOnRef.current = voiceOn }, [voiceOn])
+    const tRef = useRef(0)
+    const clock = useRef({ base: 0, at: 0 })
+    const raf = useRef(0)
+    const sound = useRef(null)
+    const voice = useRef(null)
+    const hideTimer = useRef(0)
 
     useEffect(() => {
-        let scene = null
-        if (webglAvailable()) {
-            try {
-                scene = createWorkflowScene(stageRef.current)
-                sceneRef.current = scene
-            } catch (err) {
-                console.error('WORKFLOW SCENE ERROR:', err)
-                queueMicrotask(() => setSceneError(NO_3D_MESSAGE))
-            }
-        }
-        narratorRef.current = createNarrator()
-
-        let cancelled = false
-        whenVoicesReady().then((list) => {
-            if (cancelled) return
-            setVoices(list)
-            if (list[0]) {
-                setVoiceName(list[0].name)
-                narratorRef.current.setVoice(list[0])
-            }
-        })
-        recordingsAvailable(SHOTS.map((s) => s.audio)).then((ok) => {
-            if (cancelled) return
-            setHasRecording(ok)
-            narratorRef.current.setMode(ok ? 'recording' : 'voice')
-        })
-
+        document.title = 'System Workflow · CertiChain'
+        sound.current = createReelSound()
+        voice.current = createReelVoice()
+        voice.current.ready.then(() => setUsesFile(Boolean(voice.current?.usesFile)))
+        const fit = () => setScale(Math.min(window.innerWidth / W, window.innerHeight / H))
+        fit()
+        window.addEventListener('resize', fit)
         return () => {
-            cancelled = true
-            narratorRef.current?.stop()
-            audioRef.current?.dispose()
-            scene?.dispose()
+            window.removeEventListener('resize', fit)
+            cancelAnimationFrame(raf.current)
+            sound.current?.stop()
+            voice.current?.dispose()
         }
     }, [])
 
-    const shot = SHOTS[shotIndex]
-
-    const goToShot = useCallback((index) => {
-        const i = Math.max(0, Math.min(SHOTS.length - 1, index))
-        narratorRef.current?.stop()
-        audioRef.current?.setDucked(false)
-        seq.current = { elapsed: 0, cuesFired: 0, narrationStarted: false, narrationDone: !SHOTS[i].narration, shot: i }
-        setShotIndex(i)
-        setEnded(false)
-        sceneRef.current?.setShot(SHOTS[i].id)
-    }, [])
-
-    useEffect(() => {
-        if (!started) return undefined
-        const timer = setInterval(() => {
-            if (!playingRef.current) return
-            const s = seq.current
-            const current = SHOTS[s.shot]
-            s.elapsed += TICK_MS
-
-            while (s.cuesFired < current.cues.length && s.elapsed >= current.cues[s.cuesFired][0] * 1000) {
-                audioRef.current?.play(current.cues[s.cuesFired][1])
-                s.cuesFired += 1
-            }
-
-            if (!s.narrationStarted && s.elapsed >= NARRATION_DELAY_MS) {
-                s.narrationStarted = true
-                if (current.narration && voiceOnRef.current) {
-                    const mine = s.shot
-                    audioRef.current?.setDucked(true)
-                    narratorRef.current.speak(current).then(() => {
-                        if (seq.current.shot !== mine) return
-                        seq.current.narrationDone = true
-                        audioRef.current?.setDucked(false)
-                    })
-                } else {
-                    const readMs = (current.narration || '').length * 55
-                    s.narrationDone = false
-                    s.readUntil = NARRATION_DELAY_MS + readMs
-                }
-            }
-            if (s.readUntil && s.elapsed >= s.readUntil) {
-                s.narrationDone = true
-                s.readUntil = 0
-            }
-
-            if (s.narrationStarted && s.narrationDone && s.elapsed >= current.minMs) {
-                if (s.shot < SHOTS.length - 1) {
-                    goToShot(s.shot + 1)
-                } else {
-                    setEnded(true)
-                    s.narrationDone = false
-                }
-            }
-        }, TICK_MS)
-        return () => clearInterval(timer)
-    }, [started, goToShot])
-
-    const start = async () => {
-        if (!audioRef.current) audioRef.current = createWorkflowAudio()
-        audioRef.current?.setMusic(musicOn)
-        audioRef.current?.setSfx(sfxOn)
-        await audioRef.current?.start()
-        setStarted(true)
-        setPlaying(true)
-        sceneRef.current?.setPaused(false)
-        goToShot(0)
-    }
-
-    const togglePlay = useCallback(() => {
-        if (!started) return
-        if (ended) {
-            goToShot(0)
-            setPlaying(true)
-            sceneRef.current?.setPaused(false)
-            audioRef.current?.start()
+    const loop = useCallback(function step() {
+        const now = performance.now()
+        const next = Math.min(DURATION, clock.current.base + (now - clock.current.at) / 1000)
+        tRef.current = next
+        setT(next)
+        voice.current?.tick(next)
+        if (next >= DURATION) {
+            setPlaying(false)
+            sound.current?.stop()
+            voice.current?.pause()
+            setChrome(true)
             return
         }
-        const next = !playingRef.current
-        setPlaying(next)
-        sceneRef.current?.setPaused(!next)
-        if (next) {
-            audioRef.current?.start()
-            const s = seq.current
-            if (s.narrationStarted && !s.narrationDone) s.narrationStarted = false
-        } else {
-            narratorRef.current?.stop()
-            audioRef.current?.pause()
-        }
-    }, [started, ended, goToShot])
+        raf.current = requestAnimationFrame(step)
+    }, [])
 
-    const step = useCallback((delta) => {
-        if (!started) return
-        goToShot(seq.current.shot + delta)
-        if (!playingRef.current) {
-            setPlaying(true)
-            sceneRef.current?.setPaused(false)
-            audioRef.current?.start()
-        }
-    }, [started, goToShot])
+    const playFrom = useCallback((from) => {
+        cancelAnimationFrame(raf.current)
+        const start = from >= DURATION - 0.05 ? 0 : from
+        clock.current = { base: start, at: performance.now() }
+        tRef.current = start
+        setT(start)
+        sound.current?.setMusic(musicOn)
+        sound.current?.setSfx(sfxOn)
+        sound.current?.start(start)
+        voice.current?.pause()
+        voice.current?.play(start)
+        setPlaying(true)
+        raf.current = requestAnimationFrame(loop)
+    }, [loop, musicOn, sfxOn])
 
-    const jumpToStep = (n) => {
-        const i = SHOTS.findIndex((s) => s.step === n)
-        if (i < 0) return
-        goToShot(i)
-        if (!playingRef.current) {
-            setPlaying(true)
-            sceneRef.current?.setPaused(false)
-            audioRef.current?.start()
+    const pause = useCallback(() => {
+        cancelAnimationFrame(raf.current)
+        sound.current?.stop()
+        voice.current?.pause()
+        setPlaying(false)
+        setChrome(true)
+    }, [])
+
+    const toggle = useCallback(() => {
+        if (!started) {
+            setStarted(true)
+            playFrom(0)
+            return
         }
+        if (playing) pause()
+        else playFrom(tRef.current)
+    }, [started, playing, pause, playFrom])
+
+    const seek = (to) => {
+        const next = Math.max(0, Math.min(DURATION, to))
+        if (playing) playFrom(next)
+        else {
+            tRef.current = next
+            setT(next)
+        }
+    }
+
+    const toggleFullscreen = () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {})
+        else document.exitFullscreen?.()
+    }
+
+    useEffect(() => {
+        const onKey = (e) => {
+            if (e.code === 'Space') { e.preventDefault(); toggle() }
+            else if (e.key === 'ArrowRight') seek(tRef.current + 5)
+            else if (e.key === 'ArrowLeft') seek(tRef.current - 5)
+            else if (e.key === 'f' || e.key === 'F') toggleFullscreen()
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    })
+
+    const wake = () => {
+        setChrome(true)
+        clearTimeout(hideTimer.current)
+        hideTimer.current = setTimeout(() => { if (tRef.current < DURATION) setChrome(false) }, 2200)
     }
 
     const toggleVoice = () => {
         const next = !voiceOn
         setVoiceOn(next)
-        if (!next) {
-            narratorRef.current?.stop()
-            audioRef.current?.setDucked(false)
-            seq.current.narrationDone = true
-        }
+        voice.current?.setEnabled(next)
+        if (next && playing) voice.current?.play(tRef.current)
     }
     const toggleMusic = () => {
         const next = !musicOn
         setMusicOn(next)
-        audioRef.current?.setMusic(next)
+        sound.current?.setMusic(next)
     }
     const toggleSfx = () => {
         const next = !sfxOn
         setSfxOn(next)
-        audioRef.current?.setSfx(next)
-    }
-    const toggleFullscreen = () => {
-        const el = document.documentElement
-        if (!document.fullscreenElement) el.requestFullscreen?.().catch(() => {})
-        else document.exitFullscreen?.()
+        sound.current?.setSfx(next)
     }
 
-    const chooseVoice = (name) => {
-        setVoiceName(name)
-        const v = availableVoices().find((x) => x.name === name)
-        if (v) narratorRef.current?.setVoice(v)
-    }
-
-    useEffect(() => {
-        const onKey = (e) => {
-            if (e.target.closest?.('select, input, textarea')) return
-            if (e.code === 'Space') { e.preventDefault(); togglePlay() }
-            else if (e.key === 'ArrowRight') step(1)
-            else if (e.key === 'ArrowLeft') step(-1)
-            else if (e.key === 'f' || e.key === 'F') toggleFullscreen()
-            else if (e.key === 'h' || e.key === 'H') setChromeHidden((v) => !v)
-        }
-        window.addEventListener('keydown', onKey)
-        return () => window.removeEventListener('keydown', onKey)
-    }, [togglePlay, step])
-
-    useEffect(() => {
-        document.title = 'System Workflow · CertiChain'
-    }, [])
-
-    useEffect(() => {
-        timelineRef.current?.querySelector('.wf-chip.active')?.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' })
-    }, [shotIndex])
-
-    const currentVoice = voices.find((v) => v.name === voiceName)
-    const voiceLabel = hasRecording
-        ? 'Recorded narration'
-        : currentVoice
-            ? `${currentVoice.name.replace(/^Microsoft\s+/i, '').replace(/\s*-\s*English.*$/i, '')}${isNaturalVoice(currentVoice) ? '' : ' (basic voice)'}`
-            : 'Browser voice'
+    const ended = started && !playing && t >= DURATION - 0.05
+    const current = SCENES.find((s) => t >= s.start && t < s.end) || SCENES[SCENES.length - 1]
 
     return (
-        <div className={`wf-root${started ? ' is-started' : ''}${chromeHidden ? ' is-clean' : ''}`}>
-            <div className="wf-stage" ref={stageRef} aria-hidden="true" />
-            <div className="wf-vignette" aria-hidden="true" />
-
-            {sceneError && <div className="wf-error">{sceneError}</div>}
-
-            {started && (
-                <header className="wf-top">
-                    <div className="wf-brand">
-                        <span className="wf-brand-mark"><img src={certichainLogo} alt="Holy Cross of Davao College" /></span>
-                        <div>
-                            <strong>CertiChain</strong>
-                            <span>Academic Registrar System · Workflow</span>
-                        </div>
-                    </div>
-                    <div className="wf-controls">
-                        <button type="button" onClick={() => step(-1)} aria-label="Previous step" title="Previous (←)">‹</button>
-                        <button type="button" className="wf-play" onClick={togglePlay} aria-label={playing && !ended ? 'Pause' : 'Play'} title="Play / pause (Space)">
-                            {ended ? '↻' : playing ? '❚❚' : '▶'}
-                        </button>
-                        <button type="button" onClick={() => step(1)} aria-label="Next step" title="Next (→)">›</button>
-                        <span className="wf-divider" />
-                        <button type="button" className={voiceOn ? 'is-on' : ''} onClick={toggleVoice} title="Narrator voice">Voice</button>
-                        <button type="button" className={musicOn ? 'is-on' : ''} onClick={toggleMusic} title="Background music">Music</button>
-                        <button type="button" className={sfxOn ? 'is-on' : ''} onClick={toggleSfx} title="Sound effects">SFX</button>
-                        <button type="button" onClick={toggleFullscreen} title="Full screen (F)">⛶</button>
-                    </div>
-                </header>
-            )}
-
-            {started && shot.request && shot.id !== 'finale' && (
-                <aside className="wf-status" aria-label="Live status">
-                    <div className="wf-status-block">
-                        <span className="wf-status-title">Request status</span>
-                        <ol>
-                            {REQUEST_STATUSES.map(([key, label], i) => {
-                                const current = REQUEST_STATUSES.findIndex(([k]) => k === shot.request)
-                                const state = i < current || (i === current && key === 'completed') ? 'done' : i === current ? 'active' : ''
-                                return (
-                                    <li key={key} className={state}>
-                                        <span className="wf-status-dot">{state === 'done' ? '✓' : ''}</span>
-                                        {label}
-                                    </li>
-                                )
-                            })}
-                        </ol>
-                        {shot.id === 'record' && <p className="wf-status-note is-warn">Something missing? → Requirements Needed, then back to review</p>}
-                    </div>
-                    <div className="wf-status-block">
-                        <span className="wf-status-title">Blockchain status</span>
-                        {shot.chain === 'none' ? (
-                            <p className="wf-status-note">Starts once the credential is generated</p>
-                        ) : (
-                            <ol>
-                                {CHAIN_STATUSES.map(([key, label], i) => {
-                                    const current = CHAIN_STATUSES.findIndex(([k]) => k === shot.chain)
-                                    const state = i < current || (i === current && key === 'verified') ? 'done' : i === current ? 'active' : ''
-                                    return (
-                                        <li key={key} className={state}>
-                                            <span className="wf-status-dot">{state === 'done' ? '✓' : ''}</span>
-                                            {label}
-                                            {key === 'recorded' && i <= current && <em>#124 on ICP</em>}
-                                        </li>
-                                    )
-                                })}
-                            </ol>
-                        )}
-                    </div>
-                </aside>
-            )}
-
-            {started && !ended && shot.id !== 'finale' && (
-                <section className="wf-caption" key={shot.id}>
-                    {shot.step > 0 && <span className="wf-caption-step">Step {shot.step} of {STEPS.length}</span>}
-                    <h2>{shot.title}</h2>
-                    {shot.narration && <p>{shot.narration}</p>}
-                </section>
-            )}
-
-            {started && (
-                <nav className="wf-timeline" aria-label="Workflow steps" ref={timelineRef}>
-                    {STEPS.map((label, i) => {
-                        const n = i + 1
-                        const state = ended || shot.id === 'finale' ? 'done' : shot.step === n ? 'active' : shot.step > n ? 'done' : ''
-                        return (
-                            <button key={label} type="button" className={`wf-chip ${state}`} onClick={() => jumpToStep(n)} title={label}>
-                                <span className="wf-chip-num">{state === 'done' ? '✓' : n}</span>
-                                <span className="wf-chip-label">{label}</span>
-                            </button>
-                        )
-                    })}
-                </nav>
-            )}
-
-            {started && shot.id === 'finale' && (
-                <section className={`wf-finale${ended ? ' is-ended' : ''}`}>
-                    <span className="wf-finale-check">✓</span>
-                    <h1>Request Completed</h1>
-                    <ol className="wf-flow">
-                        {FLOW.map((label, i) => (
-                            <li key={label} style={{ animationDelay: `${0.5 + i * 0.35}s` }}>
-                                <span>{label}</span>
-                            </li>
-                        ))}
-                    </ol>
-                    {ended && (
-                        <div className="wf-finale-actions">
-                            <button type="button" className="wf-btn is-primary" onClick={togglePlay}>Replay</button>
-                            <Link to="/" className="wf-btn">Back to CertiChain</Link>
-                        </div>
-                    )}
-                </section>
-            )}
+        <div className={`wr-root${chrome || !playing ? ' show-chrome' : ''}`} onMouseMove={wake} onClick={() => started && wake()}>
+            <div className="wr-stage" style={{ width: W, height: H, transform: `translate(-50%, -50%) scale(${scale})` }}>
+                <Frame t={t} />
+            </div>
 
             {!started && (
-                <div className="wf-start">
-                    <div className="wf-start-card">
-                        <span className="wf-eyebrow">CertiChain · Capstone Presentation</span>
-                        <h1>System Workflow</h1>
-                        <p className="wf-start-sub">
-                            A narrated 3D walkthrough of a document request in CertiChain: from the student's request and
-                            the registrar's review, to a credential that is fingerprinted, encrypted and recorded on the
-                            blockchain, then claimed, completed and verified by anyone.
-                        </p>
-
-                        <div className="wf-start-voice">
-                            <span>Narrator</span>
-                            {hasRecording ? (
-                                <strong>Recorded human narration</strong>
-                            ) : voices.length > 0 ? (
-                                <select value={voiceName} onChange={(e) => chooseVoice(e.target.value)} aria-label="Narrator voice">
-                                    {voices.slice(0, 14).map((v) => (
-                                        <option key={v.name} value={v.name}>
-                                            {v.name.replace(/^Microsoft\s+/i, '')}{isNaturalVoice(v) ? ' ★' : ''}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <strong>Browser voice</strong>
-                            )}
-                        </div>
-                        {!hasRecording && currentVoice && !isNaturalVoice(currentVoice) && (
-                            <p className="wf-start-hint">
-                                For the most natural voice, open this page in Microsoft Edge (its “Natural” voices sound
-                                human) or add recorded narration.
-                            </p>
-                        )}
-
-                        <button type="button" className="wf-btn is-primary wf-start-btn" onClick={start} disabled={!!sceneError}>
-                            ▶ Start presentation
-                        </button>
-                        <p className="wf-start-keys">
-                            <kbd>Space</kbd> pause · <kbd>←</kbd> <kbd>→</kbd> steps · <kbd>F</kbd> full screen · <kbd>H</kbd> hide controls
-                        </p>
-                        <p className="wf-start-voicehint">Voice: {voiceLabel}</p>
+                <div className="wr-start">
+                    <div className="wr-start-card">
+                        <Mark size={92} light />
+                        <span className="wr-start-eyebrow">CertiChain · System Workflow</span>
+                        <h1>The 1-minute reel</h1>
+                        <p>From a student&apos;s request to a credential sealed on the Internet Computer blockchain, delivered, and verified by anyone.</p>
+                        <button type="button" className="wr-start-btn" onClick={toggle}>▶ Play with sound</button>
+                        <small>
+                            {usesFile ? 'Recorded voice-over' : 'Narrated by your browser voice'} · music and sound effects · 1920×1080
+                            <br />
+                            <kbd>Space</kbd> play/pause · <kbd>←</kbd> <kbd>→</kbd> seek · <kbd>F</kbd> full screen
+                        </small>
                     </div>
+                </div>
+            )}
+
+            {started && (
+                <div className="wr-controls" onClick={(e) => e.stopPropagation()}>
+                    <button type="button" className="wr-ctl-play" onClick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
+                        {ended ? '↻' : playing ? '❚❚' : '▶'}
+                    </button>
+                    <span className="wr-ctl-time">{fmt(t)} / {fmt(DURATION)}</span>
+                    <div
+                        className="wr-scrub"
+                        onClick={(e) => {
+                            const r = e.currentTarget.getBoundingClientRect()
+                            seek(((e.clientX - r.left) / r.width) * DURATION)
+                        }}
+                    >
+                        <div className="wr-scrub-fill" style={{ width: `${(t / DURATION) * 100}%` }} />
+                        {SCENES.map((s) => (
+                            <span key={s.id} className={`wr-scrub-mark${current.id === s.id ? ' is-on' : ''}`} style={{ left: `${(s.start / DURATION) * 100}%` }} title={s.chapter}>
+                                <i>{s.chapter}</i>
+                            </span>
+                        ))}
+                    </div>
+                    <button type="button" className={voiceOn ? 'is-on' : ''} onClick={toggleVoice}>Voice</button>
+                    <button type="button" className={musicOn ? 'is-on' : ''} onClick={toggleMusic}>Music</button>
+                    <button type="button" className={sfxOn ? 'is-on' : ''} onClick={toggleSfx}>SFX</button>
+                    <button type="button" onClick={toggleFullscreen} aria-label="Full screen">⛶</button>
+                    <Link to="/" className="wr-ctl-exit">Exit</Link>
                 </div>
             )}
         </div>
