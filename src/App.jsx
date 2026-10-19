@@ -86,6 +86,7 @@ const AdminMessages = lazy(() => import('./pages/admin/Messages'))
 const AdminNotifications = lazy(() => import('./pages/admin/Notifications'))
 const AdminActivityLogs = lazy(() => import('./pages/admin/ActivityLogs'))
 const AdminIssuedCertificates = lazy(() => import('./pages/admin/IssuedCertificates'))
+const AdminDigitalCertificates = lazy(() => import('./pages/admin/DigitalCertificates'))
 const AdminRequestHandling = lazy(() => import('./pages/admin/RequestHandling'))
 const Reports = lazy(() => import('./pages/admin/Reports'))
 const AdminProfile = lazy(() => import('./pages/admin/Profile'))
@@ -122,6 +123,7 @@ const PORTAL_PAGES = [
     ['/notifications', <AdminNotifications />],
     ['/activity-logs', <AdminActivityLogs />],
     ['/issued-certificates', <AdminIssuedCertificates />],
+    ['/digital-certificates', <AdminDigitalCertificates />],
     ['/reports', <Reports />],
     ['/guide', <AdminUserGuide />],
     ['/profile', <AdminProfile />],
@@ -398,6 +400,11 @@ function App() {
           <Route
             path="/employee/certificate-of-enrollment"
             element={<RequireCanIssueCertificates><CertificateOfEnrollment /></RequireCanIssueCertificates>}
+          />
+
+          <Route
+            path="/employee/digital-certificates"
+            element={<RequireCanIssueCertificates><AdminDigitalCertificates /></RequireCanIssueCertificates>}
           />
 
           <Route

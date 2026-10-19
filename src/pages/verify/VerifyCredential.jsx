@@ -6,6 +6,7 @@ import { REGISTRAR_CONTACT } from '../../lib/registrarContact'
 import certichainLogo from '../../assets/certichain-logo.png'
 import VerificationSteps from './VerificationSteps'
 import VerifyDocument from './VerifyDocument'
+import { fileFingerprint, MAX_CERTIFICATE_MB } from '../../lib/fileFingerprint'
 import './Verify.css'
 
 const formatDate = (value) =>
@@ -13,7 +14,15 @@ const formatDate = (value) =>
         ? new Date(value).toLocaleString('en-PH', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
         : 'N/A'
 
-function outcomeFor(result) {
+function outcomeFor(result, fileCheck) {
+    if (!result && fileCheck) {
+        return {
+            tone: 'missing',
+            icon: <IconQuestion />,
+            title: 'No matching certificate',
+            subtitle: 'This file was not sealed through CertiChain, or it was changed after it was issued.',
+        }
+    }
     if (!result) {
         return {
             tone: 'missing',
@@ -36,6 +45,16 @@ function outcomeFor(result) {
             icon: <IconX />,
             title: 'Revoked credential',
             subtitle: 'The Registrar’s Office cancelled this credential. It is no longer valid.',
+        }
+    }
+    if (result.kind === 'document' && result.doc_type === 'digital') {
+        return {
+            tone: 'verified',
+            icon: <IconCheck />,
+            title: fileCheck ? 'Genuine certificate file' : 'Genuine digital certificate',
+            subtitle: fileCheck
+                ? 'This exact file was sealed by Holy Cross of Davao College and has not been changed by even one byte.'
+                : 'Sealed by Holy Cross of Davao College. Upload the file below to confirm a copy is the original.',
         }
     }
     if (result.kind === 'document') {
@@ -109,6 +128,7 @@ function VerifyCredential() {
     const [checkedAt, setCheckedAt] = useState(null)
     const [rateLimitMessage, setRateLimitMessage] = useState('')
     const [lookupError, setLookupError] = useState('')
+    const [fileCheck, setFileCheck] = useState(null)
 
     useEffect(() => {
         if (credentialNumber) {
@@ -116,9 +136,9 @@ function VerifyCredential() {
         }
     }, [credentialNumber])
 
-    const lookup = async (number) => {
+    const lookup = async (number, fileSha256 = '') => {
         const query = (number || '').trim().toUpperCase()
-        if (!query) return
+        if (!query && !fileSha256) return
 
         try {
             setLoading(true)
@@ -127,7 +147,7 @@ function VerifyCredential() {
             setLookupError('')
 
             const { data, error } = await supabase.functions.invoke('verify-credential', {
-                body: { credentialNumber: query },
+                body: fileSha256 ? { fileSha256 } : { credentialNumber: query },
             })
 
             if (error) {
@@ -154,11 +174,37 @@ function VerifyCredential() {
         e.preventDefault()
         const value = term.trim().toUpperCase()
         if (!value) return
+        setFileCheck(null)
         if (value === (credentialNumber || '').toUpperCase()) lookup(value)
         else navigate(`/verify/${encodeURIComponent(value)}`)
     }
 
+    const checkFile = async (file) => {
+        if (!file) return
+        if (file.size > MAX_CERTIFICATE_MB * 1024 * 1024) {
+            setSearched(true)
+            setResult(null)
+            setFileCheck({ name: file.name, tooLarge: true })
+            return
+        }
+        setLoading(true)
+        let hash
+        try {
+            hash = await fileFingerprint(file)
+        } catch (err) {
+            console.error('FILE FINGERPRINT ERROR:', err)
+            setLoading(false)
+            setLookupError('This file could not be read. Try another copy.')
+            return
+        }
+        setFileCheck({ name: file.name, hash })
+        setTerm('')
+        if (credentialNumber) navigate('/verify', { replace: true })
+        await lookup('', hash)
+    }
+
     const checkAnother = () => {
+        setFileCheck(null)
         setTerm('')
         setResult(null)
         setSearched(false)
@@ -167,7 +213,7 @@ function VerifyCredential() {
     }
 
     const showResult = !loading && searched && !rateLimitMessage && !lookupError
-    const outcome = outcomeFor(result)
+    const outcome = outcomeFor(result, fileCheck)
 
     return (
         <div className="verify-page">
@@ -209,6 +255,17 @@ function VerifyCredential() {
                             {loading ? 'Checking…' : 'Verify'}
                         </button>
                     </form>
+
+                    <label className="verify-file-pick">
+                        <input
+                            type="file"
+                            accept=".pdf,.png,.jpg,.jpeg,.webp"
+                            onChange={(e) => { checkFile(e.target.files?.[0]); e.target.value = '' }}
+                            disabled={loading}
+                        />
+                        <span>Have a digital certificate file? <strong>Check the file instead</strong></span>
+                        <small>The file stays on your device. Only its fingerprint is checked against the blockchain.</small>
+                    </label>
                 </div>
 
                 {loading && (
@@ -256,7 +313,7 @@ function VerifyCredential() {
                                     </p>
                                 )}
 
-                                {result.kind === 'document' ? <VerifyDocument result={result} /> : (
+                                {result.kind === 'document' ? <VerifyDocument result={result} fileCheck={fileCheck} /> : (
                                 <dl className="verify-fields">
                                     <div>
                                         <dt>Credential number</dt>
@@ -316,11 +373,19 @@ function VerifyCredential() {
                             </div>
                         ) : (
                             <div className="verify-body">
+                                {fileCheck ? (
+                                <p className="verify-missing">
+                                    {fileCheck.tooLarge
+                                        ? <>The file <strong>{fileCheck.name}</strong> is larger than {MAX_CERTIFICATE_MB} MB, so it can’t be a sealed certificate.</>
+                                        : <>No sealed certificate matches <strong>{fileCheck.name}</strong>. A certificate that was edited, re-saved, compressed or re-exported produces a different fingerprint. Ask the issuer for the original file, or contact the Registrar’s Office.</>}
+                                </p>
+                                ) : (
                                 <p className="verify-missing">
                                     No credential matches <strong className="is-mono">{(credentialNumber || term).toUpperCase()}</strong>.
                                     Check the number for typos (it looks like <span className="is-mono">CERT-000123</span>). If it’s
                                     correct, the document may not be genuine — contact the Registrar’s Office to confirm.
                                 </p>
+                                )}
                             </div>
                         )}
 

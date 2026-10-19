@@ -23,6 +23,7 @@ const NAV_ITEMS = [
     { to: '/employee/activity-logs', label: 'Activity Logs', icon: <IconHistory />, fullAccessOnly: true, stage: 'done' },
     { to: '/employee/certificate-of-enrollment', label: 'Certificate of Enrollment', icon: <IconClipboardCheck />, canIssueCertificatesOnly: true, stage: 'generate' },
     { to: '/employee/transcript-of-records', label: 'Transcript of Records', icon: <IconDocument />, canIssueCertificatesOnly: true, stage: 'generate' },
+    { to: '/employee/digital-certificates', label: 'Digital Certificates', icon: <IconShieldCheck />, canIssueCertificatesOnly: true, stage: 'generate' },
     { to: '/employee/students', label: 'Students', icon: <IconIdCard />, fullAccessOnly: true, badgeKey: 'pendingStudents', stage: 'manage' },
     { to: '/employee/documents', label: 'Documents', icon: <IconDocument />, stage: 'manage' },
     { to: '/employee/office-calendar', label: 'Office Calendar', icon: <IconCalendar />, stage: 'manage' },

@@ -1,3 +1,6 @@
+import { useState } from 'react'
+import { fileFingerprint, fileSizeText } from '../../lib/fileFingerprint'
+
 const formatDay = (value) =>
     value ? new Date(`${String(value).slice(0, 10)}T00:00:00`).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) : ''
 
@@ -14,8 +17,66 @@ function Field({ label, value, wide, mono }) {
     )
 }
 
-function VerifyDocument({ result }) {
+function CompareFile({ expected }) {
+    const [state, setState] = useState(null)
+    const compare = async (file) => {
+        if (!file) return
+        setState({ busy: true, name: file.name })
+        try {
+            const hash = await fileFingerprint(file)
+            setState({ name: file.name, match: hash === expected })
+        } catch (err) {
+            console.error('COMPARE FILE ERROR:', err)
+            setState({ name: file.name, error: true })
+        }
+    }
+    const tone = state && !state.busy && !state.error ? (state.match ? ' is-match' : ' is-mismatch') : ''
+    return (
+        <div className={`verify-compare${tone}`}>
+            <label className="verify-file-pick is-inline">
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp" onChange={(e) => { compare(e.target.files?.[0]); e.target.value = '' }} />
+                <span><strong>Compare your copy</strong> — choose the certificate file you received</span>
+            </label>
+            {state?.busy && <p>Checking {state.name}…</p>}
+            {state && !state.busy && (
+                <p>
+                    {state.error
+                        ? 'This file could not be read.'
+                        : state.match
+                            ? <><strong>{state.name}</strong> is the original sealed file, unchanged.</>
+                            : <><strong>{state.name}</strong> does not match. It is a different or edited file, so do not accept it as this certificate.</>}
+                </p>
+            )}
+        </div>
+    )
+}
+
+function VerifyDocument({ result, fileCheck }) {
     const d = result.details || {}
+    if (result.doc_type === 'digital') {
+        const fileLine = d.file_name ? [d.file_name, d.file_size ? fileSizeText(d.file_size) : ''].filter(Boolean).join(' · ') : ''
+        return (
+            <>
+                <dl className="verify-fields">
+                    <Field label="Document number" value={result.credential_number} mono />
+                    <Field label="Issued to" value={result.student_name} />
+                    <Field label="Issued on" value={formatDay(d.issued_on)} />
+                    <Field label="Issued by" value={d.issuer} wide />
+                    <Field label="Details" value={d.description} wide />
+                    <Field label="Original file" value={fileLine} wide />
+                    <Field label="File fingerprint (SHA-256)" value={d.file_sha256} wide mono />
+                    <Field label="Sealed on" value={formatDate(result.generated_at)} />
+                </dl>
+                {fileCheck?.hash && fileCheck.hash === d.file_sha256 ? (
+                    <div className="verify-compare is-match">
+                        <p><strong>{fileCheck.name}</strong> is the original sealed file, unchanged.</p>
+                    </div>
+                ) : (
+                    <CompareFile expected={d.file_sha256} />
+                )}
+            </>
+        )
+    }
     const isTor = result.doc_type === 'tor'
     const courses = Array.isArray(d.courses) ? d.courses : []
     const courseCount = courses.filter((c) => !c.heading).length
